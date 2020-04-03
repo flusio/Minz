@@ -92,7 +92,7 @@ class IntegrationTestCase extends TestCase
         $response_output = $response->render();
         $this->assertSame($code, $response->code(), 'Output is: ' . $response_output);
         if ($output !== null) {
-            $this->assertSame($output, $response_output);
+            $this->assertStringContainsString($output, $response_output);
         }
         if ($headers !== null) {
             // I would use assertArraySubset, but it's deprecated in PHPUnit 8
