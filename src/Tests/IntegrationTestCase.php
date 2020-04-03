@@ -63,7 +63,9 @@ class IntegrationTestCase extends TestCase
      */
     public function dropDatabase()
     {
-        \Minz\Database::drop();
+        if (self::$schema) {
+            \Minz\Database::drop();
+        }
     }
 
     /**
