@@ -20,14 +20,18 @@ class Request
     /** @var mixed[] */
     private $parameters;
 
+    /** @var mixed[] */
+    private $headers;
+
     /**
      * Create a Request
      *
      * @param string $method Usually the method from $_SERVER['REQUEST_METHOD']
      * @param string $uri Usually the method from $_SERVER['REQUEST_URI']
      * @param mixed[] $parameters Usually a merged array of $_GET and $_POST
+     * @param mixed[] $headers Usually the $_SERVER array
      */
-    public function __construct($method, $uri, $parameters = [])
+    public function __construct($method, $uri, $parameters = [], $headers = [])
     {
         $method = strtolower($method);
         $uri_components = parse_url($uri);
@@ -54,6 +58,7 @@ class Request
         $this->method = $method;
         $this->path = $uri_components['path'];
         $this->parameters = $parameters;
+        $this->headers = $headers;
     }
 
     /**
@@ -85,6 +90,23 @@ class Request
     {
         if (isset($this->parameters[$name])) {
             return $this->parameters[$name];
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Return a parameter value from the headers array.
+     *
+     * @param string $name The name of the parameter to get
+     * @param mixed $default A default value to return if the parameter doesn't exist
+     *
+     * @return mixed
+     */
+    public function header($name, $default = null)
+    {
+        if (isset($this->headers[$name])) {
+            return $this->headers[$name];
         } else {
             return $default;
         }

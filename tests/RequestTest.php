@@ -80,11 +80,31 @@ class RequestTest extends TestCase
 
     public function testParamWithDefaultValue()
     {
-        $request = new Request('GET', '/');
+        $request = new Request('GET', '/', []);
 
         $foo = $request->param('foo', 'bar');
 
         $this->assertSame('bar', $foo);
+    }
+
+    public function testHeader()
+    {
+        $request = new Request('GET', '/', [], [
+            'SERVER_PROTOCOL' => 'HTTP/1.1',
+        ]);
+
+        $protocol = $request->header('SERVER_PROTOCOL');
+
+        $this->assertSame('HTTP/1.1', $protocol);
+    }
+
+    public function testHeaderWithDefaultValue()
+    {
+        $request = new Request('GET', '/', [], []);
+
+        $protocol = $request->header('SERVER_PROTOCOL', 'foo');
+
+        $this->assertSame('foo', $protocol);
     }
 
     public function requestToPathProvider()
