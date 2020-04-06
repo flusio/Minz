@@ -32,6 +32,8 @@ namespace Minz;
  * Other optional keys are:
  * - database: an array specifying dsn, username, password and options to pass
  *   to the PDO interface, see https://www.php.net/manual/fr/pdo.construct.php
+ * - application: you can set options specific to your application here,
+ *   default to empty array
  * - use_session: indicates if you want to use the PHP sessions, default to `true`
  * - no_syslog: `true` to silent calls to \Minz\Log (wrapper aroung syslog function),
  *   default to `false`
@@ -67,6 +69,9 @@ class Configuration
 
     /** @var string[] An array containing database configuration */
     public static $database;
+
+    /** @var array An array for options spectific to the application */
+    public static $application;
 
     /** @var boolean Indicate if session must be initialized */
     public static $use_session;
@@ -158,6 +163,8 @@ class Configuration
             $database = array_merge($additional_default_values, $database);
         }
         self::$database = $database;
+
+        self::$application = self::getDefault($raw_configuration, 'application', []);
 
         self::$use_session = self::getDefault($raw_configuration, 'use_session', true);
 
