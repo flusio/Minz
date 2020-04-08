@@ -175,8 +175,10 @@ class Model
     {
         foreach ($this->property_declarations as $property => $declaration) {
             if (
-                $declaration['required'] &&
-                !isset($values[$property])
+                $declaration['required'] && (
+                    !isset($values[$property]) ||
+                    ($declaration['type'] === 'string' && empty($values[$property]))
+                )
             ) {
                 throw new Errors\ModelPropertyError(
                     $property,
@@ -271,7 +273,10 @@ class Model
 
         $declaration = $this->property_declarations[$property];
 
-        if ($declaration['required'] && $value === null) {
+        if ($declaration['required'] && (
+            !isset($value) ||
+            ($declaration['type'] === 'string' && empty($value))
+        )) {
             throw new Errors\ModelPropertyError(
                 $property,
                 Errors\ModelPropertyError::PROPERTY_REQUIRED,

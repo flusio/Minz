@@ -225,6 +225,22 @@ class ModelTest extends TestCase
         $model->setProperty('id', null);
     }
 
+    public function testSetPropertyFailsIfRequiredStringPropertyIsEmpty()
+    {
+        $this->expectException(Errors\ModelPropertyError::class);
+        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
+        $this->expectExceptionMessage('Required `id` property is missing.');
+
+        $model = new Model([
+            'id' => [
+                'type' => 'string',
+                'required' => true,
+            ],
+        ]);
+
+        $model->setProperty('id', '');
+    }
+
     public function testSetPropertyFailsIfValidatorReturnsFalse()
     {
         $this->expectException(Errors\ModelPropertyError::class);
@@ -388,6 +404,22 @@ class ModelTest extends TestCase
         ]);
 
         $model->fromValues(['id' => null]);
+    }
+
+    public function testFromValuesFailsIfRequiredStringPropertyIsEmpty()
+    {
+        $this->expectException(Errors\ModelPropertyError::class);
+        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
+        $this->expectExceptionMessage('Required `id` property is missing.');
+
+        $model = new Model([
+            'id' => [
+                'type' => 'string',
+                'required' => true,
+            ],
+        ]);
+
+        $model->fromValues(['id' => '']);
     }
 
     public function testFromValuesFailsIfIntegerTypeDoesNotMatch()
