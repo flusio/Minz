@@ -87,6 +87,35 @@ class RequestTest extends TestCase
         $this->assertSame('bar', $foo);
     }
 
+    public function testParamWithArrayDefaultValue()
+    {
+        $request = new Request('GET', '/', [
+            'foo' => ['bar' => 'baz'],
+        ]);
+
+        $foo = $request->param('foo', ['spam' => 'egg']);
+
+        $this->assertSame([
+            'spam' => 'egg',
+            'bar' => 'baz',
+        ], $foo);
+    }
+
+    public function testParamWithUnexpectedNonArrayValue()
+    {
+        // here, we set foo as a simple string (i.e. bar)
+        $request = new Request('GET', '/', [
+            'foo' => 'bar',
+        ]);
+
+        // but we set the default value to an array
+        $foo = $request->param('foo', ['spam' => 'egg']);
+
+        // because the two types don't match, we consider returning the correct
+        // type is more important than returning the real value
+        $this->assertSame(['spam' => 'egg'], $foo);
+    }
+
     public function testHeader()
     {
         $request = new Request('GET', '/', [], [

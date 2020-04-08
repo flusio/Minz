@@ -89,7 +89,17 @@ class Request
     public function param($name, $default = null)
     {
         if (isset($this->parameters[$name])) {
-            return $this->parameters[$name];
+            if (is_array($default) && is_array($this->parameters[$name])) {
+                return array_merge($default, $this->parameters[$name]);
+            } elseif (is_array($default) && !is_array($this->parameters[$name])) {
+                \Minz\Log::warning(
+                    "{$name} param is expected to be an array, but it isn’t."
+                    . ' Returning default value instead.'
+                );
+                return $default;
+            } else {
+                return $this->parameters[$name];
+            }
         } else {
             return $default;
         }
