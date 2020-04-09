@@ -137,6 +137,26 @@ class Response
     }
 
     /**
+     * Create an unauthorized response (HTTP 401) with a Output\View.
+     *
+     * @param string $view_pointer
+     * @param mixed[] $variables
+     *
+     * @throws \Minz\Errors\ViewError
+     *
+     * @return \Minz\Response
+     */
+    public static function unauthorized($view_pointer = '', $variables = [])
+    {
+        if ($view_pointer) {
+            $view = new Output\View($view_pointer, $variables);
+        } else {
+            $view = null;
+        }
+        return new Response(401, $view);
+    }
+
+    /**
      * Create a not found response (HTTP 404) with a Output\View.
      *
      * @param string $view_pointer

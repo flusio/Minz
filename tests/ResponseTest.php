@@ -169,6 +169,13 @@ class ResponseTest extends TestCase
         $this->assertSame(400, $response->code());
     }
 
+    public function testUnauthorized()
+    {
+        $response = Response::unauthorized();
+
+        $this->assertSame(401, $response->code());
+    }
+
     public function testNotFound()
     {
         $response = Response::notFound();
