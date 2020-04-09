@@ -20,7 +20,7 @@ class Time
             $date->setTimestamp(self::$freezed_timestamp);
             return $date;
         } elseif (self::$freezed_timestamp && self::$freezed_timestamp instanceof \DateTime) {
-            return self::$freezed_timestamp;
+            return clone self::$freezed_timestamp;
         } else {
             return \date_create();
         }
