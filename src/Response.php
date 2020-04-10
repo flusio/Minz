@@ -34,7 +34,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
@@ -54,7 +54,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
@@ -74,7 +74,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
@@ -122,7 +122,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
@@ -142,7 +142,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
@@ -162,7 +162,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
@@ -182,7 +182,7 @@ class Response
      * @param string $view_pointer
      * @param mixed[] $variables
      *
-     * @throws \Minz\Errors\ViewError
+     * @throws \Minz\Errors\OutputError
      *
      * @return \Minz\Response
      */
