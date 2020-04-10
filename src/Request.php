@@ -79,6 +79,17 @@ class Request
     }
 
     /**
+     * Set a parameter.
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setParam($name, $value)
+    {
+        $this->parameters[$name] = $value;
+    }
+
+    /**
      * Return a parameter value from $_GET or $_POST.
      *
      * @param string $name The name of the parameter to get

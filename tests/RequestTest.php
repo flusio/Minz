@@ -116,6 +116,18 @@ class RequestTest extends TestCase
         $this->assertSame(['spam' => 'egg'], $foo);
     }
 
+    public function testSetParam()
+    {
+        $request = new Request('GET', '/', [
+            'foo' => 'bar'
+        ]);
+
+        $request->setParam('foo', 'baz');
+
+        $foo = $request->param('foo');
+        $this->assertSame('baz', $foo);
+    }
+
     public function testHeader()
     {
         $request = new Request('GET', '/', [], [
