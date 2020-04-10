@@ -21,7 +21,8 @@ namespace Minz;
  * - app_name: it must be the same as the base namespace of the application
  * - url_options, with:
  *   - host: the domain name pointing to your server
- *   - port: the listening port of your server (default is 80)
+ *   - port: the listening port of your server (default is set to 443 if
+ *           protocol is https, else 80)
  *   - path: URI path to your application (default is /)
  *   - protocol: the protocol used by your server (default is http)
  *
@@ -139,11 +140,13 @@ class Configuration
         }
 
         $default_url_options = [
-            'port' => 80,
             'path' => '/',
             'protocol' => 'http',
         ];
         self::$url_options = array_merge($default_url_options, $url_options);
+        if (!isset(self::$url_options['port'])) {
+            self::$url_options['port'] = $url_options['protocol'] === 'https' ? 443 : 80;
+        }
 
         $default_data_path = $app_path . '/data';
         self::$data_path = self::getDefault(
