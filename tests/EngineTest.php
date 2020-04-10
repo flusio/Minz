@@ -23,6 +23,19 @@ class EngineTest extends TestCase
         $this->assertStringContainsString("Jean-Jean", $output);
     }
 
+    public function testRunWithParamInRoute()
+    {
+        $router = new \Minz\Router();
+        $router->addRoute('get', '/rabbits/:id', 'rabbits#show');
+        $engine = new \Minz\Engine($router);
+        $request = new \Minz\Request('GET', '/rabbits/42');
+
+        $response = $engine->run($request);
+
+        $this->assertSame(200, $response->code(), 'Rabbit #42');
+        $this->assertSame('42', $request->param('id'));
+    }
+
     public function testRunReturnsErrorIfRouteNotFound()
     {
         $router = new \Minz\Router();

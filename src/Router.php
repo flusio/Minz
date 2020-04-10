@@ -116,7 +116,8 @@ class Router
      * @throws \Minz\Errors\RoutingError if via is invalid
      * @throws \Minz\Errors\RouteNotFoundError if no patterns match with the path
      *
-     * @return string The corresponding action pointer if any.
+     * @return array An array of 2 elements: the first one is action pointer,
+     *               the second is the list of matching parameters
      */
     public function match($via, $path)
     {
@@ -134,7 +135,8 @@ class Router
         $via_routes = $this->routes[$via];
         foreach ($via_routes as $pattern => $action_pointer) {
             if ($this->pathMatchesPattern($path, $pattern)) {
-                return $action_pointer;
+                $parameters = $this->extractParameters($path, $pattern);
+                return [$action_pointer, $parameters];
             }
         }
 
@@ -221,6 +223,38 @@ class Router
         }
 
         return true;
+    }
+
+    /**
+     * Extract from a path a list of parameters matching a pattern.
+     *
+     * @param string $path
+     * @param string $pattern
+     *
+     * @return array The list of matching parameters where keys are extracted
+     *               from the pattern, and values from the path.
+     */
+    private function extractParameters($path, $pattern)
+    {
+        $parameters = [];
+
+        $pattern_exploded = explode('/', $pattern);
+        $path_exploded = explode('/', $path);
+
+        for ($i = 0; $i < count($pattern_exploded); $i++) {
+            $pattern_element = $pattern_exploded[$i];
+            $path_element = $path_exploded[$i];
+
+            $pattern_is_variable = $pattern_element && $pattern_element[0] === ':';
+            if (!$pattern_is_variable) {
+                continue;
+            }
+
+            $parameter_name = substr($pattern_element, 1);
+            $parameters[$parameter_name] = $path_element;
+        }
+
+        return $parameters;
     }
 
     /**

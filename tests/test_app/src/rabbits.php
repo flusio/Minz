@@ -17,6 +17,14 @@ function items($request)
     ]);
 }
 
+function show($request)
+{
+    $rabbit_number = 'Rabbit #' . $request->param('id');
+    return Response::ok('rabbits/show.phtml', [
+        'rabbit' => $rabbit_number,
+    ]);
+}
+
 function missingViewFile($request)
 {
     return Response::ok('rabbits/missing.phtml');

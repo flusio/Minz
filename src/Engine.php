@@ -37,7 +37,10 @@ class Engine
     public function run($request)
     {
         try {
-            $to = $this->router->match($request->method(), $request->path());
+            list(
+                $to,
+                $parameters
+            ) = $this->router->match($request->method(), $request->path());
         } catch (Errors\RouteNotFoundError $e) {
             try {
                 $output = new Output\View('not_found.phtml', ['error' => $e]);
@@ -45,6 +48,10 @@ class Engine
                 $output = new Output\Text((string)$e);
             }
             return new Response(404, $output);
+        }
+
+        foreach ($parameters as $param_name => $param_value) {
+            $request->setParam($param_name, $param_value);
         }
 
         $action_controller = new ActionController($to);

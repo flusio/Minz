@@ -163,9 +163,13 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $action_pointer = $router->match('get', '/rabbits');
+        list(
+            $action_pointer,
+            $parameters
+        ) = $router->match('get', '/rabbits');
 
         $this->assertSame('rabbits#list', $action_pointer);
+        $this->assertSame([], $parameters);
     }
 
     public function testMatchWithTrailingSlashes()
@@ -173,9 +177,13 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $action_pointer = $router->match('get', '/rabbits//');
+        list(
+            $action_pointer,
+            $parameters,
+        ) = $router->match('get', '/rabbits//');
 
         $this->assertSame('rabbits#list', $action_pointer);
+        $this->assertSame([], $parameters);
     }
 
     public function testMatchWithParam()
@@ -183,9 +191,13 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#get');
 
-        $action_pointer = $router->match('get', '/rabbits/42');
+        list(
+            $action_pointer,
+            $parameters
+        ) = $router->match('get', '/rabbits/42');
 
         $this->assertSame('rabbits#get', $action_pointer);
+        $this->assertSame(['id' => '42'], $parameters);
     }
 
     public function testMatchFailsIfNotMatchingVia()
