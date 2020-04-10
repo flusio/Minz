@@ -30,6 +30,7 @@ namespace Minz;
  * - configuration_filepath: the path to the current configuration file
  *
  * Other optional keys are:
+ * - data_path: the path to the data directory, default to $app_path/data
  * - database: an array specifying dsn, username, password and options to pass
  *   to the PDO interface, see https://www.php.net/manual/fr/pdo.construct.php
  * - application: you can set options specific to your application here,
@@ -57,6 +58,9 @@ class Configuration
 
     /** @var string The path to the current configuration file */
     public static $configuration_filepath;
+
+    /** @var string The path to the data directory */
+    public static $data_path;
 
     /**
      * @var string The name of the application. It must be identical to the
@@ -140,6 +144,13 @@ class Configuration
             'protocol' => 'http',
         ];
         self::$url_options = array_merge($default_url_options, $url_options);
+
+        $default_data_path = $app_path . '/data';
+        self::$data_path = self::getDefault(
+            $raw_configuration,
+            'data_path',
+            $default_data_path
+        );
 
         $database = self::getDefault($raw_configuration, 'database', null);
         if ($database !== null) {
