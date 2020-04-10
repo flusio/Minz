@@ -78,7 +78,10 @@ class DatabaseModel
 
         $statement = $this->prepare($sql);
         $result = $statement->execute(array_values($values));
-        if ($result) {
+
+        if ($result && isset($values[$this->primary_key_name])) {
+            return $values[$this->primary_key_name];
+        } elseif ($result) {
             return $this->lastInsertId();
         } else {
             throw self::sqlStatementError($statement);
