@@ -29,7 +29,7 @@ function url_full($action_pointer, $parameters = [])
 }
 
 /**
- * Return the relative URL for a static file (under public folder)
+ * Return the relative URL for a static file (under public/static/ folder)
  *
  * @param string $filename
  *
@@ -41,7 +41,30 @@ function url_static($filename)
     if (substr($path, -1) !== '/') {
         $path = $path . '/';
     }
-    return $path . $filename;
+    return $path . 'static/' . $filename;
+}
+
+/**
+ * Return the absolute URL for a static file (under public/static/ folder)
+ *
+ * @param string $filename
+ *
+ * @return string
+ */
+function url_full_static($filename)
+{
+    $url_options = \Minz\Configuration::$url_options;
+    $absolute_url = $url_options['protocol'] . '://';
+    $absolute_url .= $url_options['host'];
+    if (
+        !($url_options['protocol'] === 'https' && $url_options['port'] === 443) &&
+        !($url_options['protocol'] === 'http' && $url_options['port'] === 80)
+    ) {
+        $absolute_url .= ':' . $url_options['port'];
+    }
+    $absolute_url .= url_static($filename);
+
+    return $absolute_url;
 }
 
 /**

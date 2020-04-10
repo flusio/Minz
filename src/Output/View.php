@@ -38,10 +38,10 @@ class View implements Output
     private $variables;
 
     /** @var string|null */
-    private $template_name;
+    private $layout_name;
 
     /** @var mixed[] */
-    private $template_variables;
+    private $layout_variables;
 
     /** @var mixed[] */
     private static $default_variables = [];
@@ -162,10 +162,10 @@ class View implements Output
         include $this->filepath;
         $output = ob_get_clean();
 
-        if ($this->template_name) {
-            $template_pointer = "templates/{$this->template_name}";
-            $this->template_variables['content'] = $output;
-            $view = new View($template_pointer, $this->template_variables);
+        if ($this->layout_name) {
+            $layout_pointer = "_layouts/{$this->layout_name}";
+            $this->layout_variables['content'] = $output;
+            $view = new View($layout_pointer, $this->layout_variables);
             $output = $view->render();
         }
 
@@ -173,33 +173,33 @@ class View implements Output
     }
 
     /**
-     * Allow to set a template to the view.
+     * Allow to set a layout to the view.
      *
      * It must be called from within the view file directly.
      *
-     * @param string $template_name The name of the file under src/templates/
-     * @param mixed[] $template_variables A list of variables to pass to the template
+     * @param string $layout_name The name of the file under src/_layouts/
+     * @param mixed[] $layout_variables A list of variables to pass to the layout
      *
-     * @throws \Minz\Errors\OutputError if the template file doesn't exist
-     * @throws \Minz\Errors\OutputError if the template variables aren't an array
+     * @throws \Minz\Errors\OutputError if the layout file doesn't exist
+     * @throws \Minz\Errors\OutputError if the layout variables aren't an array
      */
-    private function template($template_name, $template_variables = [])
+    private function layout($layout_name, $layout_variables = [])
     {
-        $template_filepath = self::templateFilepath($template_name);
-        if (!file_exists($template_filepath)) {
+        $layout_filepath = self::layoutFilepath($layout_name);
+        if (!file_exists($layout_filepath)) {
             throw new Errors\OutputError(
-                "{$template_name} template file does not exist."
+                "{$layout_name} layout file does not exist."
             );
         }
 
-        if (!is_array($template_variables)) {
+        if (!is_array($layout_variables)) {
             throw new Errors\OutputError(
-                "Template variables parameter must be an array."
+                "Layout variables parameter must be an array."
             );
         }
 
-        $this->template_name = $template_name;
-        $this->template_variables = $template_variables;
+        $this->layout_name = $layout_name;
+        $this->layout_variables = $layout_variables;
     }
 
     /**
@@ -222,15 +222,15 @@ class View implements Output
     }
 
     /**
-     * Helper to find the path to a template file
+     * Helper to find the path to a layout file
      *
-     * @param string $template_name
+     * @param string $layout_name
      *
      * @return string
      */
-    private static function templateFilepath($template_name)
+    private static function layoutFilepath($layout_name)
     {
         $app_path = Configuration::$app_path;
-        return "{$app_path}/src/views/templates/{$template_name}";
+        return "{$app_path}/src/views/_layouts/{$layout_name}";
     }
 }
