@@ -60,6 +60,10 @@ class View implements Output
     /**
      * @param string $pointer
      * @param mixed[] $variables (optional)
+     *
+     * @throws \Minz\Errors\OutputError if the pointed file extension is not
+     *                                  associated to a supported one
+     * @throws \Minz\Errors\OutputError if the pointed file doesn't exist
      */
     public function __construct($pointer, $variables = [])
     {
@@ -88,7 +92,7 @@ class View implements Output
     /**
      * @param string $pointer
      *
-     * @throws \Minz\Errors\ViewError if the pointed file doesn't exist
+     * @throws \Minz\Errors\OutputError if the pointed file doesn't exist
      */
     public function setFilepath($pointer)
     {
@@ -96,7 +100,7 @@ class View implements Output
         $filepath = "{$app_path}/src/views/{$pointer}";
         if (!file_exists($filepath)) {
             $missing_file = "src/views/{$pointer}";
-            throw new Errors\ViewError("{$missing_file} file cannot be found.");
+            throw new Errors\OutputError("{$missing_file} file cannot be found.");
         }
 
         $this->filepath = $filepath;
@@ -113,14 +117,14 @@ class View implements Output
     /**
      * @param string $pointer
      *
-     * @throws \Minz\Errors\ViewError if the pointed file extension is not
-     *                                associated to a supported one
+     * @throws \Minz\Errors\OutputError if the pointed file extension is not
+     *                                  associated to a supported one
      */
     public function setContentType($pointer)
     {
         $file_extension = pathinfo($pointer, PATHINFO_EXTENSION);
         if (!isset(self::EXTENSION_TO_CONTENT_TYPE[$file_extension])) {
-            throw new Errors\ViewError(
+            throw new Errors\OutputError(
                 "{$file_extension} is not a supported view file extension."
             );
         }
@@ -176,20 +180,20 @@ class View implements Output
      * @param string $template_name The name of the file under src/templates/
      * @param mixed[] $template_variables A list of variables to pass to the template
      *
-     * @throws \Minz\Errors\ViewError if the template file doesn't exist
-     * @throws \Minz\Errors\ViewError if the template variables aren't an array
+     * @throws \Minz\Errors\OutputError if the template file doesn't exist
+     * @throws \Minz\Errors\OutputError if the template variables aren't an array
      */
     private function template($template_name, $template_variables = [])
     {
         $template_filepath = self::templateFilepath($template_name);
         if (!file_exists($template_filepath)) {
-            throw new Errors\ViewError(
+            throw new Errors\OutputError(
                 "{$template_name} template file does not exist."
             );
         }
 
         if (!is_array($template_variables)) {
-            throw new Errors\ViewError(
+            throw new Errors\OutputError(
                 "Template variables parameter must be an array."
             );
         }
@@ -203,7 +207,7 @@ class View implements Output
      *
      * @param string $variable_name
      *
-     * @throws \Minz\Errors\ViewError if the variable doesn't exist
+     * @throws \Minz\Errors\OutputError if the variable doesn't exist
      *
      * @return mixed
      */
@@ -211,7 +215,7 @@ class View implements Output
     {
         $variables = array_merge(self::$default_variables, $this->variables);
         if (!isset($variables[$variable_name])) {
-            throw new Errors\ViewError("{$variable_name} variable does not exist.");
+            throw new Errors\OutputError("{$variable_name} variable does not exist.");
         }
 
         return $variables[$variable_name];

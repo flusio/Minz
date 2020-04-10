@@ -17,7 +17,7 @@ class ViewTest extends TestCase
 
     public function testConstructorFailsIfViewFileDoesntExist()
     {
-        $this->expectException(Errors\ViewError::class);
+        $this->expectException(Errors\OutputError::class);
         $this->expectExceptionMessage(
             'src/views/rabbits/missing.phtml file cannot be found.'
         );
@@ -27,7 +27,7 @@ class ViewTest extends TestCase
 
     public function testConstructorFailsIfViewFileExtensionIsntSupported()
     {
-        $this->expectException(Errors\ViewError::class);
+        $this->expectException(Errors\OutputError::class);
         $this->expectExceptionMessage(
             'nope is not a supported view file extension.'
         );
