@@ -273,10 +273,12 @@ class Model
 
         $declaration = $this->property_declarations[$property];
 
-        if ($declaration['required'] && (
-            !isset($value) ||
-            ($declaration['type'] === 'string' && empty($value))
-        )) {
+        if (
+            $declaration['required'] && (
+                !isset($value) ||
+                ($declaration['type'] === 'string' && empty($value))
+            )
+        ) {
             throw new Errors\ModelPropertyError(
                 $property,
                 Errors\ModelPropertyError::PROPERTY_REQUIRED,
