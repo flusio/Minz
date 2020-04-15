@@ -145,7 +145,7 @@ class Configuration
         ];
         self::$url_options = array_merge($default_url_options, $url_options);
         if (!isset(self::$url_options['port'])) {
-            self::$url_options['port'] = $url_options['protocol'] === 'https' ? 443 : 80;
+            self::$url_options['port'] = self::$url_options['protocol'] === 'https' ? 443 : 80;
         }
 
         $default_data_path = $app_path . '/data';
