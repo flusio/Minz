@@ -12,7 +12,7 @@ What I like in Minz is:
   missing)
 - it's easy to perform integration tests
 - it provides a common interface for both Web and CLI requests
-- it has no dependencies (at the moment)
+- it has very few dependencies (only one at the moment, which is PHPMailer)
 - I learnt a LOT by coding it and it was quite fun
 
 ## Contributing
