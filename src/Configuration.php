@@ -195,11 +195,16 @@ class Configuration
         }
         self::$database = $database;
 
-        $mailer = self::getDefault($raw_configuration, 'mailer', [
+        $default_mailer_options = [
             'type' => 'mail',
             'from' => 'root@localhost',
             'debug' => $environment === 'development' ? 2 : 0,
-        ]);
+        ];
+        $mailer = array_merge(
+            $default_mailer_options,
+            self::getDefault($raw_configuration, 'mailer', [])
+        );
+
         if ($mailer['type'] === 'smtp') {
             $default_smtp_options = [
                 'domain' => '', // the domain used in the Message-ID header
@@ -217,6 +222,7 @@ class Configuration
             $smtp_options = array_merge($default_smtp_options, $mailer['smtp']);
             $mailer['smtp'] = $smtp_options;
         }
+
         self::$mailer = $mailer;
 
         self::$application = self::getDefault($raw_configuration, 'application', []);
