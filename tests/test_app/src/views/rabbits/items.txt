@@ -1,0 +1,6 @@
+The rabbits
+
+<?php foreach ($rabbits as $rabbit): ?>
+- <?= $rabbit ?>
+
+<?php endforeach; ?>

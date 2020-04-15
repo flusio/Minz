@@ -34,6 +34,20 @@ namespace Minz;
  * - data_path: the path to the data directory, default to $app_path/data
  * - database: an array specifying dsn, username, password and options to pass
  *   to the PDO interface, see https://www.php.net/manual/fr/pdo.construct.php
+ * - mailer: an array specifying mailing options, with:
+ *   - type: either `mail` or `smtp`, default 'mail'
+ *   - from: a valid email address, default 'root@localhost'
+ *   - debug: optional, default is 2 if environment is set to `development`, 0
+ *     otherwise
+ *   - smtp: only if type is set to `stmp` (optional), with:
+ *     - domain: the domain used in the Message-ID header, default ''
+ *     - host: the SMTP server address, default 'localhost'
+ *     - port: default 25
+ *     - auth: whether to use SMTP authentication, default false
+       - auth_type: 'CRAM-MD5', 'LOGIN', 'PLAIN', 'XOAUTH2' or '', default ''
+ *     - username: default ''
+ *     - password: default ''
+ *     - secure: '', 'ssl' or 'tls', default ''
  * - application: you can set options specific to your application here,
  *   default to empty array
  * - use_session: indicates if you want to use the PHP sessions, default to `true`
@@ -71,6 +85,9 @@ class Configuration
 
     /** @var array The web server information to build URLs */
     public static $url_options;
+
+    /** @var array An array containing mailer configuration */
+    public static $mailer;
 
     /** @var string[] An array containing database configuration */
     public static $database;
@@ -177,6 +194,30 @@ class Configuration
             $database = array_merge($additional_default_values, $database);
         }
         self::$database = $database;
+
+        $mailer = self::getDefault($raw_configuration, 'mailer', [
+            'type' => 'mail',
+            'from' => 'root@localhost',
+            'debug' => $environment === 'development' ? 2 : 0,
+        ]);
+        if ($mailer['type'] === 'smtp') {
+            $default_smtp_options = [
+                'domain' => '', // the domain used in the Message-ID header
+                'host' => 'localhost', // the SMTP server address
+                'port' => 25,
+                'auth' => false,
+                'auth_type' => '', // 'CRAM-MD5', 'LOGIN', 'PLAIN', 'XOAUTH2' or ''
+                'username' => '',
+                'password' => '',
+                'secure' => '', // '', 'ssl' or 'tls'
+            ];
+            if (!isset($mailer['smtp']) || !is_array($mailer['smtp'])) {
+                $mailer['smtp'] = [];
+            }
+            $smtp_options = array_merge($default_smtp_options, $mailer['smtp']);
+            $mailer['smtp'] = $smtp_options;
+        }
+        self::$mailer = $mailer;
 
         self::$application = self::getDefault($raw_configuration, 'application', []);
 
