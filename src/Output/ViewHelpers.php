@@ -37,11 +37,20 @@ function url_full($action_pointer, $parameters = [])
  */
 function url_static($filename)
 {
-    $path = \Minz\Configuration::$url_options['path'];
-    if (substr($path, -1) !== '/') {
-        $path = $path . '/';
+    $filepath = \Minz\Configuration::$app_path . '/public/static/' . $filename;
+    $modification_time = @filemtime($filepath);
+
+    $url_path = \Minz\Configuration::$url_options['path'];
+    if (substr($url_path, -1) !== '/') {
+        $url_path = $url_path . '/';
     }
-    return $path . 'static/' . $filename;
+    $file_url = $url_path . 'static/' . $filename;
+
+    if ($modification_time) {
+        return $file_url . '?' . $modification_time;
+    } else {
+        return $file_url;
+    }
 }
 
 /**
