@@ -73,9 +73,7 @@ class IntegrationTestCase extends TestCase
      */
     public function resetSession()
     {
-        if (\Minz\Configuration::$use_session) {
-            session_unset();
-        }
+        session_unset();
     }
 
     /**
