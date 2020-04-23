@@ -16,14 +16,16 @@ use PHPMailer\PHPMailer;
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
-class Mailer {
+class Mailer
+{
     /** @var \PHPMailer\PHPMailer\PHPMailer */
     public $mailer;
 
     /**
      * Setup the PHPMailer mailer with the application configuration.
      */
-    public function __construct () {
+    public function __construct()
+    {
         PHPMailer\PHPMailer::$validator = 'html5';
 
         $mailer = new PHPMailer\PHPMailer(true);
@@ -80,7 +82,8 @@ class Mailer {
      *
      * @return bool true on success, false if a SMTP error happens
      */
-    public function send($to, $subject) {
+    public function send($to, $subject)
+    {
         try {
             $this->mailer->addAddress($to);
             $this->mailer->Subject = $subject;
@@ -92,4 +95,3 @@ class Mailer {
         }
     }
 }
-
