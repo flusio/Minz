@@ -41,11 +41,7 @@ class Router
      * action name, separated by a hash. For instance, `rabbits#items` points
      * to the `items` action of the `rabbits` controller.
      *
-     * Via can be a single value or an array of valid "vias". You are responsible
-     * to make the distinction in the action, but note it's highly recommended
-     * to point an action to a single via.
-     *
-     * @param string|string[] $vias The valid via(s) of the route
+     * @param string $via The valid via(s) of the route
      * @param string $pattern The path pattern of the new route
      * @param string $action_pointer The destination of the route
      *
@@ -54,12 +50,11 @@ class Router
      * @throws \Minz\Errors\RoutingError if action_pointer is empty
      * @throws \Minz\Errors\RoutingError if action_pointer contains no hash
      * @throws \Minz\Errors\RoutingError if action_pointer contains more than one hash
-     * @throws \Minz\Errors\RoutingError if via is empty
-     * @throws \Minz\Errors\RoutingError if via is invalid (or contains an invalid one)
+     * @throws \Minz\Errors\RoutingError if via is invalid
      *
      * @return void
      */
-    public function addRoute($vias, $pattern, $action_pointer)
+    public function addRoute($via, $pattern, $action_pointer)
     {
         if (!$pattern) {
             throw new Errors\RoutingError('Route "pattern" cannot be empty.');
@@ -85,26 +80,14 @@ class Router
             );
         }
 
-        if (!is_array($vias)) {
-            $vias = [$vias];
+        if (!in_array($via, self::VALID_VIAS)) {
+            $vias_as_string = implode(', ', self::VALID_VIAS);
+            throw new Errors\RoutingError(
+                "{$via} via is invalid ({$vias_as_string})."
+            );
         }
 
-        $vias = array_filter($vias);
-
-        if (empty($vias)) {
-            throw new Errors\RoutingError('Route "via" cannot be empty.');
-        }
-
-        foreach ($vias as $via) {
-            if (!in_array($via, self::VALID_VIAS)) {
-                $vias_as_string = implode(', ', self::VALID_VIAS);
-                throw new Errors\RoutingError(
-                    "{$via} via is invalid ({$vias_as_string})."
-                );
-            }
-
-            $this->routes[$via][$pattern] = $action_pointer;
-        }
+        $this->routes[$via][$pattern] = $action_pointer;
     }
 
     /**

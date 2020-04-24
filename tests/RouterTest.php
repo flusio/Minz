@@ -29,23 +29,6 @@ class RouterTest extends TestCase
         ], $routes);
     }
 
-    public function testAddRouteWithSeveralVias()
-    {
-        $router = new Router();
-
-        $router->addRoute(['get', 'post'], '/rabbits', 'rabbits#list');
-
-        $routes = $router->routes();
-        $this->assertSame([
-            'get' => [
-                '/rabbits' => 'rabbits#list',
-            ],
-            'post' => [
-                '/rabbits' => 'rabbits#list',
-            ],
-        ], $routes);
-    }
-
     public function testAddRouteAcceptsCliVia()
     {
         $router = new Router();
@@ -119,19 +102,6 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @dataProvider emptyValuesProvider
-     */
-    public function testAddRouteFailsIfViaIsEmpty($emptyVia)
-    {
-        $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage('Route "via" cannot be empty.');
-
-        $router = new Router();
-
-        $router->addRoute($emptyVia, '/rabbits', 'rabbits#list');
-    }
-
-    /**
      * @dataProvider invalidViaProvider
      */
     public function testAddRouteFailsIfViaIsInvalid($invalidVia)
@@ -144,18 +114,6 @@ class RouterTest extends TestCase
         $router = new Router();
 
         $router->addRoute($invalidVia, '/rabbits', 'rabbits#list');
-    }
-
-    public function testAddRouteFailsIfContainsInvalidVia()
-    {
-        $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage(
-            "invalid via is invalid (get, post, patch, put, delete, cli)."
-        );
-
-        $router = new Router();
-
-        $router->addRoute(['get', 'invalid'], '/rabbits', 'rabbits#list');
     }
 
     public function testMatch()
