@@ -30,6 +30,17 @@ class UrlTest extends TestCase
         $this->assertSame('/rabbits', $url);
     }
 
+    public function testForWithName()
+    {
+        $router = new Router();
+        $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
+        Url::setRouter($router);
+
+        $url = Url::for('rabbits');
+
+        $this->assertSame('/rabbits', $url);
+    }
+
     /**
      * @dataProvider viaProvider
      */
@@ -95,7 +106,7 @@ class UrlTest extends TestCase
     {
         $this->expectException(Errors\UrlError::class);
         $this->expectExceptionMessage(
-            'rabbits#list action pointer does not exist in the router.'
+            'rabbits#list action pointer or route name does not exist in the router.'
         );
 
         $router = new Router();

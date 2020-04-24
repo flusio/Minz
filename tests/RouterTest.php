@@ -207,22 +207,22 @@ class RouterTest extends TestCase
         $router->match($invalidVia, '/rabbits');
     }
 
-    public function testUriFor()
+    public function testUriByPointer()
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $uri = $router->uriFor('get', 'rabbits#list');
+        $uri = $router->uriByPointer('get', 'rabbits#list');
 
         $this->assertSame('/rabbits', $uri);
     }
 
-    public function testUriForWithParams()
+    public function testUriByPointerWithParams()
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#details');
 
-        $uri = $router->uriFor('get', 'rabbits#details', ['id' => 42]);
+        $uri = $router->uriByPointer('get', 'rabbits#details', ['id' => 42]);
 
         $this->assertSame('/rabbits/42', $uri);
     }
@@ -232,25 +232,25 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#details');
 
-        $uri = $router->uriFor('get', 'rabbits#details', ['id' => 42]);
+        $uri = $router->uriByPointer('get', 'rabbits#details', ['id' => 42]);
 
         $this->assertSame('/rabbits?id=42', $uri);
     }
 
-    public function testUriForWithUrlOptionPath()
+    public function testUriByPointerWithUrlOptionPath()
     {
         Configuration::$url_options['path'] = '/path';
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $uri = $router->uriFor('get', 'rabbits#list');
+        $uri = $router->uriByPointer('get', 'rabbits#list');
 
         $this->assertSame('/path/rabbits', $uri);
 
         Configuration::$url_options['path'] = '';
     }
 
-    public function testUriForFailsIfParameterIsMissing()
+    public function testUriByPointerFailsIfParameterIsMissing()
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage('Required `id` parameter is missing.');
@@ -258,10 +258,10 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#details');
 
-        $uri = $router->uriFor('get', 'rabbits#details');
+        $uri = $router->uriByPointer('get', 'rabbits#details');
     }
 
-    public function testUriForFailsIfActionPointerNotRegistered()
+    public function testUriByPointerFailsIfActionPointerNotRegistered()
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage(
@@ -270,13 +270,13 @@ class RouterTest extends TestCase
 
         $router = new Router();
 
-        $router->uriFor('get', 'rabbits#list');
+        $router->uriByPointer('get', 'rabbits#list');
     }
 
     /**
      * @dataProvider invalidViaProvider
      */
-    public function testUriForFailsIfViaIsInvalid($invalid_via)
+    public function testUriByPointerFailsIfViaIsInvalid($invalid_via)
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
@@ -286,7 +286,73 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $router->uriFor($invalid_via, 'rabbits#list');
+        $router->uriByPointer($invalid_via, 'rabbits#list');
+    }
+
+    public function testUriByName()
+    {
+        $router = new Router();
+        $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
+
+        $uri = $router->uriByName('rabbits');
+
+        $this->assertSame('/rabbits', $uri);
+    }
+
+    public function testUriByNameWithParams()
+    {
+        $router = new Router();
+        $router->addRoute('get', '/rabbits/:id', 'rabbits#details', 'rabbit');
+
+        $uri = $router->uriByName('rabbit', ['id' => 42]);
+
+        $this->assertSame('/rabbits/42', $uri);
+    }
+
+    public function testUriByNameWithAdditionalParameters()
+    {
+        $router = new Router();
+        $router->addRoute('get', '/rabbits', 'rabbits#details', 'rabbit');
+
+        $uri = $router->uriByName('rabbit', ['id' => 42]);
+
+        $this->assertSame('/rabbits?id=42', $uri);
+    }
+
+    public function testUriByNameWithUrlOptionPath()
+    {
+        Configuration::$url_options['path'] = '/path';
+        $router = new Router();
+        $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
+
+        $uri = $router->uriByName('rabbits');
+
+        $this->assertSame('/path/rabbits', $uri);
+
+        Configuration::$url_options['path'] = '';
+    }
+
+    public function testUriByNameFailsIfParameterIsMissing()
+    {
+        $this->expectException(Errors\RoutingError::class);
+        $this->expectExceptionMessage('Required `id` parameter is missing.');
+
+        $router = new Router();
+        $router->addRoute('get', '/rabbits/:id', 'rabbits#details', 'rabbit');
+
+        $uri = $router->uriByName('rabbit');
+    }
+
+    public function testUriByNameFailsIfNameNotRegistered()
+    {
+        $this->expectException(Errors\RouteNotFoundError::class);
+        $this->expectExceptionMessage(
+            'Route named "rabbits" doesn’t match any route.'
+        );
+
+        $router = new Router();
+
+        $router->uriByName('rabbits');
     }
 
     public function emptyValuesProvider()

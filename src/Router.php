@@ -22,6 +22,11 @@ class Router
      */
     private $routes = [];
 
+    /**
+     * @var array Contains the routes indexed by their names
+     */
+    private $routes_by_names = [];
+
     public function __construct()
     {
         foreach (self::VALID_VIAS as $via) {
@@ -44,6 +49,7 @@ class Router
      * @param string $via The valid via(s) of the route
      * @param string $pattern The path pattern of the new route
      * @param string $action_pointer The destination of the route
+     * @param string $route_name An optional name for the route
      *
      * @throws \Minz\Errors\RoutingError if pattern is empty
      * @throws \Minz\Errors\RoutingError if pattern doesn't start by a slash
@@ -54,7 +60,7 @@ class Router
      *
      * @return void
      */
-    public function addRoute($via, $pattern, $action_pointer)
+    public function addRoute($via, $pattern, $action_pointer, $route_name = '')
     {
         if (!$pattern) {
             throw new Errors\RoutingError('Route "pattern" cannot be empty.');
@@ -88,6 +94,13 @@ class Router
         }
 
         $this->routes[$via][$pattern] = $action_pointer;
+        if ($route_name) {
+            $this->routes_by_names[$route_name] = [
+                'via' => $via,
+                'pattern' => $pattern,
+                'action_pointer' => $action_pointer,
+            ];
+        }
     }
 
     /**
@@ -137,6 +150,32 @@ class Router
     }
 
     /**
+     * @param string $name
+     * @param array $parameters
+     *
+     * @throws \Minz\Errors\RoutingError if required parameters are missing
+     * @throws \Minz\Errors\RouteNotFoundError if name matches with no route
+     *
+     * @return string The URI corresponding to the action
+     */
+    public function uriByName($name, $parameters = [])
+    {
+        if (!isset($this->routes_by_names[$name])) {
+            throw new Errors\RouteNotFoundError(
+                "Route named \"{$name}\" doesn’t match any route."
+            );
+        }
+
+        $route = $this->routes_by_names[$name];
+        $path = Configuration::$url_options['path'];
+        if (substr($path, -1) === '/') {
+            $path = substr($path, 0, -1);
+        }
+
+        return $path . $this->patternToUri($route['pattern'], $parameters);
+    }
+
+    /**
      * @param string $via
      * @param string $action_pointer
      * @param array $parameters
@@ -147,7 +186,7 @@ class Router
      *
      * @return string The URI corresponding to the action
      */
-    public function uriFor($via, $action_pointer, $parameters = [])
+    public function uriByPointer($via, $action_pointer, $parameters = [])
     {
         if (!in_array($via, self::VALID_VIAS)) {
             $vias_as_string = implode(', ', self::VALID_VIAS);

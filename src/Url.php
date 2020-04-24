@@ -27,7 +27,7 @@ class Url
     /**
      * Return the relative URL corresponding to an action.
      *
-     * @param string $action_pointer
+     * @param string $action_pointer_or_name
      * @param array $parameters
      *
      * @throws \Minz\Errors\UrlError if router has not been registered
@@ -37,7 +37,7 @@ class Url
      *
      * @return string The URL corresponding to the action
      */
-    public static function for($action_pointer, $parameters = [])
+    public static function for($action_pointer_or_name, $parameters = [])
     {
         if (!self::$router) {
             throw new Errors\UrlError(
@@ -45,10 +45,18 @@ class Url
             );
         }
 
+        try {
+            return self::$router->uriByName($action_pointer_or_name, $parameters);
+        } catch (Errors\RouteNotFoundError $e) {
+            // Do nothing on purpose
+        } catch (Errors\RoutingError $e) {
+            throw new Errors\UrlError($e->getMessage());
+        }
+
         $vias = Router::VALID_VIAS;
         foreach ($vias as $via) {
             try {
-                return self::$router->uriFor($via, $action_pointer, $parameters);
+                return self::$router->uriByPointer($via, $action_pointer_or_name, $parameters);
             } catch (Errors\RouteNotFoundError $e) {
                 // Do nothing on purpose
             } catch (Errors\RoutingError $e) {
@@ -57,7 +65,7 @@ class Url
         }
 
         throw new Errors\UrlError(
-            "{$action_pointer} action pointer does not exist in the router."
+            "{$action_pointer_or_name} action pointer or route name does not exist in the router."
         );
     }
 
