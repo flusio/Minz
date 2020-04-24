@@ -15,7 +15,7 @@
  */
 function url($action_pointer, $parameters = [])
 {
-    return \Minz\Url::for($action_pointer, $parameters = []);
+    return \Minz\Url::for($action_pointer, $parameters);
 }
 
 /**
@@ -25,7 +25,7 @@ function url($action_pointer, $parameters = [])
  */
 function url_full($action_pointer, $parameters = [])
 {
-    return \Minz\Url::absoluteFor($action_pointer, $parameters = []);
+    return \Minz\Url::absoluteFor($action_pointer, $parameters);
 }
 
 /**
