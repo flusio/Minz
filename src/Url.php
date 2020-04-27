@@ -31,8 +31,6 @@ class Url
      * @param array $parameters
      *
      * @throws \Minz\Errors\UrlError if router has not been registered
-     * @throws \Minz\Errors\UrlError if the action pointer has not be added to
-     *                               the router
      * @throws \Minz\Errors\UrlError if required parameter is missing
      *
      * @return string The URL corresponding to the action
@@ -64,9 +62,11 @@ class Url
             }
         }
 
-        throw new Errors\UrlError(
-            "{$action_pointer_or_name} action pointer or route name does not exist in the router."
-        );
+        $path = Configuration::$url_options['path'];
+        if (substr($path, -1) === '/') {
+            $path = substr($path, 0, -1);
+        }
+        return $path . '/' . $action_pointer_or_name;
     }
 
     /**
@@ -76,8 +76,6 @@ class Url
      * @param array $parameters
      *
      * @throws \Minz\Errors\UrlError if router has not been registered
-     * @throws \Minz\Errors\UrlError if the action pointer has not be added to
-     *                               the router
      * @throws \Minz\Errors\UrlError if required parameter is missing
      *
      * @return string The URL corresponding to the action
