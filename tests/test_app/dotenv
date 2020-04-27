@@ -1,0 +1,5 @@
+FOO=bar
+  WITH =   SPACES   
+TRUE_VALUE
+SINGLE_QUOTES='foo'
+DOUBLE_QUOTES="foo"
