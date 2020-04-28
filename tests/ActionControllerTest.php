@@ -31,6 +31,17 @@ class ActionControllerTest extends TestCase
         $this->assertSame('rabbits/items.phtml', $response->output()->pointer());
     }
 
+    public function testExecuteWithSubDirectory()
+    {
+        $request = new Request('GET', '/');
+        $action_controller = new ActionController('admin/rabbits#items');
+
+        $response = $action_controller->execute($request);
+
+        $this->assertSame(200, $response->code());
+        $this->assertSame('rabbits/items.phtml', $response->output()->pointer());
+    }
+
     public function testExecuteFailsIfControllerDoesntExist()
     {
         $this->expectException(Errors\ControllerError::class);

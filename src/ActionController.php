@@ -27,6 +27,7 @@ class ActionController
     public function __construct($to)
     {
         list($controller_name, $action_name) = explode('#', $to);
+        $controller_name = str_replace('/', '\\', $controller_name);
 
         $this->controller_name = $controller_name;
         $this->action_name = $action_name;
@@ -99,7 +100,8 @@ class ActionController
     public static function loadControllerCode($controller_name)
     {
         $app_path = Configuration::$app_path;
-        $controller_filepath = "{$app_path}/src/{$controller_name}.php";
+        $controller_pathname = str_replace('\\', '/', $controller_name);
+        $controller_filepath = "{$app_path}/src/{$controller_pathname}.php";
 
         return @include_once($controller_filepath);
     }
