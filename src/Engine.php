@@ -58,6 +58,7 @@ class Engine
         try {
             return $action_controller->execute($request);
         } catch (\Exception $e) {
+            Log::error((string)$e);
             try {
                 $output = new Output\View(
                     'internal_server_error.phtml',
