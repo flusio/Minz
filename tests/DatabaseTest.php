@@ -14,7 +14,7 @@ class DatabaseTest extends TestCase
     public function tearDown(): void
     {
         if (Configuration::$database) {
-            Database::drop();
+            Database::reset();
         }
         Configuration::$database = $this->initial_configuration;
     }

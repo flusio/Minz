@@ -29,7 +29,7 @@ SQL;
 
     public function tearDown(): void
     {
-        Database::drop();
+        Database::reset();
     }
 
     public function testConstructorFailsIfTableNameIsInvalid()

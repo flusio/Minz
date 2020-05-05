@@ -52,7 +52,7 @@ class IntegrationTestCase extends TestCase
      */
     public function initDatabase()
     {
-        if (self::$schema) {
+        if (\Minz\Configuration::$database) {
             $database = \Minz\Database::get();
             $database->exec(self::$schema);
         }
@@ -61,10 +61,10 @@ class IntegrationTestCase extends TestCase
     /**
      * @after
      */
-    public function dropDatabase()
+    public function resetDatabase()
     {
-        if (self::$schema) {
-            \Minz\Database::drop();
+        if (\Minz\Configuration::$database) {
+            \Minz\Database::reset();
         }
     }
 

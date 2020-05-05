@@ -88,6 +88,75 @@ class Database extends \PDO
     }
 
     /**
+     * Create a database.
+     *
+     * It's useful for tests. Take care of getting a new database object after
+     * calling this method.
+     *
+     * @throws \Minz\Errors\DatabaseError if database is not configured
+     * @throws \Minz\Errors\DatabaseError if an error occurs on create
+     *
+     * @return boolean Return true if the database was created, false otherwise
+     */
+    public static function create()
+    {
+        $database_configuration = Configuration::$database;
+        if (!$database_configuration) {
+            throw new Errors\DatabaseError(
+                'The database is not set in the configuration file.'
+            );
+        }
+
+        $database_type = $database_configuration['type'];
+        self::$instance = null;
+
+        if ($database_type === 'sqlite') {
+            $database_path = $database_configuration['path'];
+            if ($database_path === ':memory:') {
+                return true;
+            } else {
+                return @touch($database_path);
+            }
+        } elseif ($database_type === 'pgsql') {
+            $dsn = self::buildDsn($database_configuration, false);
+            $username = $database_configuration['username'];
+            $password = $database_configuration['password'];
+            $options = $database_configuration['options'];
+
+            $pdo = new self($dsn, $username, $password, $options);
+            $result = $pdo->exec("CREATE DATABASE {$database_configuration['dbname']} ENCODING 'UTF8'");
+
+            if ($result === false) {
+                $error_info = $pdo->errorInfo();
+                throw new Errors\DatabaseError(
+                    "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
+                );
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Reset the whole database
+     *
+     * @see \Minz\Database::drop
+     * @see \Minz\Database::create
+     *
+     * @throws \Minz\Errors\DatabaseError if database is not configured
+     * @throws \Minz\Errors\DatabaseError if an error occurs on create
+     *
+     * @return boolean Return true if the database was created, false otherwise
+     */
+    public static function reset()
+    {
+        self::drop();
+        self::create();
+    }
+
+    /**
      * Return a DSN string to initialize PDO
      *
      * @param array $database_configuration The array from the Configuration
