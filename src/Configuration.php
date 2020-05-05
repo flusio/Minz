@@ -32,8 +32,12 @@ namespace Minz;
  *
  * Other optional keys are:
  * - data_path: the path to the data directory, default to $app_path/data
- * - database: an array specifying dsn, username, password and options to pass
- *   to the PDO interface, see https://www.php.net/manual/fr/pdo.construct.php
+ * - database: an array specifying:
+ *   - dsn
+ *   - username (optional if database is sqlite)
+ *   - password (optional if database is sqlite)
+ *   - options (optional)
+ *   See https://www.php.net/manual/fr/pdo.construct.php
  * - mailer: an array specifying mailing options, with:
  *   - type: either `mail` or `smtp`, default 'mail'
  *   - from: a valid email address, default 'root@localhost'
@@ -182,12 +186,39 @@ class Configuration
                 );
             }
 
+            $info_from_dsn = self::extractDsnInfo($database['dsn']);
             $additional_default_values = [
                 'username' => null,
                 'password' => null,
                 'options' => [],
             ];
-            $database = array_merge($additional_default_values, $database);
+            $database = array_merge($additional_default_values, $database, $info_from_dsn);
+
+            if ($database['type'] === 'sqlite') {
+                // all should be good, do nothing
+            } elseif ($database['type'] === 'pgsql') {
+                if (!isset($database['host'])) {
+                    throw new Errors\ConfigurationError(
+                        'pgsql connection requires a `host` key, check your dsn string.'
+                    );
+                }
+
+                if (!isset($database['port'])) {
+                    throw new Errors\ConfigurationError(
+                        'pgsql connection requires a `port` key, check your dsn string.'
+                    );
+                }
+
+                if (!isset($database['dbname'])) {
+                    throw new Errors\ConfigurationError(
+                        'pgsql connection requires a `dbname` key, check your dsn string.'
+                    );
+                }
+            } else {
+                throw new Errors\ConfigurationError(
+                    "{$database['type']} database is not supported."
+                );
+            }
         }
         self::$database = $database;
 
@@ -263,5 +294,35 @@ class Configuration
         } else {
             return $default;
         }
+    }
+
+    /**
+     * Split a DSN string and return the information as an array
+     *
+     * @param string $dsn
+     *
+     * @return array
+     */
+    private static function extractDsnInfo($dsn)
+    {
+        $info = [];
+
+        list($database_type, $dsn_rest) = explode(':', $dsn, 2);
+        if ($database_type === 'sqlite') {
+            $info['path'] = $dsn_rest;
+        } elseif ($database_type === 'pgsql') {
+            $dsn_parts = explode(';', $dsn_rest);
+            foreach ($dsn_parts as $dsn_part) {
+                list($part_key, $part_value) = explode('=', $dsn_part, 2);
+                if ($part_key === 'user') {
+                    $part_key = 'username';
+                }
+                $info[$part_key] = $part_value;
+            }
+        }
+
+        $info['type'] = $database_type;
+
+        return $info;
     }
 }
