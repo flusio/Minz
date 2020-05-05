@@ -1,12 +1,19 @@
 <?php
 
+$dsn = getenv('DB_DSN');
+if ($dsn === false) {
+    $dsn = 'sqlite::memory:';
+}
+
 return [
     'app_name' => 'AppTest',
     'url_options' => [
         'host' => 'localhost',
     ],
     'database' => [
-        'dsn' => 'sqlite::memory:',
+        'dsn' => $dsn,
+        'username' => getenv('DB_USERNAME'),
+        'password' => getenv('DB_PASSWORD'),
     ],
     'no_syslog' => !getenv('APP_SYSLOG_ENABLED'),
 ];
