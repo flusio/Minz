@@ -1,8 +1,22 @@
 .DEFAULT_GOAL := help
 
+ifdef PGSQL
+	DB_DSN='pgsql:host=localhost;port=5432;dbname=minz_test'
+	DB_USERNAME='postgres'
+	DB_PASSWORD='password'
+else
+	DB_DSN='sqlite::memory:'
+	DB_USERNAME=none
+	DB_PASSWORD=none
+endif
+
+.PHONY: postgres
+postgres: ## Start a Postgres database in a Docker container
+	docker run --name minz-postgres --rm -p 5432:5432 -e POSTGRES_DB=minz_test -e POSTGRES_PASSWORD=password postgres:12-alpine
+
 .PHONY: test
 test: bin/phpunit ## Run the tests suite
-	php ./bin/phpunit --bootstrap ./tests/bootstrap.php ./tests
+	DB_DSN=$(DB_DSN) DB_USERNAME=$(DB_USERNAME) DB_PASSWORD=$(DB_PASSWORD) php ./bin/phpunit --bootstrap ./tests/bootstrap.php ./tests
 
 .PHONY: lint
 lint: bin/phpcs ## Run the linter on the PHP files
