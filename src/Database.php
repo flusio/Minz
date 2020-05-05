@@ -17,9 +17,21 @@ class Database extends \PDO
      */
     public static function get()
     {
-        if (!self::$instance) {
-            self::$instance = new self();
+        $database_configuration = Configuration::$database;
+        if (!$database_configuration) {
+            throw new Errors\DatabaseError(
+                'The database is not set in the configuration file.'
+            );
         }
+
+        if (!self::$instance) {
+            $dsn = self::buildDsn($database_configuration, true);
+            $username = $database_configuration['username'];
+            $password = $database_configuration['password'];
+            $options = $database_configuration['options'];
+            self::$instance = new self($dsn, $username, $password, $options);
+        }
+
         return self::$instance;
     }
 
@@ -43,43 +55,64 @@ class Database extends \PDO
             );
         }
 
-        $dsn = $database_configuration['dsn'];
-        list($database_type, $dsn_rest) = explode(':', $dsn, 2);
+        $database_type = $database_configuration['type'];
 
-        if ($database_type !== 'sqlite') {
+        self::$instance = null;
+
+        if ($database_type === 'sqlite') {
+            $database_path = $database_configuration['path'];
+            if ($database_path === ':memory:') {
+                return true;
+            } else {
+                return @unlink($database_path);
+            }
+        } else {
             throw new Errors\DatabaseError(
                 "The database type {$database_type} is not supported for dropping."
             );
         }
+    }
 
-        self::$instance = null;
-
-        if ($dsn_rest === ':memory:') {
-            return true;
+    /**
+     * Return a DSN string to initialize PDO
+     *
+     * @param array $database_configuration The array from the Configuration
+     * @param boolean $with_dbname Indicates if dbname must be included in the DSN
+     *                             (it has no effects with SQLite)
+     *
+     * @return string
+     */
+    private static function buildDsn($database_configuration, $with_dbname)
+    {
+        if ($database_configuration['type'] === 'sqlite') {
+            return 'sqlite:' . $database_configuration['path'];
+        } elseif ($database_configuration['type'] === 'pgsql') {
+            $dsn = 'pgsql:';
+            $dsn .= 'host=' . $database_configuration['host'];
+            $dsn .= ';port=' . $database_configuration['port'];
+            if ($with_dbname) {
+                $dsn .= ';dbname=' . $database_configuration['dbname'];
+            }
+            return $dsn;
         } else {
-            return @unlink($dsn_rest);
+            return '';
         }
     }
 
     /**
      * Initialize a PDO database.
      *
-     * @throws \Minz\Errors\DatabaseError if database is not configured
+     * @see \PDO
+     *
+     * @param string $dsn
+     * @param string $username (optional if sqlite)
+     * @param string $password (optional if sqlite)
+     * @param array $options (optional)
+     *
      * @throws \Minz\Errors\DatabaseError if an error occured during initialization
      */
-    private function __construct()
+    private function __construct($dsn, $username = null, $password = null, $options = [])
     {
-        $database_configuration = Configuration::$database;
-        if (!$database_configuration) {
-            throw new Errors\DatabaseError(
-                'The database is not set in the configuration file.'
-            );
-        }
-
-        $dsn = $database_configuration['dsn'];
-        $username = $database_configuration['username'];
-        $password = $database_configuration['password'];
-        $options = $database_configuration['options'];
         $database_type = strstr($dsn, ':', true);
 
         // Force some options values
