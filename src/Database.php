@@ -38,13 +38,13 @@ class Database extends \PDO
     /**
      * Drop the entire database. Hell yeah!
      *
-     * It's useful for tests. Only SQLite database is supported for now. Take
-     * care of getting a new database object after calling this method.
+     * It's useful for tests. Take care of getting a new database object after
+     * calling this method.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
-     * @throws \Minz\Errors\DatabaseError if database is not SQLite
+     * @throws \Minz\Errors\DatabaseError if an error occurs on drop
      *
-     * @return boolean Return true if the database file was deleted, false otherwise
+     * @return boolean Return true if the database was dropped, false otherwise
      */
     public static function drop()
     {
@@ -56,7 +56,6 @@ class Database extends \PDO
         }
 
         $database_type = $database_configuration['type'];
-
         self::$instance = null;
 
         if ($database_type === 'sqlite') {
@@ -66,10 +65,25 @@ class Database extends \PDO
             } else {
                 return @unlink($database_path);
             }
+        } elseif ($database_type === 'pgsql') {
+            $dsn = self::buildDsn($database_configuration, false);
+            $username = $database_configuration['username'];
+            $password = $database_configuration['password'];
+            $options = $database_configuration['options'];
+
+            $pdo = new self($dsn, $username, $password, $options);
+            $result = $pdo->exec("DROP DATABASE IF EXISTS {$database_configuration['dbname']}");
+
+            if ($result === false) {
+                $error_info = $pdo->errorInfo();
+                throw new Errors\DatabaseError(
+                    "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
+                );
+            }
+
+            return true;
         } else {
-            throw new Errors\DatabaseError(
-                "The database type {$database_type} is not supported for dropping."
-            );
+            return false;
         }
     }
 

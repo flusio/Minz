@@ -13,7 +13,7 @@ class DatabaseTest extends TestCase
 
     public function tearDown(): void
     {
-        if (Configuration::$database && Configuration::$database['type'] === 'sqlite') {
+        if (Configuration::$database) {
             Database::drop();
         }
         Configuration::$database = $this->initial_configuration;
@@ -141,6 +141,21 @@ SQL;
         $this->assertFalse($result);
     }
 
+    public function testDropFailsReturnsFalseIfDatabaseTypeIsntSupported()
+    {
+        Configuration::$database = [
+            'type' => 'mysql',
+            'host' => 'localhost',
+            'port' => 3306,
+            'dbname' => 'testdb',
+            'username' => '',
+        ];
+
+        $result = Database::drop();
+
+        $this->assertFalse($result);
+    }
+
     public function testDropFailsIfDatabaseIsntConfigured()
     {
         $this->expectException(Errors\DatabaseError::class);
@@ -149,23 +164,6 @@ SQL;
         );
 
         Configuration::$database = null;
-
-        Database::drop();
-    }
-
-    public function testDropFailsIfDatabaseTypeIsntSqlite()
-    {
-        $this->expectException(Errors\DatabaseError::class);
-        $this->expectExceptionMessage(
-            'The database type pgsql is not supported for dropping.'
-        );
-
-        Configuration::$database = [
-            'type' => 'pgsql',
-            'host' => 'localhost',
-            'port' => 5432,
-            'dbname' => 'testdb',
-        ];
 
         Database::drop();
     }
