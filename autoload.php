@@ -10,6 +10,6 @@ spl_autoload_register(function ($class_name) {
     } elseif (strpos($class_name, 'AppTest') === 0) {
         $class_name = substr($class_name, 8);
         $class_path = str_replace('\\', '/', $class_name) . '.php';
-        include(__DIR__ . '/tests/test_app/src/' . $class_path);
+        @include(__DIR__ . '/tests/test_app/src/' . $class_path);
     }
 });

@@ -8,16 +8,16 @@ class ActionControllerTest extends TestCase
 {
     public function testConstruct()
     {
-        $action_controller = new ActionController('rabbits#items');
+        $action_controller = new ActionController('Rabbits#items');
 
-        $this->assertSame('rabbits', $action_controller->controllerName());
+        $this->assertSame('Rabbits', $action_controller->controllerName());
         $this->assertSame('items', $action_controller->actionName());
     }
 
     public function testExecute()
     {
         $request = new Request('GET', '/');
-        $action_controller = new ActionController('rabbits#items');
+        $action_controller = new ActionController('Rabbits#items');
 
         $response = $action_controller->execute($request);
 
@@ -34,7 +34,7 @@ class ActionControllerTest extends TestCase
     public function testExecuteWithSubDirectory()
     {
         $request = new Request('GET', '/');
-        $action_controller = new ActionController('admin/rabbits#items');
+        $action_controller = new ActionController('admin/Rabbits#items');
 
         $response = $action_controller->execute($request);
 
@@ -45,10 +45,10 @@ class ActionControllerTest extends TestCase
     public function testExecuteFailsIfControllerDoesntExist()
     {
         $this->expectException(Errors\ControllerError::class);
-        $this->expectExceptionMessage('src/missing.php file cannot be loaded.');
+        $this->expectExceptionMessage('Missing controller class cannot be found.');
 
         $request = new Request('GET', '/');
-        $action_controller = new ActionController('missing#items');
+        $action_controller = new ActionController('Missing#items');
 
         $action_controller->execute($request);
     }
@@ -57,11 +57,11 @@ class ActionControllerTest extends TestCase
     {
         $this->expectException(Errors\ControllerError::class);
         $this->expectExceptionMessage(
-            'src/controller_as_directory.php file cannot be loaded.'
+            'Controller_as_directory controller class cannot be found.'
         );
 
         $request = new Request('GET', '/');
-        $action_controller = new ActionController('controller_as_directory#items');
+        $action_controller = new ActionController('Controller_as_directory#items');
 
         $action_controller->execute($request);
     }
@@ -70,11 +70,11 @@ class ActionControllerTest extends TestCase
     {
         $this->expectException(Errors\ActionError::class);
         $this->expectExceptionMessage(
-            '\AppTest\controllers\rabbits\uncallable action cannot be called.'
+            'uncallable action cannot be called on Rabbits controller.'
         );
 
         $request = new Request('GET', '/');
-        $action_controller = new ActionController('rabbits#uncallable');
+        $action_controller = new ActionController('Rabbits#uncallable');
 
         $action_controller->execute($request);
     }
@@ -83,11 +83,11 @@ class ActionControllerTest extends TestCase
     {
         $this->expectException(Errors\ActionError::class);
         $this->expectExceptionMessage(
-            '\AppTest\controllers\rabbits\noResponse action does not return a Response.'
+            'noResponse action in Rabbits controller does not return a Response.'
         );
 
         $request = new Request('GET', '/');
-        $action_controller = new ActionController('rabbits#noResponse');
+        $action_controller = new ActionController('Rabbits#noResponse');
 
         $action_controller->execute($request);
     }

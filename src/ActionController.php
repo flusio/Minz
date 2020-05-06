@@ -63,46 +63,32 @@ class ActionController
      */
     public function execute($request)
     {
-        $included = self::loadControllerCode($this->controller_name);
-        if (!$included) {
-            $controller_filepath = "src/{$this->controller_name}.php";
-            throw new Errors\ControllerError(
-                "{$controller_filepath} file cannot be loaded."
-            );
-        }
-
         $app_name = Configuration::$app_name;
-        $base_action = "\\{$app_name}\\controllers";
-        $action = "{$base_action}\\{$this->controller_name}\\{$this->action_name}";
-        if (!is_callable($action)) {
-            throw new Errors\ActionError(
-                "{$action} action cannot be called."
+        $namespaced_controller = "\\{$app_name}\\{$this->controller_name}";
+        $action = $this->action_name;
+
+        try {
+            $controller = new $namespaced_controller();
+        } catch (\Error $e) {
+            throw new Errors\ControllerError(
+                "{$this->controller_name} controller class cannot be found."
             );
         }
 
-        $response = $action($request);
+        if (!is_callable([$controller, $action])) {
+            throw new Errors\ActionError(
+                "{$action} action cannot be called on {$this->controller_name} controller."
+            );
+        }
+
+        $response = $controller->$action($request);
+
         if (!($response instanceof Response)) {
             throw new Errors\ActionError(
-                "{$action} action does not return a Response."
+                "{$action} action in {$this->controller_name} controller does not return a Response."
             );
         }
 
         return $response;
-    }
-
-    /**
-     * Include the controller file based on the given name.
-     *
-     * @param string $controller_name
-     *
-     * @return boolean Return true if the controller has been included, false otherwise
-     */
-    public static function loadControllerCode($controller_name)
-    {
-        $app_path = Configuration::$app_path;
-        $controller_pathname = str_replace('\\', '/', $controller_name);
-        $controller_filepath = "{$app_path}/src/{$controller_pathname}.php";
-
-        return @include_once($controller_filepath);
     }
 }
