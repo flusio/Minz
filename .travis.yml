@@ -4,9 +4,19 @@ php:
     - 7.3
     - 7.4
 
+services:
+    - postgresql
+
 cache:
     directories:
         - bin
+
+env:
+    - DB_DSN='sqlite::memory:'
+    - DB_DSN='pgsql:host=localhost;port=5432;dbname=test' DB_USERNAME='postgres' DB_PASSWORD=''
+
+before_script:
+    - psql -c 'create database test;' -U postgres
 
 script:
     - make lint

@@ -17,22 +17,34 @@ class Database extends \PDO
      */
     public static function get()
     {
-        if (!self::$instance) {
-            self::$instance = new self();
+        $database_configuration = Configuration::$database;
+        if (!$database_configuration) {
+            throw new Errors\DatabaseError(
+                'The database is not set in the configuration file.'
+            );
         }
+
+        if (!self::$instance) {
+            $dsn = self::buildDsn($database_configuration, true);
+            $username = $database_configuration['username'];
+            $password = $database_configuration['password'];
+            $options = $database_configuration['options'];
+            self::$instance = new self($dsn, $username, $password, $options);
+        }
+
         return self::$instance;
     }
 
     /**
      * Drop the entire database. Hell yeah!
      *
-     * It's useful for tests. Only SQLite database is supported for now. Take
-     * care of getting a new database object after calling this method.
+     * It's useful for tests. Take care of getting a new database object after
+     * calling this method.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
-     * @throws \Minz\Errors\DatabaseError if database is not SQLite
+     * @throws \Minz\Errors\DatabaseError if an error occurs on drop
      *
-     * @return boolean Return true if the database file was deleted, false otherwise
+     * @return boolean Return true if the database was dropped, false otherwise
      */
     public static function drop()
     {
@@ -43,31 +55,50 @@ class Database extends \PDO
             );
         }
 
-        $dsn = $database_configuration['dsn'];
-        list($database_type, $dsn_rest) = explode(':', $dsn, 2);
-
-        if ($database_type !== 'sqlite') {
-            throw new Errors\DatabaseError(
-                "The database type {$database_type} is not supported for dropping."
-            );
-        }
-
+        $database_type = $database_configuration['type'];
         self::$instance = null;
 
-        if ($dsn_rest === ':memory:') {
+        if ($database_type === 'sqlite') {
+            $database_path = $database_configuration['path'];
+            if ($database_path === ':memory:') {
+                return true;
+            } else {
+                return @unlink($database_path);
+            }
+        } elseif ($database_type === 'pgsql') {
+            $dsn = self::buildDsn($database_configuration, false);
+            $username = $database_configuration['username'];
+            $password = $database_configuration['password'];
+            $options = $database_configuration['options'];
+
+            $pdo = new self($dsn, $username, $password, $options);
+            $result = $pdo->exec("DROP DATABASE IF EXISTS {$database_configuration['dbname']}");
+
+            if ($result === false) {
+                $error_info = $pdo->errorInfo();
+                throw new Errors\DatabaseError(
+                    "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
+                );
+            }
+
             return true;
         } else {
-            return @unlink($dsn_rest);
+            return false;
         }
     }
 
     /**
-     * Initialize a PDO database.
+     * Create a database.
+     *
+     * It's useful for tests. Take care of getting a new database object after
+     * calling this method.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
-     * @throws \Minz\Errors\DatabaseError if an error occured during initialization
+     * @throws \Minz\Errors\DatabaseError if an error occurs on create
+     *
+     * @return boolean Return true if the database was created, false otherwise
      */
-    private function __construct()
+    public static function create()
     {
         $database_configuration = Configuration::$database;
         if (!$database_configuration) {
@@ -76,10 +107,95 @@ class Database extends \PDO
             );
         }
 
-        $dsn = $database_configuration['dsn'];
-        $username = $database_configuration['username'];
-        $password = $database_configuration['password'];
-        $options = $database_configuration['options'];
+        $database_type = $database_configuration['type'];
+        self::$instance = null;
+
+        if ($database_type === 'sqlite') {
+            $database_path = $database_configuration['path'];
+            if ($database_path === ':memory:') {
+                return true;
+            } else {
+                return @touch($database_path);
+            }
+        } elseif ($database_type === 'pgsql') {
+            $dsn = self::buildDsn($database_configuration, false);
+            $username = $database_configuration['username'];
+            $password = $database_configuration['password'];
+            $options = $database_configuration['options'];
+
+            $pdo = new self($dsn, $username, $password, $options);
+            $result = $pdo->exec("CREATE DATABASE {$database_configuration['dbname']} ENCODING 'UTF8'");
+
+            if ($result === false) {
+                $error_info = $pdo->errorInfo();
+                throw new Errors\DatabaseError(
+                    "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
+                );
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Reset the whole database
+     *
+     * @see \Minz\Database::drop
+     * @see \Minz\Database::create
+     *
+     * @throws \Minz\Errors\DatabaseError if database is not configured
+     * @throws \Minz\Errors\DatabaseError if an error occurs on create
+     *
+     * @return boolean Return true if the database was created, false otherwise
+     */
+    public static function reset()
+    {
+        self::drop();
+        self::create();
+    }
+
+    /**
+     * Return a DSN string to initialize PDO
+     *
+     * @param array $database_configuration The array from the Configuration
+     * @param boolean $with_dbname Indicates if dbname must be included in the DSN
+     *                             (it has no effects with SQLite)
+     *
+     * @return string
+     */
+    private static function buildDsn($database_configuration, $with_dbname)
+    {
+        if ($database_configuration['type'] === 'sqlite') {
+            return 'sqlite:' . $database_configuration['path'];
+        } elseif ($database_configuration['type'] === 'pgsql') {
+            $dsn = 'pgsql:';
+            $dsn .= 'host=' . $database_configuration['host'];
+            $dsn .= ';port=' . $database_configuration['port'];
+            if ($with_dbname) {
+                $dsn .= ';dbname=' . $database_configuration['dbname'];
+            }
+            return $dsn;
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * Initialize a PDO database.
+     *
+     * @see \PDO
+     *
+     * @param string $dsn
+     * @param string $username (optional if sqlite)
+     * @param string $password (optional if sqlite)
+     * @param array $options (optional)
+     *
+     * @throws \Minz\Errors\DatabaseError if an error occured during initialization
+     */
+    private function __construct($dsn, $username = null, $password = null, $options = [])
+    {
         $database_type = strstr($dsn, ':', true);
 
         // Force some options values

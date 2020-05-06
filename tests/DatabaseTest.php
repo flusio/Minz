@@ -13,12 +13,17 @@ class DatabaseTest extends TestCase
 
     public function tearDown(): void
     {
+        if (Configuration::$database) {
+            Database::reset();
+        }
         Configuration::$database = $this->initial_configuration;
-        Database::drop();
     }
 
-    public function testGet()
+    public function testGetWithSqlite()
     {
+        Configuration::$database['type'] = 'sqlite';
+        Configuration::$database['path'] = ':memory:';
+
         $database = Database::get();
 
         $foreign_keys_pragma = $database->query('PRAGMA foreign_keys')->fetchColumn();
@@ -59,16 +64,18 @@ class DatabaseTest extends TestCase
             'An error occured during database initialization: invalid data source name.'
         );
 
-        Configuration::$database['dsn'] = 'not a dsn';
+        Configuration::$database['type'] = 'not a correct type';
 
         Database::get();
     }
 
-    public function testDrop()
+    public function testDropIfSqlite()
     {
         $sqlite_file = tmpfile();
         $sqlite_filename = stream_get_meta_data($sqlite_file)['uri'];
-        Configuration::$database['dsn'] = 'sqlite:' . $sqlite_filename;
+        Configuration::$database['type'] = 'sqlite';
+        Configuration::$database['path'] = $sqlite_filename;
+
         $database = Database::get();
         $schema = <<<'SQL'
 CREATE TABLE rabbits (
@@ -95,7 +102,9 @@ SQL;
 
     public function testDropIfSqliteIsInMemory()
     {
-        Configuration::$database['dsn'] = 'sqlite::memory:';
+        Configuration::$database['type'] = 'sqlite';
+        Configuration::$database['path'] = ':memory:';
+
         $database = Database::get();
         $schema = <<<'SQL'
 CREATE TABLE rabbits (
@@ -123,7 +132,23 @@ SQL;
     public function testDropReturnsFalseIfSqliteFileDoesNotExist()
     {
         Configuration::$database = [
-            'dsn' => 'sqlite:/missing/file.sqlite',
+            'type' => 'sqlite',
+            'path' => '/missing/file.sqlite',
+        ];
+
+        $result = Database::drop();
+
+        $this->assertFalse($result);
+    }
+
+    public function testDropFailsReturnsFalseIfDatabaseTypeIsntSupported()
+    {
+        Configuration::$database = [
+            'type' => 'mysql',
+            'host' => 'localhost',
+            'port' => 3306,
+            'dbname' => 'testdb',
+            'username' => '',
         ];
 
         $result = Database::drop();
@@ -139,20 +164,6 @@ SQL;
         );
 
         Configuration::$database = null;
-
-        Database::drop();
-    }
-
-    public function testDropFailsIfDatabaseTypeIsntSqlite()
-    {
-        $this->expectException(Errors\DatabaseError::class);
-        $this->expectExceptionMessage(
-            'The database type pgsql is not supported for dropping.'
-        );
-
-        Configuration::$database = [
-            'dsn' => 'pgsql:host=localhost;port=5432;dbname=testdb',
-        ];
 
         Database::drop();
     }

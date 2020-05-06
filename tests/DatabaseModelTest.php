@@ -9,27 +9,16 @@ class DatabaseModelTest extends TestCase
 {
     public function setUp(): void
     {
-        $sql_schema = <<<'SQL'
-CREATE TABLE friends (
-    id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name varchar(255) NOT NULL,
-    address varchar(255)
-);
-
-CREATE TABLE rabbits (
-    rabbit_id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name varchar(255) NOT NULL,
-    friend_id integer NOT NULL,
-    FOREIGN KEY (friend_id) REFERENCES friends(id)
-);
-SQL;
+        $database_type = Configuration::$database['type'];
+        $sql_schema_path = Configuration::$app_path . "/schema.{$database_type}.sql";
+        $sql_schema = file_get_contents($sql_schema_path);
         $database = Database::get();
         $database->exec($sql_schema);
     }
 
     public function tearDown(): void
     {
-        Database::drop();
+        Database::reset();
     }
 
     public function testConstructorFailsIfTableNameIsInvalid()
@@ -118,9 +107,7 @@ SQL;
     public function testCreateFailsIfRequiredPropertyIsntSet()
     {
         $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage(
-            'Error in SQL statement: NOT NULL constraint failed: friends.name (23000).'
-        );
+        $this->expectExceptionMessage('Error in SQL statement');
 
         $dao = new models\dao\Friend();
 
@@ -147,9 +134,7 @@ SQL;
     public function testCreateFailsIfDependencyNotMet()
     {
         $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage(
-            'Error in SQL statement: FOREIGN KEY constraint failed (23000).'
-        );
+        $this->expectExceptionMessage('Error in SQL statement');
 
         $dao = new models\dao\Rabbit();
 
