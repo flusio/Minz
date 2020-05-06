@@ -197,6 +197,20 @@ class Response
     }
 
     /**
+     * Create a text response with the given HTTP code.
+     *
+     * @param integer $code
+     * @param string $text
+     *
+     * @return \Minz\Response
+     */
+    public static function text($code, $text)
+    {
+        $output = new \Minz\Output\Text($text);
+        return new Response($code, $output);
+    }
+
+    /**
      * Create a Response from a HTTP status code.
      *
      * @param integer $code The HTTP code to set for the response

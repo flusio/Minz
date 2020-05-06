@@ -190,6 +190,14 @@ class ResponseTest extends TestCase
         $this->assertSame(500, $response->code());
     }
 
+    public function testText()
+    {
+        $response = Response::text(200, 'Foo bar');
+
+        $this->assertSame(200, $response->code());
+        $this->assertSame('Foo bar', $response->render());
+    }
+
     public function testRender()
     {
         $rabbits = [
