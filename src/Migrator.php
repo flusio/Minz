@@ -21,11 +21,17 @@ class Migrator
      * Create a Migrator instance. If directory is given, it'll load the
      * migrations from it.
      *
-     * The migrations in the directory must declare a `migrate` function in the
-     * namespace <app_name>\migration_<filename> where:
+     * The migrations in the directory must declare a namespaced class named
+     * \<app_name>\migrations\<filename>, where:
      *
      * - <app_name> is the application name declared in the configuration file
      * - <filename> is the migration file name, without the `.php` extension
+     *
+     * This class must declare a `migrate` method.
+     *
+     * @throws \Minz\Errors\MigrationError if a file doesn't contain a valid class
+     * @throws \Minz\Errors\MigrationError if a migrate method is not callable
+     *                                     on a migration
      *
      * @param string|null $directory
      */
@@ -35,43 +41,42 @@ class Migrator
             return;
         }
 
+        $app_name = Configuration::$app_name;
         foreach (scandir($directory) as $filename) {
             if ($filename[0] === '.') {
                 continue;
             }
 
-            $filepath = $directory . '/' . $filename;
-            $migration_name = basename($filename, '.php');
-            $app_name = Configuration::$app_name;
-            $migration_namespace = "\\{$app_name}\\migration_{$migration_name}";
-            $migration_callback = "{$migration_namespace}\\migrate";
+            $migration_version = basename($filename, '.php');
+            $migration_classname = "\\{$app_name}\\migrations\\{$migration_version}";
 
-            $include_result = @include_once($filepath);
-            if (!$include_result) {
-                Log::warning("{$filepath} migration file cannot be loaded.");
+            try {
+                $migration = new $migration_classname();
+            } catch (\Error $e) {
+                throw new Errors\MigrationError("{$migration_version} migration cannot be instantiated.");
             }
-            $this->addMigration($migration_name, $migration_callback);
+            $this->addMigration($migration_version, [$migration, 'migrate']);
         }
     }
 
     /**
      * Register a migration into the migration system.
      *
-     * @param string $name The name of the migration (be careful, migrations
-     *                     are sorted with the `strnatcmp` function)
+     * @param string $version The name version of the migration (be careful,
+     *                        migrations are sorted with the `strnatcmp` function)
      * @param callback $callback The migration function to execute, it should
      *                           return true on success and must return false
      *                           on error
      *
      * @throws \Minz\Errors\MigrationError if the callback isn't callable.
      */
-    public function addMigration($name, $callback)
+    public function addMigration($version, $callback)
     {
         if (!is_callable($callback)) {
-            throw new Errors\MigrationError("{$name} migration cannot be called.");
+            throw new Errors\MigrationError("{$version} migration cannot be called.");
         }
 
-        $this->migrations[$name] = $callback;
+        $this->migrations[$version] = $callback;
     }
 
     /**
@@ -155,14 +160,14 @@ class Migrator
     {
         $result = [];
         $apply_migration = $this->version === null;
-        foreach ($this->migrations() as $version => $migration) {
+        foreach ($this->migrations() as $version => $callback) {
             if (!$apply_migration) {
                 $apply_migration = $this->version === $version;
                 continue;
             }
 
             try {
-                $migration_result = $migration();
+                $migration_result = call_user_func($callback);
                 $result[$version] = $migration_result;
             } catch (\Exception $e) {
                 $migration_result = false;

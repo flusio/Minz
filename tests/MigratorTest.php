@@ -285,7 +285,7 @@ class MigratorTest extends TestCase
     {
         $migrations_path = Configuration::$app_path . '/src/migrations';
         $migrator = new Migrator($migrations_path);
-        $expected_names = ['20191222_225420_Foo', '20191222_225428_Bar'];
+        $expected_names = ['Migration_20191222_225420_Foo', 'Migration_20191222_225428_Bar'];
 
         $migrations = $migrator->migrations();
 
