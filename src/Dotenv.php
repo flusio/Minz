@@ -6,7 +6,9 @@ namespace Minz;
  * The Dotenv class allows to load variables from a file, generally named `.env`
  * It is usually used to load the production configuration.
  *
- * It doesn't load the variables to any `getenv()`, `$_ENV` or `$_SERVER`.
+ * It doesn't load the variables to any `$_ENV` or `$_SERVER`. However, if a
+ * variable defined in the .env is already set, the value from the .env file is
+ * skipped.
  *
  * Also, the only method to get the values is `pop`, which deletes the variable
  * from the Dotenv object. This is done to avoid to duplicate critical secrets
@@ -22,14 +24,13 @@ class Dotenv
 
     /**
      * @param string $dotenv_path
-     *
-     * @throws \Minz\Errors\DotenvError if the path doesn't exist or cannot be read
      */
     public function __construct($dotenv_path)
     {
         $dotenv_content = @file_get_contents($dotenv_path);
         if ($dotenv_content === false) {
-            throw new Errors\DotenvError("{$dotenv_path} cannot be read.");
+            Log::warning("{$dotenv_path} dotenv file cannot be read.");
+            return;
         }
 
         $dotenv_lines = preg_split("/\r\n|\n|\r/", $dotenv_content);
@@ -48,13 +49,18 @@ class Dotenv
                 $value = '';
             }
 
-            $value_length = strlen($value);
-            if ($value_length > 0) {
-                $single_quoted = $value[0] === "'" && $value[$value_length - 1] === "'";
-                $double_quoted = $value[0] === '"' && $value[$value_length - 1] === '"';
+            $value_from_env = getenv($name);
+            if ($value_from_env !== false) {
+                $value = $value_from_env;
+            } else {
+                $value_length = strlen($value);
+                if ($value_length > 0) {
+                    $single_quoted = $value[0] === "'" && $value[$value_length - 1] === "'";
+                    $double_quoted = $value[0] === '"' && $value[$value_length - 1] === '"';
 
-                if ($single_quoted || $double_quoted) {
-                    $value = substr($value, 1, $value_length - 2);
+                    if ($single_quoted || $double_quoted) {
+                        $value = substr($value, 1, $value_length - 2);
+                    }
                 }
             }
 
