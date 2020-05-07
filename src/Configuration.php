@@ -32,6 +32,7 @@ namespace Minz;
  *
  * Other optional keys are:
  * - data_path: the path to the data directory, default to $app_path/data
+ * - schema_path: the path to the SQL schema file, default to $app_path/src/schema.sql
  * - database: an array specifying:
  *   - dsn
  *   - username (optional if database is sqlite)
@@ -79,6 +80,9 @@ class Configuration
 
     /** @var string The path to the data directory */
     public static $data_path;
+
+    /** @var string The path to the schema.sql file */
+    public static $schema_path;
 
     /**
      * @var string The name of the application. It must be identical to the
@@ -165,11 +169,16 @@ class Configuration
             self::$url_options['port'] = self::$url_options['protocol'] === 'https' ? 443 : 80;
         }
 
-        $default_data_path = $app_path . '/data';
         self::$data_path = self::getDefault(
             $raw_configuration,
             'data_path',
-            $default_data_path
+            $app_path . '/data'
+        );
+
+        self::$schema_path = self::getDefault(
+            $raw_configuration,
+            'schema_path',
+            $app_path . '/src/schema.sql'
         );
 
         $database = self::getDefault($raw_configuration, 'database', null);

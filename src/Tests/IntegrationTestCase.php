@@ -29,11 +29,7 @@ class IntegrationTestCase extends TestCase
      */
     public static function loadSchema()
     {
-        $app_path = \Minz\Configuration::$app_path;
-        $schema_path = $app_path . '/src/schema.sql';
-        if (file_exists($schema_path)) {
-            self::$schema = file_get_contents($schema_path);
-        }
+        self::$schema = @file_get_contents(\Minz\Configuration::$schema_path);
     }
 
     /**
@@ -52,19 +48,10 @@ class IntegrationTestCase extends TestCase
      */
     public function initDatabase()
     {
-        if (\Minz\Configuration::$database) {
+        if (\Minz\Configuration::$database && self::$schema) {
+            \Minz\Database::reset();
             $database = \Minz\Database::get();
             $database->exec(self::$schema);
-        }
-    }
-
-    /**
-     * @after
-     */
-    public function resetDatabase()
-    {
-        if (\Minz\Configuration::$database) {
-            \Minz\Database::reset();
         }
     }
 
