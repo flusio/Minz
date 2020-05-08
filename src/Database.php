@@ -10,12 +10,15 @@ class Database extends \PDO
     /**
      * Return an instance of Database.
      *
+     * @param boolean $with_dbname Indicates if dbname must be included in the DSN
+     *                             (it has no effects with SQLite)
+     *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occured during initialization
      *
      * @return \Minz\Database
      */
-    public static function get()
+    public static function get($with_dbname = true)
     {
         $database_configuration = Configuration::$database;
         if (!$database_configuration) {
@@ -25,7 +28,7 @@ class Database extends \PDO
         }
 
         if (!self::$instance) {
-            $dsn = self::buildDsn($database_configuration, true);
+            $dsn = self::buildDsn($database_configuration, $with_dbname);
             $username = $database_configuration['username'];
             $password = $database_configuration['password'];
             $options = $database_configuration['options'];
