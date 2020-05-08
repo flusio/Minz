@@ -7,6 +7,7 @@ if ($dsn === false) {
 
 return [
     'app_name' => 'AppTest',
+    'secret_key' => 'change-me',
     'url_options' => [
         'host' => 'localhost',
     ],
