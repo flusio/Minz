@@ -12,7 +12,9 @@ namespace Minz;
  * loaded for a given environment (either "development", "test" or
  * "production") and from a `configuration/environment_<environment>.php`
  * file, where `<environment>` is replaced by the value of the current env.
- * These files must return a PHP array.
+ * These files must return a PHP array and have access to the $app_path
+ * variable. If a `.env` file exists at the root path, the files will also have
+ * access to a $dotenv variable.
  *
  * An `environment` and an `app_path` values are automatically set from the
  * parameters of the `load` method.
@@ -113,7 +115,10 @@ class Configuration
     /**
      * Load the application's configuration, for a given environment.
      *
-     * @param string $environment
+     * @param string $environment Can be set to development, production, test
+     *                            or dotenv. In the last case, a `APP_ENVIRONMENT`
+     *                            is searched either in the environment
+     *                            variables or in a `.env` file.
      * @param string $app_path
      *
      * @throws \Minz\Errors\ConfigurationError if the environment is not part
@@ -128,6 +133,25 @@ class Configuration
      */
     public static function load($environment, $app_path)
     {
+        $dotenv_path = $app_path . '/.env';
+        if (file_exists($dotenv_path)) {
+            $dotenv = new Dotenv($dotenv_path);
+        }
+
+        if ($environment === 'dotenv') {
+            if (isset($dotenv)) {
+                $environment = $dotenv->pop('APP_ENVIRONMENT');
+            } else {
+                $environment = getenv('APP_ENVIRONMENT');
+            }
+
+            if (!$environment) {
+                throw new Errors\ConfigurationError(
+                    'You must declare an APP_ENVIRONMENT environment variable when using dotenv environment.'
+                );
+            }
+        }
+
         if (!in_array($environment, self::VALID_ENVIRONMENTS)) {
             throw new Errors\ConfigurationError(
                 "{$environment} is not a valid environment."
