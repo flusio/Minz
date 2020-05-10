@@ -58,6 +58,14 @@ class View implements Output
     }
 
     /**
+     * @return mixed[] $variables
+     */
+    public static function defaultVariables()
+    {
+        return self::$default_variables;
+    }
+
+    /**
      * @param string $pointer
      * @param mixed[] $variables (optional)
      *
