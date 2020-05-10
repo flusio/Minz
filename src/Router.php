@@ -226,13 +226,15 @@ class Router
         $pattern_exploded = explode('/', $pattern);
         $path_exploded = explode('/', $path);
 
-        if (count($pattern_exploded) !== count($path_exploded)) {
-            return false;
-        }
-
         for ($i = 0; $i < count($pattern_exploded); $i++) {
             $pattern_element = $pattern_exploded[$i];
             $path_element = $path_exploded[$i];
+
+            // If the pattern is *, the rest of the path is considered as
+            // matching
+            if ($pattern_element && $pattern_element === '*') {
+                return true;
+            }
 
             // In the pattern /rabbits/:id, :id is a variable name, which is
             // replaced by a real value in the URI (e.g. /rabbits/42).
@@ -244,7 +246,8 @@ class Router
             }
         }
 
-        return true;
+        // we still have to check that the path has no more elements than the pattern
+        return count($pattern_exploded) === count($path_exploded);
     }
 
     /**
@@ -266,6 +269,14 @@ class Router
         for ($i = 0; $i < count($pattern_exploded); $i++) {
             $pattern_element = $pattern_exploded[$i];
             $path_element = $path_exploded[$i];
+
+            if ($pattern_element && $pattern_element === '*') {
+                // the rest of the path matches with the pattern wildcard, so
+                // we rebuild this part of the path
+                $rest_of_path = array_slice($path_exploded, $i);
+                $parameters['*'] = implode('/', $rest_of_path);
+                break;
+            }
 
             $pattern_is_variable = $pattern_element && $pattern_element[0] === ':';
             if (!$pattern_is_variable) {

@@ -158,6 +158,20 @@ class RouterTest extends TestCase
         $this->assertSame(['id' => '42'], $parameters);
     }
 
+    public function testMatchWithWildcard()
+    {
+        $router = new Router();
+        $router->addRoute('get', '/assets/*', 'assets#serve');
+
+        list(
+            $action_pointer,
+            $parameters
+        ) = $router->match('get', '/assets/path/to/an/asset.css');
+
+        $this->assertSame('assets#serve', $action_pointer);
+        $this->assertSame(['*' => 'path/to/an/asset.css'], $parameters);
+    }
+
     public function testMatchFailsIfNotMatchingVia()
     {
         $this->expectException(Errors\RouteNotFoundError::class);
