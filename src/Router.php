@@ -227,6 +227,10 @@ class Router
         $path_exploded = explode('/', $path);
 
         for ($i = 0; $i < count($pattern_exploded); $i++) {
+            if (!isset($path_exploded[$i])) {
+                return false;
+            }
+
             $pattern_element = $pattern_exploded[$i];
             $path_element = $path_exploded[$i];
 

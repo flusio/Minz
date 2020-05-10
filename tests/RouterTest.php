@@ -172,6 +172,17 @@ class RouterTest extends TestCase
         $this->assertSame(['*' => 'path/to/an/asset.css'], $parameters);
     }
 
+    public function testMatchFailsIfPatternIsLongerThanPath()
+    {
+        $this->expectException(Errors\RouteNotFoundError::class);
+        $this->expectExceptionMessage('Path "get /rabbits" doesn’t match any route.');
+
+        $router = new Router();
+        $router->addRoute('get', '/rabbits/:id', 'rabbits#show');
+
+        $router->match('get', '/rabbits');
+    }
+
     public function testMatchFailsIfNotMatchingVia()
     {
         $this->expectException(Errors\RouteNotFoundError::class);
