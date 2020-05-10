@@ -13,6 +13,8 @@ use Minz\Errors;
 class File implements Output
 {
     public const EXTENSION_TO_CONTENT_TYPE = [
+        'css' => 'text/css',
+        'js' => 'text/javascript',
         'pdf' => 'application/pdf',
     ];
 
