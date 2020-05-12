@@ -147,8 +147,7 @@ class Model
         $values = [];
         foreach ($this->property_declarations as $property => $declaration) {
             if ($declaration['type'] === 'datetime' && $this->$property) {
-                // @todo Return ISO8601 string
-                $values[$property] = $this->$property->getTimestamp();
+                $values[$property] = $this->$property->format(DATE_ATOM);
             } else {
                 $values[$property] = $this->$property;
             }
@@ -213,13 +212,17 @@ class Model
 
                 if (
                     $declaration['type'] === 'datetime' &&
-                    filter_var($value, FILTER_VALIDATE_INT) === false
+                    !($value instanceof \DateTime)
                 ) {
-                    throw new Errors\ModelPropertyError(
-                        $property,
-                        Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                        "`{$property}` property must be a timestamp."
-                    );
+                    $value = date_create_from_format(DATE_ATOM, $value);
+
+                    if ($value === false) {
+                        throw new Errors\ModelPropertyError(
+                            $property,
+                            Errors\ModelPropertyError::VALUE_TYPE_INVALID,
+                            "`{$property}` property must be a \DateTime or a valid ISO-8601 string."
+                        );
+                    }
                 }
 
                 if (
@@ -233,11 +236,7 @@ class Model
                     );
                 }
 
-                if ($declaration['type'] === 'datetime') {
-                    $date = new \DateTime();
-                    $date->setTimestamp(intval($value));
-                    $value = $date;
-                } elseif ($declaration['type'] === 'integer') {
+                if ($declaration['type'] === 'integer') {
                     $value = intval($value);
                 } elseif ($declaration['type'] === 'boolean') {
                     $value = $value === 'true';

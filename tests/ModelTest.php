@@ -100,7 +100,7 @@ class ModelTest extends TestCase
 
         $values = $model->toValues();
 
-        $this->assertSame(1000, $values['created_at']);
+        $this->assertSame($created_at->format(DATE_ATOM), $values['created_at']);
     }
 
     public function testToValuesWithUnsetDatetimeProperty()
@@ -342,20 +342,24 @@ class ModelTest extends TestCase
     public function testFromValuesWithDatetime()
     {
         $model = new Model(['created_at' => 'datetime']);
+        $created_at = new \DateTime();
 
-        $model->fromValues(['created_at' => '1000']);
+        $model->fromValues(['created_at' => $created_at]);
 
-        $this->assertInstanceOf(\DateTime::class, $model->created_at);
-        $this->assertSame(1000, $model->created_at->getTimestamp());
+        $this->assertEquals($created_at, $model->created_at);
     }
 
-    public function testFromValuesWithDatetimeTimestampZero()
+    public function testFromValuesWithIso8601()
     {
         $model = new Model(['created_at' => 'datetime']);
+        $created_at = new \DateTime();
+        $iso_8601 = $created_at->format(DATE_ATOM);
 
-        $model->fromValues(['created_at' => '0']);
+        $model->fromValues(['created_at' => $iso_8601]);
 
-        $this->assertSame(0, $model->created_at->getTimestamp());
+        // we must compare timestamps because ISO-8601 lose the microseconds
+        // and so the two DateTime are, in fact, different.
+        $this->assertEquals($created_at->getTimestamp(), $model->created_at->getTimestamp());
     }
 
     public function testFromValuesWithValidator()
@@ -437,7 +441,7 @@ class ModelTest extends TestCase
     {
         $this->expectException(Errors\ModelPropertyError::class);
         $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_TYPE_INVALID);
-        $this->expectExceptionMessage('`created_at` property must be a timestamp.');
+        $this->expectExceptionMessage('`created_at` property must be a \DateTime or a valid ISO-8601 string.');
 
         $model = new Model(['created_at' => 'datetime']);
 
