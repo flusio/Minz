@@ -46,6 +46,11 @@ class Model
         'validator' => null,
     ];
 
+    // This is almost ISO 8601 format, only the middle T is replaced by a space
+    // to match with the output format of pgsql.
+    // @see https://www.postgresql.org/docs/current/datatype-datetime.html#DATATYPE-DATETIME-OUTPUT
+    public const DATETIME_FORMAT = 'Y-m-d H:i:sP';
+
     /** @var array */
     protected $property_declarations;
 
@@ -147,7 +152,7 @@ class Model
         $values = [];
         foreach ($this->property_declarations as $property => $declaration) {
             if ($declaration['type'] === 'datetime' && $this->$property) {
-                $values[$property] = $this->$property->format(DATE_ATOM);
+                $values[$property] = $this->$property->format(self::DATETIME_FORMAT);
             } else {
                 $values[$property] = $this->$property;
             }
@@ -214,7 +219,7 @@ class Model
                     $declaration['type'] === 'datetime' &&
                     !($value instanceof \DateTime)
                 ) {
-                    $value = date_create_from_format(DATE_ATOM, $value);
+                    $value = date_create_from_format(self::DATETIME_FORMAT, $value);
 
                     if ($value === false) {
                         throw new Errors\ModelPropertyError(

@@ -100,7 +100,7 @@ class ModelTest extends TestCase
 
         $values = $model->toValues();
 
-        $this->assertSame($created_at->format(DATE_ATOM), $values['created_at']);
+        $this->assertSame($created_at->format(Model::DATETIME_FORMAT), $values['created_at']);
     }
 
     public function testToValuesWithUnsetDatetimeProperty()
@@ -353,7 +353,7 @@ class ModelTest extends TestCase
     {
         $model = new Model(['created_at' => 'datetime']);
         $created_at = new \DateTime();
-        $iso_8601 = $created_at->format(DATE_ATOM);
+        $iso_8601 = $created_at->format(Model::DATETIME_FORMAT);
 
         $model->fromValues(['created_at' => $iso_8601]);
 
