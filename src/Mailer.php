@@ -87,7 +87,11 @@ class Mailer
         try {
             $this->mailer->addAddress($to);
             $this->mailer->Subject = $subject;
-            $this->mailer->send();
+            if (Configuration::$mailer['type'] === 'test') {
+                Tests\Mailer::store($this->mailer);
+            } else {
+                $this->mailer->send();
+            }
             return true;
         } catch (PHPMailer\Exception $e) {
             Log::error('Mailer cannot send a message: ' . $this->mailer->ErrorInfo);

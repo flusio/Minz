@@ -44,7 +44,7 @@ namespace Minz;
  *   - options (optional)
  *   See https://www.php.net/manual/fr/pdo.construct.php
  * - mailer: an array specifying mailing options, with:
- *   - type: either `mail` or `smtp`, default 'mail'
+ *   - type: either `mail`, `smtp` or `test`, default 'mail'
  *   - from: a valid email address, default 'root@localhost'
  *   - debug: optional, default is 2 if environment is set to `development`, 0
  *     otherwise
@@ -276,6 +276,12 @@ class Configuration
             $default_mailer_options,
             self::getDefault($raw_configuration, 'mailer', [])
         );
+
+        if (!in_array($mailer['type'], ['mail', 'smtp', 'test'])) {
+            throw new Errors\ConfigurationError(
+                "{$mailer['type']} is not a valid mailer type."
+            );
+        }
 
         if ($mailer['type'] === 'smtp') {
             $default_smtp_options = [

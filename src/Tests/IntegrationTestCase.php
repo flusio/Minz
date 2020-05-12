@@ -64,6 +64,14 @@ class IntegrationTestCase extends TestCase
     }
 
     /**
+     * @after
+     */
+    public function resetTestsMailer()
+    {
+        Mailer::clear();
+    }
+
+    /**
      * Assert that a Response is matching the given conditions.
      *
      * @param \Minz\Response $response
