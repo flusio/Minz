@@ -84,13 +84,17 @@ class IntegrationTestCase extends TestCase
     {
         $response_output = $response->render();
         $this->assertSame($code, $response->code(), 'Output is: ' . $response_output);
-        if ($output !== null) {
+
+        $response_headers = $response->headers(true);
+        if ($output !== null && ($code === 301 || $code === 302)) {
+            $this->assertSame($output, $response_headers['Location']);
+        } elseif ($output !== null) {
             $this->assertStringContainsString($output, $response_output);
         }
+
         if ($headers !== null) {
             // I would use assertArraySubset, but it's deprecated in PHPUnit 8
             // and will be removed in PHPUnit 9.
-            $response_headers = $response->headers(true);
             foreach ($headers as $header => $value) {
                 $this->assertArrayHasKey($header, $response_headers);
                 $this->assertSame($value, $response_headers[$header]);
