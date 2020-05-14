@@ -32,4 +32,30 @@ class Mailer
     {
         self::$emails = [];
     }
+
+    /**
+     * Return the number of sent emails.
+     *
+     * @return integer
+     */
+    public static function count()
+    {
+        return count(self::$emails);
+    }
+
+    /**
+     * Return the $n email.
+     *
+     * @param integer $n (default is 0)
+     *
+     * @param \PHPMailer\PHPMailer\PHPMailer|null
+     */
+    public static function take($n = 0)
+    {
+        if (isset(self::$emails[$n])) {
+            return self::$emails[$n];
+        } else {
+            return null;
+        }
+    }
 }
