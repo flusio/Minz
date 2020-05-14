@@ -132,6 +132,7 @@ class Router
         foreach ($via_routes as $pattern => $action_pointer) {
             if ($this->pathMatchesPattern($path, $pattern)) {
                 $parameters = $this->extractParameters($path, $pattern);
+                $parameters['_action_pointer'] = $action_pointer;
                 return [$action_pointer, $parameters];
             }
         }

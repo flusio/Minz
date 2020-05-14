@@ -127,7 +127,9 @@ class RouterTest extends TestCase
         ) = $router->match('get', '/rabbits');
 
         $this->assertSame('rabbits#list', $action_pointer);
-        $this->assertSame([], $parameters);
+        $this->assertSame([
+            '_action_pointer' => 'rabbits#list',
+        ], $parameters);
     }
 
     public function testMatchWithTrailingSlashes()
@@ -141,7 +143,9 @@ class RouterTest extends TestCase
         ) = $router->match('get', '/rabbits//');
 
         $this->assertSame('rabbits#list', $action_pointer);
-        $this->assertSame([], $parameters);
+        $this->assertSame([
+            '_action_pointer' => 'rabbits#list',
+        ], $parameters);
     }
 
     public function testMatchWithParam()
@@ -155,7 +159,10 @@ class RouterTest extends TestCase
         ) = $router->match('get', '/rabbits/42');
 
         $this->assertSame('rabbits#get', $action_pointer);
-        $this->assertSame(['id' => '42'], $parameters);
+        $this->assertSame([
+            'id' => '42',
+            '_action_pointer' => 'rabbits#get',
+        ], $parameters);
     }
 
     public function testMatchWithWildcard()
@@ -169,7 +176,10 @@ class RouterTest extends TestCase
         ) = $router->match('get', '/assets/path/to/an/asset.css');
 
         $this->assertSame('assets#serve', $action_pointer);
-        $this->assertSame(['*' => 'path/to/an/asset.css'], $parameters);
+        $this->assertSame([
+            '*' => 'path/to/an/asset.css',
+            '_action_pointer' => 'assets#serve',
+        ], $parameters);
     }
 
     public function testMatchFailsIfPatternIsLongerThanPath()
