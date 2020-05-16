@@ -490,6 +490,217 @@ class ModelTest extends TestCase
         $model->fromValues(['status' => 'new']);
     }
 
+    public function testValidateReturnsNoErrorsIfValid()
+    {
+        $model = new Model([
+            'status' => [
+                'type' => 'string',
+                'required' => true,
+                'validator' => function ($value) {
+                    return in_array($value, ['new', 'finished']);
+                },
+            ],
+        ]);
+        $model->status = 'new';
+
+        $errors = $model->validate();
+
+        $this->assertEmpty($errors);
+    }
+
+    public function testValidateReturnsErrorIfRequiredPropertyIsNull()
+    {
+        $model = new Model([
+            'id' => [
+                'type' => 'string',
+                'required' => true,
+            ],
+        ]);
+        $model->id = null;
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'id' => [
+                    'code' => Model::ERROR_REQUIRED,
+                    'description' => 'Required `id` property is missing.',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateReturnsErrorIfRequiredStringPropertyIsEmpty()
+    {
+        $model = new Model([
+            'id' => [
+                'type' => 'string',
+                'required' => true,
+            ],
+        ]);
+        $model->id = '';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'id' => [
+                    'code' => Model::ERROR_REQUIRED,
+                    'description' => 'Required `id` property is missing.',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateReturnsErrorIfIntegerTypeDoesNotMatch()
+    {
+        $model = new Model(['id' => 'integer']);
+        $model->id = 'not an integer';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'id' => [
+                    'code' => Model::ERROR_VALUE_TYPE_INVALID,
+                    'description' => '`id` property must be an integer.',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateReturnsErrorIfDatetimeTypeDoesNotMatch()
+    {
+        $model = new Model(['created_at' => 'datetime']);
+        $model->created_at = 'not a datetime';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'created_at' => [
+                    'code' => Model::ERROR_VALUE_TYPE_INVALID,
+                    'description' => '`created_at` property must be a \DateTime.',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateReturnsErrorIfBooleanTypeDoesNotMatch()
+    {
+        $model = new Model(['is_cool' => 'boolean']);
+        $model->is_cool = 'not a boolean';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'is_cool' => [
+                    'code' => Model::ERROR_VALUE_TYPE_INVALID,
+                    'description' => '`is_cool` property must be a boolean.',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateReturnsErrorIfValidatorReturnsFalse()
+    {
+        $model = new Model([
+            'status' => [
+                'type' => 'string',
+                'validator' => function ($value) {
+                    return in_array($value, ['new', 'finished']);
+                },
+            ],
+        ]);
+        $model->status = 'not valid';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'status' => [
+                    'code' => Model::ERROR_VALUE_INVALID,
+                    'description' => '`status` property is invalid (not valid).',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateReturnsErrorIfValidatorReturnsCustomMessage()
+    {
+        $model = new Model([
+            'status' => [
+                'type' => 'string',
+                'validator' => function ($value) {
+                    if (in_array($value, ['new', 'finished'])) {
+                        return true;
+                    } else {
+                        return 'must be either new or finished';
+                    }
+                },
+            ],
+        ]);
+        $model->status = 'not valid';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'status' => [
+                    'code' => Model::ERROR_VALUE_INVALID,
+                    'description' => 'must be either new or finished',
+                ],
+            ],
+            $errors
+        );
+    }
+
+    public function testValidateCanReturnSeveralErrors()
+    {
+        $model = new Model([
+            'id' => [
+                'type' => 'string',
+                'required' => true,
+            ],
+            'created_at' => [
+                'type' => 'datetime',
+                'required' => true,
+            ],
+            'status' => [
+                'type' => 'string',
+                'validator' => function ($value) {
+                    return in_array($value, ['new', 'finished']);
+                },
+            ],
+        ]);
+        $model->id = 'an id';
+        $model->created_at = null;
+        $model->status = 'not valid';
+
+        $errors = $model->validate();
+
+        $this->assertSame(
+            [
+                'created_at' => [
+                    'code' => Model::ERROR_REQUIRED,
+                    'description' => 'Required `created_at` property is missing.',
+                ],
+                'status' => [
+                    'code' => Model::ERROR_VALUE_INVALID,
+                    'description' => '`status` property is invalid (not valid).',
+                ],
+            ],
+            $errors
+        );
+    }
+
     public function validTypesProvider()
     {
         return [

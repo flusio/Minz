@@ -51,6 +51,10 @@ class Model
     // @see https://www.postgresql.org/docs/current/datatype-datetime.html#DATATYPE-DATETIME-OUTPUT
     public const DATETIME_FORMAT = 'Y-m-d H:i:sP';
 
+    public const ERROR_REQUIRED = 'required';
+    public const ERROR_VALUE_TYPE_INVALID = 'value_type_invalid';
+    public const ERROR_VALUE_INVALID = 'value_invalid';
+
     /** @var array */
     protected $property_declarations;
 
@@ -308,5 +312,80 @@ class Model
         }
 
         $this->$property = $value;
+    }
+
+    /**
+     * Return the errors of the model by checking its values against the declarations.
+     *
+     * The array is empty if there are no errors.
+     *
+     * Otherwise, the array is indexed by the properties names and the values
+     * are arrays with a `code` (the \Minz\Model::ERROR_* constants) and a
+     * `description`.
+     *
+     * @return array
+     */
+    public function validate()
+    {
+        $errors = [];
+        foreach ($this->property_declarations as $property => $declaration) {
+            $type = $declaration['type'];
+            $value = $this->$property;
+
+            $is_empty = !isset($value) || ($type === 'string' && empty($value));
+            if ($declaration['required'] && $is_empty) {
+                $errors[$property] = [
+                    'code' => self::ERROR_REQUIRED,
+                    'description' => "Required `{$property}` property is missing.",
+                ];
+                continue;
+            }
+
+            if ($value !== null) {
+                if ($type === 'integer' && !is_int($value)) {
+                    $errors[$property] = [
+                        'code' => self::ERROR_VALUE_TYPE_INVALID,
+                        'description' => "`{$property}` property must be an integer.",
+                    ];
+                    continue;
+                }
+
+                if ($type === 'datetime' && !($value instanceof \DateTime)) {
+                    $errors[$property] = [
+                        'code' => self::ERROR_VALUE_TYPE_INVALID,
+                        'description' => "`{$property}` property must be a \DateTime.",
+                    ];
+                    continue;
+                }
+
+                if ($type === 'boolean' && !is_bool($value)) {
+                    $errors[$property] = [
+                        'code' => self::ERROR_VALUE_TYPE_INVALID,
+                        'description' => "`{$property}` property must be a boolean.",
+                    ];
+                    continue;
+                }
+
+                if ($declaration['validator']) {
+                    $validator_result = $declaration['validator']($value);
+
+                    if ($validator_result !== true) {
+                        if ($validator_result === false) {
+                            $error_message = "`{$property}` property is invalid ({$value}).";
+                        } else {
+                            $error_message = $validator_result;
+                        }
+
+                        $errors[$property] = [
+                            'code' => self::ERROR_VALUE_INVALID,
+                            'description' => $error_message,
+                        ];
+                        continue;
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }
