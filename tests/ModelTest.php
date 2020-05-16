@@ -27,7 +27,7 @@ class ModelTest extends TestCase
     public function testConstructorFailsIfPropertyTypeIsNotSupported()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_TYPE_INVALID);
+        $this->expectExceptionCode(Model::ERROR_PROPERTY_TYPE_INVALID);
         $this->expectExceptionMessage('`not a type` is not a valid property type.');
 
         new Model(['id' => 'not a type']);
@@ -36,7 +36,7 @@ class ModelTest extends TestCase
     public function testConstructorFailsIfValidatorIsUncallable()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_VALIDATOR_INVALID);
+        $this->expectExceptionCode(Model::ERROR_PROPERTY_VALIDATOR_INVALID);
         $this->expectExceptionMessage('`not_callable` validator cannot be called.');
 
         new Model([
@@ -212,7 +212,7 @@ class ModelTest extends TestCase
     public function testSetPropertyFailsIfRequiredPropertyIsNull()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
+        $this->expectExceptionCode(Model::ERROR_REQUIRED);
         $this->expectExceptionMessage('Required `id` property is missing.');
 
         $model = new Model([
@@ -228,7 +228,7 @@ class ModelTest extends TestCase
     public function testSetPropertyFailsIfRequiredStringPropertyIsEmpty()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
+        $this->expectExceptionCode(Model::ERROR_REQUIRED);
         $this->expectExceptionMessage('Required `id` property is missing.');
 
         $model = new Model([
@@ -244,7 +244,7 @@ class ModelTest extends TestCase
     public function testSetPropertyFailsIfValidatorReturnsFalse()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_INVALID);
+        $this->expectExceptionCode(Model::ERROR_VALUE_INVALID);
         $this->expectExceptionMessage('`status` property is invalid (not valid).');
 
         $model = new Model([
@@ -262,7 +262,7 @@ class ModelTest extends TestCase
     public function testSetPropertyFailsIfValidatorReturnsCustomMessage()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_INVALID);
+        $this->expectExceptionCode(Model::ERROR_VALUE_INVALID);
         $this->expectExceptionMessage(
             '`status` property is invalid (new): a custom message error.'
         );
@@ -282,7 +282,7 @@ class ModelTest extends TestCase
     public function testSetPropertyFailsIfUndeclaredProperty()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_UNDECLARED);
+        $this->expectExceptionCode(Model::ERROR_PROPERTY_UNDECLARED);
         $this->expectExceptionMessage(
             '`status` property has not been declared.'
         );
@@ -392,7 +392,7 @@ class ModelTest extends TestCase
     public function testFromValuesFailsIfUndeclaredProperty()
     {
         $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_UNDECLARED);
+        $this->expectExceptionCode(Model::ERROR_PROPERTY_UNDECLARED);
         $this->expectExceptionMessage(
             '`status` property has not been declared.'
         );

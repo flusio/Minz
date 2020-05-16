@@ -54,6 +54,9 @@ class Model
     public const ERROR_REQUIRED = 'required';
     public const ERROR_VALUE_TYPE_INVALID = 'value_type_invalid';
     public const ERROR_VALUE_INVALID = 'value_invalid';
+    public const ERROR_PROPERTY_UNDECLARED = 'property_undeclared';
+    public const ERROR_PROPERTY_TYPE_INVALID = 'property_type_invalid';
+    public const ERROR_PROPERTY_VALIDATOR_INVALID = 'property_validator_invalid';
 
     /** @var array */
     protected $property_declarations;
@@ -113,7 +116,7 @@ class Model
             if (!in_array($declaration['type'], self::VALID_PROPERTY_TYPES)) {
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::PROPERTY_TYPE_INVALID,
+                    self::ERROR_PROPERTY_TYPE_INVALID,
                     "`{$declaration['type']}` is not a valid property type."
                 );
             }
@@ -124,7 +127,7 @@ class Model
             ) {
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::PROPERTY_VALIDATOR_INVALID,
+                    self::ERROR_PROPERTY_VALIDATOR_INVALID,
                     "`{$declaration['validator']}` validator cannot be called."
                 );
             }
@@ -180,7 +183,7 @@ class Model
             if (!isset($this->property_declarations[$property])) {
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::PROPERTY_UNDECLARED,
+                    self::ERROR_PROPERTY_UNDECLARED,
                     "`{$property}` property has not been declared."
                 );
             }
@@ -226,7 +229,7 @@ class Model
         if (!isset($this->property_declarations[$property])) {
             throw new Errors\ModelPropertyError(
                 $property,
-                Errors\ModelPropertyError::PROPERTY_UNDECLARED,
+                self::ERROR_PROPERTY_UNDECLARED,
                 "`{$property}` property has not been declared."
             );
         }
@@ -241,7 +244,7 @@ class Model
         ) {
             throw new Errors\ModelPropertyError(
                 $property,
-                Errors\ModelPropertyError::PROPERTY_REQUIRED,
+                self::ERROR_REQUIRED,
                 "Required `{$property}` property is missing."
             );
         }
@@ -257,7 +260,7 @@ class Model
                 $error_message = "`{$property}` property is invalid ({$value}){$custom_message}.";
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::VALUE_INVALID,
+                    self::ERROR_VALUE_INVALID,
                     $error_message
                 );
             }
