@@ -147,7 +147,7 @@ class Model
     /**
      * Return the list of declared properties values.
      *
-     * Note that datetime are converted to timestamps.
+     * Note that datetime are converted to (almost) iso 8601, see DATETIME_FORMAT.
      *
      * @return array
      */
@@ -172,30 +172,10 @@ class Model
      *
      * @param array $values
      *
-     * @throws \Minz\Errors\ModelPropertyError if required property is missing
      * @throws \Minz\Errors\ModelPropertyError if property is not declared
-     * @throws \Minz\Errors\ModelPropertyError if value doesn't correspond to the
-     *                                         declared type
-     * @throws \Minz\Errors\ModelPropertyError if validator returns false or a
-     *                                         custom message
      */
     public function fromValues($values)
     {
-        foreach ($this->property_declarations as $property => $declaration) {
-            if (
-                $declaration['required'] && (
-                    !isset($values[$property]) ||
-                    ($declaration['type'] === 'string' && empty($values[$property]))
-                )
-            ) {
-                throw new Errors\ModelPropertyError(
-                    $property,
-                    Errors\ModelPropertyError::PROPERTY_REQUIRED,
-                    "Required `{$property}` property is missing."
-                );
-            }
-        }
-
         foreach ($values as $property => $value) {
             if (!isset($this->property_declarations[$property])) {
                 throw new Errors\ModelPropertyError(
@@ -205,54 +185,26 @@ class Model
                 );
             }
 
-            $declaration = $this->property_declarations[$property];
-
             if ($value !== null) {
-                if (
-                    $declaration['type'] === 'integer' &&
-                    filter_var($value, FILTER_VALIDATE_INT) === false
-                ) {
-                    throw new Errors\ModelPropertyError(
-                        $property,
-                        Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                        "`{$property}` property must be an integer."
-                    );
-                }
+                $declaration = $this->property_declarations[$property];
+                $type = $declaration['type'];
 
-                if (
-                    $declaration['type'] === 'datetime' &&
-                    !($value instanceof \DateTime)
-                ) {
-                    $value = date_create_from_format(self::DATETIME_FORMAT, $value);
-
-                    if ($value === false) {
-                        throw new Errors\ModelPropertyError(
-                            $property,
-                            Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                            "`{$property}` property must be a \DateTime or a valid ISO-8601 string."
-                        );
-                    }
-                }
-
-                if (
-                    $declaration['type'] === 'boolean' &&
-                    filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null
-                ) {
-                    throw new Errors\ModelPropertyError(
-                        $property,
-                        Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                        "`{$property}` property must be a boolean."
-                    );
-                }
-
-                if ($declaration['type'] === 'integer') {
+                if ($type === 'integer' && filter_var($value, FILTER_VALIDATE_INT) !== false) {
                     $value = intval($value);
-                } elseif ($declaration['type'] === 'boolean') {
+                } elseif ($type === 'datetime' && is_string($value)) {
+                    $date = date_create_from_format(self::DATETIME_FORMAT, $value);
+                    if ($date !== false) {
+                        $value = $date;
+                    }
+                } elseif (
+                    $type === 'boolean' &&
+                    filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) !== null
+                ) {
                     $value = $value === 'true';
                 }
             }
 
-            $this->setProperty($property, $value);
+            $this->$property = $value;
         }
     }
 

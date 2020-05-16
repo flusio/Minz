@@ -362,119 +362,31 @@ class ModelTest extends TestCase
         $this->assertEquals($created_at->getTimestamp(), $model->created_at->getTimestamp());
     }
 
-    public function testFromValuesWithValidator()
+    public function testFromValuesWhenIntegerTypeDoesNotMatch()
     {
-        $model = new Model([
-            'status' => [
-                'type' => 'string',
-                'validator' => function ($value) {
-                    return in_array($value, ['new', 'finished']);
-                },
-            ],
-        ]);
-
-        $model->fromValues(['status' => 'new']);
-
-        $this->assertSame('new', $model->status);
-    }
-
-    public function testFromValuesFailsIfMissingRequiredProperty()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
-        $this->expectExceptionMessage('Required `id` property is missing.');
-
-        $model = new Model([
-            'id' => [
-                'type' => 'string',
-                'required' => true,
-            ],
-        ]);
-
-        $model->fromValues([]);
-    }
-
-    public function testFromValuesFailsIfRequiredPropertyIsNull()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
-        $this->expectExceptionMessage('Required `id` property is missing.');
-
-        $model = new Model([
-            'id' => [
-                'type' => 'string',
-                'required' => true,
-            ],
-        ]);
-
-        $model->fromValues(['id' => null]);
-    }
-
-    public function testFromValuesFailsIfRequiredStringPropertyIsEmpty()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::PROPERTY_REQUIRED);
-        $this->expectExceptionMessage('Required `id` property is missing.');
-
-        $model = new Model([
-            'id' => [
-                'type' => 'string',
-                'required' => true,
-            ],
-        ]);
-
-        $model->fromValues(['id' => '']);
-    }
-
-    public function testFromValuesFailsIfIntegerTypeDoesNotMatch()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_TYPE_INVALID);
-        $this->expectExceptionMessage('`id` property must be an integer.');
-
         $model = new Model(['id' => 'integer']);
 
         $model->fromValues(['id' => 'not an integer']);
+
+        $this->assertSame('not an integer', $model->id);
     }
 
-    public function testFromValuesFailsIfDatetimeTypeDoesNotMatch()
+    public function testFromValuesWhenDatetimeTypeDoesNotMatch()
     {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_TYPE_INVALID);
-        $this->expectExceptionMessage('`created_at` property must be a \DateTime or a valid ISO-8601 string.');
-
         $model = new Model(['created_at' => 'datetime']);
 
         $model->fromValues(['created_at' => 'not a timestamp']);
+
+        $this->assertSame('not a timestamp', $model->created_at);
     }
 
-    public function testFromValuesFailsIfBooleanTypeDoesNotMatch()
+    public function testFromValuesWhenBooleanTypeDoesNotMatch()
     {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_TYPE_INVALID);
-        $this->expectExceptionMessage('`is_cool` property must be a boolean.');
-
         $model = new Model(['is_cool' => 'boolean']);
 
         $model->fromValues(['is_cool' => 'not a boolean']);
-    }
 
-    public function testFromValuesFailsIfValidatorReturnsFalse()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Errors\ModelPropertyError::VALUE_INVALID);
-        $this->expectExceptionMessage('`status` property is invalid (not valid).');
-
-        $model = new Model([
-            'status' => [
-                'type' => 'string',
-                'validator' => function ($value) {
-                    return in_array($value, ['new', 'finished']);
-                },
-            ],
-        ]);
-
-        $model->fromValues(['status' => 'not valid']);
+        $this->assertSame('not a boolean', $model->is_cool);
     }
 
     public function testFromValuesFailsIfUndeclaredProperty()
