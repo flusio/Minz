@@ -92,22 +92,25 @@ class UrlTest extends TestCase
         Configuration::$url_options['path'] = '';
     }
 
-    public function testForWithMissingActionPointer()
-    {
-        $router = new Router();
-        Url::setRouter($router);
-
-        $url = Url::for('rabbits.html');
-
-        $this->assertSame('/rabbits.html', $url);
-    }
-
     public function testForFailsIfRouterIsNotRegistered()
     {
         $this->expectException(Errors\UrlError::class);
         $this->expectExceptionMessage(
             'You must set a Router to the Url class before using it.'
         );
+
+        Url::for('rabbits#list');
+    }
+
+    public function testForFailsIfActionPointerDoesNotExist()
+    {
+        $this->expectException(Errors\UrlError::class);
+        $this->expectExceptionMessage(
+            'rabbits#list action pointer or route name does not exist in the router.'
+        );
+
+        $router = new Router();
+        Url::setRouter($router);
 
         Url::for('rabbits#list');
     }
