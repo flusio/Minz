@@ -168,12 +168,7 @@ class Router
         }
 
         $route = $this->routes_by_names[$name];
-        $path = Configuration::$url_options['path'];
-        if (substr($path, -1) === '/') {
-            $path = substr($path, 0, -1);
-        }
-
-        return $path . $this->patternToUri($route['pattern'], $parameters);
+        return $this->patternToUri($route['pattern'], $parameters);
     }
 
     /**
@@ -196,15 +191,10 @@ class Router
             );
         }
 
-        $path = Configuration::$url_options['path'];
-        if (substr($path, -1) === '/') {
-            $path = substr($path, 0, -1);
-        }
-
         $via_routes = $this->routes[$via];
         foreach ($via_routes as $pattern => $route_action_pointer) {
             if ($action_pointer === $route_action_pointer) {
-                return $path . $this->patternToUri($pattern, $parameters);
+                return $this->patternToUri($pattern, $parameters);
             }
         }
 

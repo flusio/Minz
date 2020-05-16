@@ -40,12 +40,7 @@ function url_static($filename)
     $filepath = \Minz\Configuration::$app_path . '/public/static/' . $filename;
     $modification_time = @filemtime($filepath);
 
-    $url_path = \Minz\Configuration::$url_options['path'];
-    if (substr($url_path, -1) !== '/') {
-        $url_path = $url_path . '/';
-    }
-    $file_url = $url_path . 'static/' . $filename;
-
+    $file_url = \Minz\Url::path() . '/static/' . $filename;
     if ($modification_time) {
         return $file_url . '?' . $modification_time;
     } else {
@@ -62,18 +57,7 @@ function url_static($filename)
  */
 function url_full_static($filename)
 {
-    $url_options = \Minz\Configuration::$url_options;
-    $absolute_url = $url_options['protocol'] . '://';
-    $absolute_url .= $url_options['host'];
-    if (
-        !($url_options['protocol'] === 'https' && $url_options['port'] === 443) &&
-        !($url_options['protocol'] === 'http' && $url_options['port'] === 80)
-    ) {
-        $absolute_url .= ':' . $url_options['port'];
-    }
-    $absolute_url .= url_static($filename);
-
-    return $absolute_url;
+    return \Minz\Url::baseUrl() . url_static($filename);
 }
 
 /**

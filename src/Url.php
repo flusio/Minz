@@ -46,7 +46,8 @@ class Url
         }
 
         try {
-            return self::$router->uriByName($action_pointer_or_name, $parameters);
+            $uri = self::$router->uriByName($action_pointer_or_name, $parameters);
+            return self::path() . $uri;
         } catch (Errors\RouteNotFoundError $e) {
             // Do nothing on purpose
         } catch (Errors\RoutingError $e) {
@@ -56,7 +57,8 @@ class Url
         $vias = Router::VALID_VIAS;
         foreach ($vias as $via) {
             try {
-                return self::$router->uriByPointer($via, $action_pointer_or_name, $parameters);
+                $uri = self::$router->uriByPointer($via, $action_pointer_or_name, $parameters);
+                return self::path() . $uri;
             } catch (Errors\RouteNotFoundError $e) {
                 // Do nothing on purpose
             } catch (Errors\RoutingError $e) {
@@ -84,9 +86,18 @@ class Url
      */
     public static function absoluteFor($action_pointer, $parameters = [])
     {
-        $url_options = Configuration::$url_options;
-
         $relative_url = self::for($action_pointer, $parameters);
+        return self::baseUrl() . $relative_url;
+    }
+
+    /**
+     * Return the URL of the server, based on Configuration url_options.
+     *
+     * @return string
+     */
+    public static function baseUrl()
+    {
+        $url_options = Configuration::$url_options;
         $absolute_url = $url_options['protocol'] . '://';
         $absolute_url .= $url_options['host'];
         if (
@@ -95,8 +106,23 @@ class Url
         ) {
             $absolute_url .= ':' . $url_options['port'];
         }
-        $absolute_url .= $relative_url;
 
         return $absolute_url;
+    }
+
+    /**
+     * Return the path as specified in the Configuration url_options.
+     *
+     * It always removes the final character if the path ends with a slash (/).
+     *
+     * @return string
+     */
+    public static function path()
+    {
+        $path = Configuration::$url_options['path'];
+        if (substr($path, -1) === '/') {
+            $path = substr($path, 0, -1);
+        }
+        return $path;
     }
 }

@@ -272,19 +272,6 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits?id=42', $uri);
     }
 
-    public function testUriByPointerWithUrlOptionPath()
-    {
-        Configuration::$url_options['path'] = '/path';
-        $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
-
-        $uri = $router->uriByPointer('get', 'rabbits#list');
-
-        $this->assertSame('/path/rabbits', $uri);
-
-        Configuration::$url_options['path'] = '';
-    }
-
     public function testUriByPointerFailsIfParameterIsMissing()
     {
         $this->expectException(Errors\RoutingError::class);
@@ -352,19 +339,6 @@ class RouterTest extends TestCase
         $uri = $router->uriByName('rabbit', ['id' => 42]);
 
         $this->assertSame('/rabbits?id=42', $uri);
-    }
-
-    public function testUriByNameWithUrlOptionPath()
-    {
-        Configuration::$url_options['path'] = '/path';
-        $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
-
-        $uri = $router->uriByName('rabbits');
-
-        $this->assertSame('/path/rabbits', $uri);
-
-        Configuration::$url_options['path'] = '';
     }
 
     public function testUriByNameFailsIfParameterIsMissing()
