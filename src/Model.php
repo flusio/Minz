@@ -212,64 +212,6 @@ class Model
     }
 
     /**
-     * Load a specific property value to the model.
-     *
-     * Note that values are NOT casted so you have to make sure to use the
-     * correct type.
-     *
-     * @param array $values
-     *
-     * @throws \Minz\Errors\ModelPropertyError if property is not declared
-     * @throws \Minz\Errors\ModelPropertyError if required property is null
-     * @throws \Minz\Errors\ModelPropertyError if validator returns false or a
-     *                                         custom message
-     */
-    public function setProperty($property, $value)
-    {
-        if (!isset($this->property_declarations[$property])) {
-            throw new Errors\ModelPropertyError(
-                $property,
-                self::ERROR_PROPERTY_UNDECLARED,
-                "`{$property}` property has not been declared."
-            );
-        }
-
-        $declaration = $this->property_declarations[$property];
-
-        if (
-            $declaration['required'] && (
-                !isset($value) ||
-                ($declaration['type'] === 'string' && empty($value))
-            )
-        ) {
-            throw new Errors\ModelPropertyError(
-                $property,
-                self::ERROR_REQUIRED,
-                "Required `{$property}` property is missing."
-            );
-        }
-
-        if ($value !== null && $declaration['validator']) {
-            $validator_result = $declaration['validator']($value);
-
-            if ($validator_result !== true) {
-                $custom_message = '';
-                if ($validator_result !== false) {
-                    $custom_message = ': ' . $validator_result;
-                }
-                $error_message = "`{$property}` property is invalid ({$value}){$custom_message}.";
-                throw new Errors\ModelPropertyError(
-                    $property,
-                    self::ERROR_VALUE_INVALID,
-                    $error_message
-                );
-            }
-        }
-
-        $this->$property = $value;
-    }
-
-    /**
      * Return the errors of the model by checking its values against the declarations.
      *
      * The array is empty if there are no errors.
