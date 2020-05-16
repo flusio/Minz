@@ -61,6 +61,32 @@ function url_full_static($filename)
 }
 
 /**
+ * Return the relative URL for a public file (under public/ folder). Note you
+ * should probably use url_static() if you target a file under public/static/.
+ *
+ * @param string $filename
+ *
+ * @return string
+ */
+function url_public($filename)
+{
+    return \Minz\Url::path() . '/' . $filename;
+}
+
+/**
+ * Return the absolute URL for a public file (under public/ folder). Note you
+ * should probably use url_full_static() if you target a file under public/static/.
+ *
+ * @param string $filename
+ *
+ * @return string
+ */
+function url_full_public($filename)
+{
+    return \Minz\Url::baseUrl() . url_public($filename);
+}
+
+/**
  * Return a CSRF token
  *
  * @return string
