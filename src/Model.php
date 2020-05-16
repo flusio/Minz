@@ -51,6 +51,13 @@ class Model
     // @see https://www.postgresql.org/docs/current/datatype-datetime.html#DATATYPE-DATETIME-OUTPUT
     public const DATETIME_FORMAT = 'Y-m-d H:i:sP';
 
+    public const ERROR_REQUIRED = 'required';
+    public const ERROR_VALUE_TYPE_INVALID = 'value_type_invalid';
+    public const ERROR_VALUE_INVALID = 'value_invalid';
+    public const ERROR_PROPERTY_UNDECLARED = 'property_undeclared';
+    public const ERROR_PROPERTY_TYPE_INVALID = 'property_type_invalid';
+    public const ERROR_PROPERTY_VALIDATOR_INVALID = 'property_validator_invalid';
+
     /** @var array */
     protected $property_declarations;
 
@@ -109,7 +116,7 @@ class Model
             if (!in_array($declaration['type'], self::VALID_PROPERTY_TYPES)) {
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::PROPERTY_TYPE_INVALID,
+                    self::ERROR_PROPERTY_TYPE_INVALID,
                     "`{$declaration['type']}` is not a valid property type."
                 );
             }
@@ -120,7 +127,7 @@ class Model
             ) {
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::PROPERTY_VALIDATOR_INVALID,
+                    self::ERROR_PROPERTY_VALIDATOR_INVALID,
                     "`{$declaration['validator']}` validator cannot be called."
                 );
             }
@@ -143,7 +150,7 @@ class Model
     /**
      * Return the list of declared properties values.
      *
-     * Note that datetime are converted to timestamps.
+     * Note that datetime are converted to (almost) iso 8601, see DATETIME_FORMAT.
      *
      * @return array
      */
@@ -168,145 +175,114 @@ class Model
      *
      * @param array $values
      *
-     * @throws \Minz\Errors\ModelPropertyError if required property is missing
      * @throws \Minz\Errors\ModelPropertyError if property is not declared
-     * @throws \Minz\Errors\ModelPropertyError if value doesn't correspond to the
-     *                                         declared type
-     * @throws \Minz\Errors\ModelPropertyError if validator returns false or a
-     *                                         custom message
      */
     public function fromValues($values)
     {
-        foreach ($this->property_declarations as $property => $declaration) {
-            if (
-                $declaration['required'] && (
-                    !isset($values[$property]) ||
-                    ($declaration['type'] === 'string' && empty($values[$property]))
-                )
-            ) {
-                throw new Errors\ModelPropertyError(
-                    $property,
-                    Errors\ModelPropertyError::PROPERTY_REQUIRED,
-                    "Required `{$property}` property is missing."
-                );
-            }
-        }
-
         foreach ($values as $property => $value) {
             if (!isset($this->property_declarations[$property])) {
                 throw new Errors\ModelPropertyError(
                     $property,
-                    Errors\ModelPropertyError::PROPERTY_UNDECLARED,
+                    self::ERROR_PROPERTY_UNDECLARED,
                     "`{$property}` property has not been declared."
                 );
             }
 
-            $declaration = $this->property_declarations[$property];
-
             if ($value !== null) {
-                if (
-                    $declaration['type'] === 'integer' &&
-                    filter_var($value, FILTER_VALIDATE_INT) === false
-                ) {
-                    throw new Errors\ModelPropertyError(
-                        $property,
-                        Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                        "`{$property}` property must be an integer."
-                    );
-                }
+                $declaration = $this->property_declarations[$property];
+                $type = $declaration['type'];
 
-                if (
-                    $declaration['type'] === 'datetime' &&
-                    !($value instanceof \DateTime)
-                ) {
-                    $value = date_create_from_format(self::DATETIME_FORMAT, $value);
-
-                    if ($value === false) {
-                        throw new Errors\ModelPropertyError(
-                            $property,
-                            Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                            "`{$property}` property must be a \DateTime or a valid ISO-8601 string."
-                        );
-                    }
-                }
-
-                if (
-                    $declaration['type'] === 'boolean' &&
-                    filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null
-                ) {
-                    throw new Errors\ModelPropertyError(
-                        $property,
-                        Errors\ModelPropertyError::VALUE_TYPE_INVALID,
-                        "`{$property}` property must be a boolean."
-                    );
-                }
-
-                if ($declaration['type'] === 'integer') {
+                if ($type === 'integer' && filter_var($value, FILTER_VALIDATE_INT) !== false) {
                     $value = intval($value);
-                } elseif ($declaration['type'] === 'boolean') {
+                } elseif ($type === 'datetime' && is_string($value)) {
+                    $date = date_create_from_format(self::DATETIME_FORMAT, $value);
+                    if ($date !== false) {
+                        $value = $date;
+                    }
+                } elseif (
+                    $type === 'boolean' &&
+                    filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) !== null
+                ) {
                     $value = $value === 'true';
                 }
             }
 
-            $this->setProperty($property, $value);
+            $this->$property = $value;
         }
     }
 
     /**
-     * Load a specific property value to the model.
+     * Return the errors of the model by checking its values against the declarations.
      *
-     * Note that values are NOT casted so you have to make sure to use the
-     * correct type.
+     * The array is empty if there are no errors.
      *
-     * @param array $values
+     * Otherwise, the array is indexed by the properties names and the values
+     * are arrays with a `code` (the \Minz\Model::ERROR_* constants) and a
+     * `description`.
      *
-     * @throws \Minz\Errors\ModelPropertyError if property is not declared
-     * @throws \Minz\Errors\ModelPropertyError if required property is null
-     * @throws \Minz\Errors\ModelPropertyError if validator returns false or a
-     *                                         custom message
+     * @return array
      */
-    public function setProperty($property, $value)
+    public function validate()
     {
-        if (!isset($this->property_declarations[$property])) {
-            throw new Errors\ModelPropertyError(
-                $property,
-                Errors\ModelPropertyError::PROPERTY_UNDECLARED,
-                "`{$property}` property has not been declared."
-            );
-        }
+        $errors = [];
+        foreach ($this->property_declarations as $property => $declaration) {
+            $type = $declaration['type'];
+            $value = $this->$property;
 
-        $declaration = $this->property_declarations[$property];
+            $is_empty = !isset($value) || ($type === 'string' && empty($value));
+            if ($declaration['required'] && $is_empty) {
+                $errors[$property] = [
+                    'code' => self::ERROR_REQUIRED,
+                    'description' => "Required `{$property}` property is missing.",
+                ];
+                continue;
+            }
 
-        if (
-            $declaration['required'] && (
-                !isset($value) ||
-                ($declaration['type'] === 'string' && empty($value))
-            )
-        ) {
-            throw new Errors\ModelPropertyError(
-                $property,
-                Errors\ModelPropertyError::PROPERTY_REQUIRED,
-                "Required `{$property}` property is missing."
-            );
-        }
-
-        if ($value !== null && $declaration['validator']) {
-            $validator_result = $declaration['validator']($value);
-
-            if ($validator_result !== true) {
-                $custom_message = '';
-                if ($validator_result !== false) {
-                    $custom_message = ': ' . $validator_result;
+            if ($value !== null) {
+                if ($type === 'integer' && !is_int($value)) {
+                    $errors[$property] = [
+                        'code' => self::ERROR_VALUE_TYPE_INVALID,
+                        'description' => "`{$property}` property must be an integer.",
+                    ];
+                    continue;
                 }
-                $error_message = "`{$property}` property is invalid ({$value}){$custom_message}.";
-                throw new Errors\ModelPropertyError(
-                    $property,
-                    Errors\ModelPropertyError::VALUE_INVALID,
-                    $error_message
-                );
+
+                if ($type === 'datetime' && !($value instanceof \DateTime)) {
+                    $errors[$property] = [
+                        'code' => self::ERROR_VALUE_TYPE_INVALID,
+                        'description' => "`{$property}` property must be a \DateTime.",
+                    ];
+                    continue;
+                }
+
+                if ($type === 'boolean' && !is_bool($value)) {
+                    $errors[$property] = [
+                        'code' => self::ERROR_VALUE_TYPE_INVALID,
+                        'description' => "`{$property}` property must be a boolean.",
+                    ];
+                    continue;
+                }
+
+                if ($declaration['validator']) {
+                    $validator_result = $declaration['validator']($value);
+
+                    if ($validator_result !== true) {
+                        if ($validator_result === false) {
+                            $error_message = "`{$property}` property is invalid ({$value}).";
+                        } else {
+                            $error_message = $validator_result;
+                        }
+
+                        $errors[$property] = [
+                            'code' => self::ERROR_VALUE_INVALID,
+                            'description' => $error_message,
+                        ];
+                        continue;
+                    }
+                }
             }
         }
 
-        $this->$property = $value;
+        return $errors;
     }
 }
