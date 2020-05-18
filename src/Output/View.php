@@ -159,7 +159,7 @@ class View implements Output
         $variables = array_merge(self::$default_variables, $this->variables);
         foreach ($variables as $var_name => $var_value) {
             if (is_string($var_value)) {
-                $var_value = htmlspecialchars($var_value, ENT_COMPAT, 'UTF-8');
+                $var_value = $this->protect($var_value);
             }
             $$var_name = $var_value;
         }
@@ -227,6 +227,23 @@ class View implements Output
         }
 
         return $variables[$variable_name];
+    }
+
+    /**
+     * Return a variable by escaping its value.
+     *
+     * This is normally done for the string variables, but you might want to
+     * output an object attribute, which is not protected.
+     *
+     * @see https://www.php.net/manual/function.htmlspecialchars.php
+     *
+     * @param string $variable
+     *
+     * @return string
+     */
+    private function protect($variable)
+    {
+        return htmlspecialchars($variable, ENT_COMPAT, 'UTF-8');
     }
 
     /**
