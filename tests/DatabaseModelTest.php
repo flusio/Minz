@@ -365,6 +365,18 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $dao->count());
     }
 
+    public function testDeleteWithArrayOfIds()
+    {
+        $dao = new models\dao\Friend();
+        $id_1 = $dao->create(['name' => 'Joël']);
+        $id_2 = $dao->create(['name' => 'Pat']);
+        $this->assertSame(2, $dao->count());
+
+        $dao->delete([$id_1, $id_2]);
+
+        $this->assertSame(0, $dao->count());
+    }
+
     public function testDeleteWithUnknownId()
     {
         $dao = new models\dao\Friend();

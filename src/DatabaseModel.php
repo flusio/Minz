@@ -282,14 +282,20 @@ class DatabaseModel
      *
      * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
      */
-    public function delete($primary_key)
+    public function delete($pk_values)
     {
-        $where_statement = "{$this->primary_key_name} = ?";
+        if (is_array($pk_values)) {
+            $question_marks = array_fill(0, count($pk_values), '?');
+            $where_statement = implode(',', $question_marks);
+            $where_statement = "{$this->primary_key_name} IN ({$where_statement})";
+        } else {
+            $where_statement = "{$this->primary_key_name} = ?";
+            $pk_values = [$pk_values];
+        }
 
         $sql = "DELETE FROM {$this->table_name} WHERE {$where_statement}";
-
         $statement = $this->prepare($sql);
-        $result = $statement->execute([$primary_key]);
+        $result = $statement->execute($pk_values);
         if (!$result) {
             throw self::sqlStatementError($statement);
         }
