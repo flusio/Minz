@@ -37,6 +37,8 @@ namespace Minz;
  * Other optional keys are:
  * - data_path: the path to the data directory, default to $app_path/data
  * - schema_path: the path to the SQL schema file, default to $app_path/src/schema.sql
+ * - session_lifetime: duration of a PHP session, in days (default is 0, i.e.
+ *                     until the browser is closed)
  * - database: an array specifying:
  *   - dsn
  *   - username (optional if database is sqlite)
@@ -96,6 +98,9 @@ class Configuration
      *             application's namespace.
      */
     public static $app_name;
+
+    /** @var integer Duration of a PHP session in days */
+    public static $session_lifetime;
 
     /** @var array The web server information to build URLs */
     public static $url_options;
@@ -216,6 +221,8 @@ class Configuration
             'schema_path',
             $app_path . '/src/schema.sql'
         );
+
+        self::$session_lifetime = self::getDefault($raw_configuration, 'session_lifetime', 0);
 
         $database = self::getDefault($raw_configuration, 'database', null);
         if ($database !== null) {

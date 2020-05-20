@@ -44,7 +44,16 @@ class Environment
      */
     public static function startSession()
     {
+        $url_options = Configuration::$url_options;
         session_name(Configuration::$app_name);
+        session_set_cookie_params([
+            'lifetime' => Configuration::$session_lifetime * 24 * 60 * 60,
+            'path' => $url_options['path'],
+            'domain' => $url_options['host'],
+            'secure' => $url_options['protocol'] === 'https',
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
         session_start();
     }
 }
