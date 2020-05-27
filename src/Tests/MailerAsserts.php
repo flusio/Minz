@@ -49,6 +49,17 @@ trait MailerAsserts
     }
 
     /**
+     * Assert a mailer to declare the given "reply_to" email.
+     *
+     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
+     * @param string $reply_to
+     */
+    public function assertEmailContainsReplyTo($mailer, $reply_to)
+    {
+        $this->assertArrayHasKey($reply_to, $mailer->getReplyToAddresses());
+    }
+
+    /**
      * Assert a mailer to contain the given content in body.
      *
      * @param \PHPMailer\PHPMailer\PHPMailer $mailer
