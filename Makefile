@@ -10,13 +10,35 @@ else
 	DB_PASSWORD=none
 endif
 
+ifndef COVERAGE
+	COVERAGE = --coverage-html ./coverage
+endif
+
+ifdef FILTER
+	PHPUNIT_FILTER = --filter=$(FILTER)
+else
+	PHPUNIT_FILTER =
+endif
+
+ifdef FILE
+	PHPUNIT_FILE = $(FILE)
+else
+	PHPUNIT_FILE = ./tests
+endif
+
 .PHONY: postgres
 postgres: ## Start a Postgres database in a Docker container
 	docker run --name minz-postgres --rm -p 5432:5432 -e POSTGRES_DB=minz_test -e POSTGRES_PASSWORD=password postgres:12-alpine
 
 .PHONY: test
 test: bin/phpunit ## Run the tests suite
-	DB_DSN=$(DB_DSN) DB_USERNAME=$(DB_USERNAME) DB_PASSWORD=$(DB_PASSWORD) php ./bin/phpunit --bootstrap ./tests/bootstrap.php ./tests
+	DB_DSN=$(DB_DSN) DB_USERNAME=$(DB_USERNAME) DB_PASSWORD=$(DB_PASSWORD) \
+		php ./bin/phpunit \
+		$(COVERAGE) --whitelist ./src \
+		--bootstrap ./tests/bootstrap.php \
+		--testdox \
+		$(PHPUNIT_FILTER) \
+		$(PHPUNIT_FILE)
 
 .PHONY: lint
 lint: bin/phpcs ## Run the linter on the PHP files
