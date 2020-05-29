@@ -3,55 +3,13 @@
 namespace Minz;
 
 use PHPUnit\Framework\TestCase;
+use AppTest\models;
 
 class ModelTest extends TestCase
 {
-    public function testConstuctor()
-    {
-        $model = new Model(['property' => 'string']);
-
-        $this->assertNull($model->property);
-    }
-
-    /**
-     * @dataProvider validTypesProvider
-     */
-    public function testConstructorWithValidPropertyTypes($type)
-    {
-        $model = new Model(['property' => $type]);
-
-        $property_declarations = $model->propertyDeclarations();
-        $this->assertSame($type, $property_declarations['property']['type']);
-    }
-
-    public function testConstructorFailsIfPropertyTypeIsNotSupported()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Model::ERROR_PROPERTY_TYPE_INVALID);
-        $this->expectExceptionMessage('`not a type` is not a valid property type.');
-
-        new Model(['id' => 'not a type']);
-    }
-
-    public function testConstructorFailsIfValidatorIsUncallable()
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Model::ERROR_PROPERTY_VALIDATOR_INVALID);
-        $this->expectExceptionMessage('`not_callable` validator cannot be called.');
-
-        new Model([
-            'id' => [
-                'type' => 'integer',
-                'validator' => 'not_callable',
-            ],
-        ]);
-    }
-
     public function testPropertyDeclarations()
     {
-        $model = new Model(['id' => 'integer']);
-
-        $property_declarations = $model->propertyDeclarations();
+        $property_declarations = models\SimpleId::propertyDeclarations();
 
         $this->assertSame([
             'id' => [
@@ -62,9 +20,55 @@ class ModelTest extends TestCase
         ], $property_declarations);
     }
 
+    public function testPropertyDeclarationsWithValidTypes()
+    {
+        $property_declarations = models\ValidPropertyTypes::propertyDeclarations();
+
+        $this->assertSame([
+            'integer' => [
+                'type' => 'integer',
+                'required' => false,
+                'validator' => null,
+            ],
+            'string' => [
+                'type' => 'string',
+                'required' => false,
+                'validator' => null,
+            ],
+            'datetime' => [
+                'type' => 'datetime',
+                'required' => false,
+                'validator' => null,
+            ],
+            'boolean' => [
+                'type' => 'boolean',
+                'required' => false,
+                'validator' => null,
+            ],
+        ], $property_declarations);
+    }
+
+    public function testPropertyDeclarationsFailsIfPropertyTypeIsNotSupported()
+    {
+        $this->expectException(Errors\ModelPropertyError::class);
+        $this->expectExceptionCode(Model::ERROR_PROPERTY_TYPE_INVALID);
+        $this->expectExceptionMessage('`not a type` is not a valid property type.');
+
+        models\BadType::propertyDeclarations();
+    }
+
+    public function testPropertyDeclarationsFailsIfValidatorIsUncallable()
+    {
+        $this->expectException(Errors\ModelPropertyError::class);
+        $this->expectExceptionCode(Model::ERROR_PROPERTY_VALIDATOR_INVALID);
+        $this->expectExceptionMessage('`not_callable` validator cannot be called.');
+
+        models\BadValidator::propertyDeclarations();
+    }
+
     public function testToValues()
     {
-        $model = new Model(['id' => 'integer']);
+        $model = new models\SimpleId();
         $model->id = 42;
 
         $values = $model->toValues();
@@ -74,7 +78,7 @@ class ModelTest extends TestCase
 
     public function testToValuesWithUnsetValue()
     {
-        $model = new Model(['id' => 'integer']);
+        $model = new models\SimpleId();
 
         $values = $model->toValues();
 
@@ -83,19 +87,18 @@ class ModelTest extends TestCase
 
     public function testToValuesWithUndeclaredProperty()
     {
-        $model = new Model();
-        $model->id = 42;
+        $model = new models\SimpleId();
+        $model->foo = 'bar';
 
         $values = $model->toValues();
 
-        $this->assertSame([], $values);
+        $this->assertArrayNotHasKey('foo', $values);
     }
 
     public function testToValuesWithDatetimeProperty()
     {
-        $model = new Model(['created_at' => 'datetime']);
+        $model = new models\SimpleDateTime();
         $created_at = new \DateTime();
-        $created_at->setTimestamp(1000);
         $model->created_at = $created_at;
 
         $values = $model->toValues();
@@ -105,7 +108,7 @@ class ModelTest extends TestCase
 
     public function testToValuesWithUnsetDatetimeProperty()
     {
-        $model = new Model(['created_at' => 'datetime']);
+        $model = new models\SimpleDateTime();
 
         $values = $model->toValues();
 
@@ -114,99 +117,99 @@ class ModelTest extends TestCase
 
     public function testFromValuesWithString()
     {
-        $model = new Model(['foo' => 'string']);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['foo' => 'bar']);
+        $model->fromValues(['string' => 'foo']);
 
-        $this->assertSame('bar', $model->foo);
+        $this->assertSame('foo', $model->string);
     }
 
     public function testFromValuesWithInteger()
     {
-        $model = new Model(['id' => 'integer']);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['id' => '42']);
+        $model->fromValues(['integer' => '42']);
 
-        $this->assertSame(42, $model->id);
+        $this->assertSame(42, $model->integer);
     }
 
     public function testFromValuesWithIntegerZero()
     {
-        $model = new Model(['id' => 'integer']);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['id' => '0']);
+        $model->fromValues(['integer' => '0']);
 
-        $this->assertSame(0, $model->id);
+        $this->assertSame(0, $model->integer);
     }
 
     public function testFromValuesWithBoolean()
     {
-        $model = new Model(['is_cool' => 'boolean']);
+        $model = new models\ValidPropertyTypes();
 
-        // @todo check value returned by SQLite
-        $model->fromValues(['is_cool' => 'true']);
+        // @todo check value returned by SQLite and PGSQL
+        $model->fromValues(['boolean' => 'true']);
 
-        $this->assertTrue($model->is_cool);
+        $this->assertTrue($model->boolean);
     }
 
     public function testFromValuesWithBooleanFalse()
     {
-        $model = new Model(['is_cool' => 'boolean']);
+        $model = new models\ValidPropertyTypes();
 
-        // @todo check value returned by SQLite
-        $model->fromValues(['is_cool' => 'false']);
+        // @todo check value returned by SQLite and PGSQL
+        $model->fromValues(['boolean' => 'false']);
 
-        $this->assertFalse($model->is_cool);
+        $this->assertFalse($model->boolean);
     }
 
     public function testFromValuesWithDatetime()
     {
-        $model = new Model(['created_at' => 'datetime']);
-        $created_at = new \DateTime();
+        $model = new models\ValidPropertyTypes();
+        $datetime = new \DateTime();
 
-        $model->fromValues(['created_at' => $created_at]);
+        $model->fromValues(['datetime' => $datetime]);
 
-        $this->assertEquals($created_at, $model->created_at);
+        $this->assertEquals($datetime, $model->datetime);
     }
 
     public function testFromValuesWithIso8601()
     {
-        $model = new Model(['created_at' => 'datetime']);
-        $created_at = new \DateTime();
-        $iso_8601 = $created_at->format(Model::DATETIME_FORMAT);
+        $model = new models\ValidPropertyTypes();
+        $datetime = new \DateTime();
+        $iso_8601 = $datetime->format(Model::DATETIME_FORMAT);
 
-        $model->fromValues(['created_at' => $iso_8601]);
+        $model->fromValues(['datetime' => $iso_8601]);
 
         // we must compare timestamps because ISO-8601 lose the microseconds
         // and so the two DateTime are, in fact, different.
-        $this->assertEquals($created_at->getTimestamp(), $model->created_at->getTimestamp());
+        $this->assertEquals($datetime->getTimestamp(), $model->datetime->getTimestamp());
     }
 
     public function testFromValuesWhenIntegerTypeDoesNotMatch()
     {
-        $model = new Model(['id' => 'integer']);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['id' => 'not an integer']);
+        $model->fromValues(['integer' => 'not an integer']);
 
-        $this->assertSame('not an integer', $model->id);
+        $this->assertSame('not an integer', $model->integer);
     }
 
     public function testFromValuesWhenDatetimeTypeDoesNotMatch()
     {
-        $model = new Model(['created_at' => 'datetime']);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['created_at' => 'not a timestamp']);
+        $model->fromValues(['datetime' => 'not a datetime']);
 
-        $this->assertSame('not a timestamp', $model->created_at);
+        $this->assertSame('not a datetime', $model->datetime);
     }
 
     public function testFromValuesWhenBooleanTypeDoesNotMatch()
     {
-        $model = new Model(['is_cool' => 'boolean']);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['is_cool' => 'not a boolean']);
+        $model->fromValues(['boolean' => 'not a boolean']);
 
-        $this->assertSame('not a boolean', $model->is_cool);
+        $this->assertSame('not a boolean', $model->boolean);
     }
 
     public function testFromValuesFailsIfUndeclaredProperty()
@@ -214,25 +217,17 @@ class ModelTest extends TestCase
         $this->expectException(Errors\ModelPropertyError::class);
         $this->expectExceptionCode(Model::ERROR_PROPERTY_UNDECLARED);
         $this->expectExceptionMessage(
-            '`status` property has not been declared.'
+            '`not_a_property` property has not been declared.'
         );
 
-        $model = new Model([]);
+        $model = new models\ValidPropertyTypes();
 
-        $model->fromValues(['status' => 'new']);
+        $model->fromValues(['not_a_property' => 'foo']);
     }
 
     public function testValidateReturnsNoErrorsIfValid()
     {
-        $model = new Model([
-            'status' => [
-                'type' => 'string',
-                'required' => true,
-                'validator' => function ($value) {
-                    return in_array($value, ['new', 'finished']);
-                },
-            ],
-        ]);
+        $model = new models\Validator();
         $model->status = 'new';
 
         $errors = $model->validate();
@@ -242,12 +237,7 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfRequiredPropertyIsNull()
     {
-        $model = new Model([
-            'id' => [
-                'type' => 'string',
-                'required' => true,
-            ],
-        ]);
+        $model = new models\Required();
         $model->id = null;
 
         $errors = $model->validate();
@@ -265,12 +255,7 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfRequiredStringPropertyIsEmpty()
     {
-        $model = new Model([
-            'id' => [
-                'type' => 'string',
-                'required' => true,
-            ],
-        ]);
+        $model = new models\Required();
         $model->id = '';
 
         $errors = $model->validate();
@@ -288,16 +273,16 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfIntegerTypeDoesNotMatch()
     {
-        $model = new Model(['id' => 'integer']);
-        $model->id = 'not an integer';
+        $model = new models\ValidPropertyTypes();
+        $model->integer = 'not an integer';
 
         $errors = $model->validate();
 
         $this->assertSame(
             [
-                'id' => [
+                'integer' => [
                     'code' => Model::ERROR_VALUE_TYPE_INVALID,
-                    'description' => '`id` property must be an integer.',
+                    'description' => '`integer` property must be an integer.',
                 ],
             ],
             $errors
@@ -306,16 +291,16 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfDatetimeTypeDoesNotMatch()
     {
-        $model = new Model(['created_at' => 'datetime']);
-        $model->created_at = 'not a datetime';
+        $model = new models\ValidPropertyTypes();
+        $model->datetime = 'not a datetime';
 
         $errors = $model->validate();
 
         $this->assertSame(
             [
-                'created_at' => [
+                'datetime' => [
                     'code' => Model::ERROR_VALUE_TYPE_INVALID,
-                    'description' => '`created_at` property must be a \DateTime.',
+                    'description' => '`datetime` property must be a \DateTime.',
                 ],
             ],
             $errors
@@ -324,16 +309,16 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfBooleanTypeDoesNotMatch()
     {
-        $model = new Model(['is_cool' => 'boolean']);
-        $model->is_cool = 'not a boolean';
+        $model = new models\ValidPropertyTypes();
+        $model->boolean = 'not a boolean';
 
         $errors = $model->validate();
 
         $this->assertSame(
             [
-                'is_cool' => [
+                'boolean' => [
                     'code' => Model::ERROR_VALUE_TYPE_INVALID,
-                    'description' => '`is_cool` property must be a boolean.',
+                    'description' => '`boolean` property must be a boolean.',
                 ],
             ],
             $errors
@@ -342,14 +327,7 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfValidatorReturnsFalse()
     {
-        $model = new Model([
-            'status' => [
-                'type' => 'string',
-                'validator' => function ($value) {
-                    return in_array($value, ['new', 'finished']);
-                },
-            ],
-        ]);
+        $model = new models\Validator();
         $model->status = 'not valid';
 
         $errors = $model->validate();
@@ -367,18 +345,7 @@ class ModelTest extends TestCase
 
     public function testValidateReturnsErrorIfValidatorReturnsCustomMessage()
     {
-        $model = new Model([
-            'status' => [
-                'type' => 'string',
-                'validator' => function ($value) {
-                    if (in_array($value, ['new', 'finished'])) {
-                        return true;
-                    } else {
-                        return 'must be either new or finished';
-                    }
-                },
-            ],
-        ]);
+        $model = new models\ValidatorMessage();
         $model->status = 'not valid';
 
         $errors = $model->validate();
@@ -396,25 +363,10 @@ class ModelTest extends TestCase
 
     public function testValidateCanReturnSeveralErrors()
     {
-        $model = new Model([
-            'id' => [
-                'type' => 'string',
-                'required' => true,
-            ],
-            'created_at' => [
-                'type' => 'datetime',
-                'required' => true,
-            ],
-            'status' => [
-                'type' => 'string',
-                'validator' => function ($value) {
-                    return in_array($value, ['new', 'finished']);
-                },
-            ],
-        ]);
+        $model = new models\Friend();
         $model->id = 'an id';
         $model->created_at = null;
-        $model->status = 'not valid';
+        $model->name = 'not valid';
 
         $errors = $model->validate();
 
@@ -424,22 +376,12 @@ class ModelTest extends TestCase
                     'code' => Model::ERROR_REQUIRED,
                     'description' => 'Required `created_at` property is missing.',
                 ],
-                'status' => [
+                'name' => [
                     'code' => Model::ERROR_VALUE_INVALID,
-                    'description' => '`status` property is invalid (not valid).',
+                    'description' => '`name` property is invalid (not valid).',
                 ],
             ],
             $errors
         );
-    }
-
-    public function validTypesProvider()
-    {
-        return [
-            ['string'],
-            ['integer'],
-            ['datetime'],
-            ['boolean'],
-        ];
     }
 }
