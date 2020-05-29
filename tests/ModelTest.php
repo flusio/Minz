@@ -51,6 +51,7 @@ class ModelTest extends TestCase
                 'type' => 'datetime',
                 'required' => false,
                 'validator' => null,
+                'format' => Model::DATETIME_FORMAT,
             ],
             'boolean' => [
                 'type' => 'boolean',
@@ -122,6 +123,17 @@ class ModelTest extends TestCase
         $values = $model->toValues();
 
         $this->assertSame($created_at->format(Model::DATETIME_FORMAT), $values['created_at']);
+    }
+
+    public function testToValuesWithDatetimePropertyAndCustomFormat()
+    {
+        $model = new models\FormattedDateTime();
+        $created_at = new \DateTime();
+        $model->created_at = $created_at;
+
+        $values = $model->toValues();
+
+        $this->assertSame($created_at->format('Y-m-d'), $values['created_at']);
     }
 
     public function testToValuesWithUnsetDatetimeProperty()
@@ -201,6 +213,17 @@ class ModelTest extends TestCase
         // we must compare timestamps because ISO-8601 lose the microseconds
         // and so the two DateTime are, in fact, different.
         $this->assertEquals($datetime->getTimestamp(), $model->datetime->getTimestamp());
+    }
+
+    public function testFromValuesWithCustomFormat()
+    {
+        $model = new models\FormattedDateTime();
+        $datetime = new \DateTime('2020-01-20');
+        $formatted_datetime = $datetime->format('Y-m-d');
+
+        $model->fromValues(['created_at' => $formatted_datetime]);
+
+        $this->assertEquals($formatted_datetime, $model->created_at->format('Y-m-d'));
     }
 
     public function testFromValuesWhenIntegerTypeDoesNotMatch()

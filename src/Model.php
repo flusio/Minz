@@ -29,14 +29,19 @@ namespace Minz;
  *         ]);
  *     }
  *
- * A Model MUST declare a PROPERTIES public const. A declaration is an array
+ * A Model should declare a PROPERTIES public const. A declaration is an array
  * where keys are property names, and the values their declarations. A
  * declaration can be a simple string defining a type (string, integer,
  * datetime or boolean), or an array with a required `type` key and optional
- * `required` and `validator` keys. For example:
+ * `required`, `validator` and `format` keys. For example:
  *
  *     [
  *         'id' => 'integer',
+ *
+ *         'created_at' => [
+ *             'type' => 'datetime',
+ *             'format' => 'U',
+ *         ]
  *
  *         'name' => [
  *             'type' => 'string',
@@ -49,6 +54,9 @@ namespace Minz;
  *             'validator' => '\MyApp\models\MyModel::validateStatus',
  *         ],
  *     ]
+ *
+ * The format option can only be used on datetime properties and handles the
+ * format in database. It's set to Model::DATETIME_FORMAT by default.
  *
  * A validator must return true if the value is correct, or false otherwise. It
  * also can return a string to detail the reason of the error.
@@ -147,6 +155,13 @@ class Model
                 );
             }
 
+            if (
+                $declaration['type'] === 'datetime' &&
+                !isset($declaration['format'])
+            ) {
+                $declaration['format'] = self::DATETIME_FORMAT;
+            }
+
             self::$property_declarations[$model_class_name][$property] = $declaration;
         }
     }
@@ -176,7 +191,8 @@ class Model
     /**
      * Return the list of declared properties values.
      *
-     * Note that datetime are converted to (almost) iso 8601, see DATETIME_FORMAT.
+     * Note that datetime are converted to (almost) iso 8601 by default, see
+     * DATETIME_FORMAT. It can be changed by providing a `format` option.
      *
      * @return array
      */
@@ -185,7 +201,7 @@ class Model
         $values = [];
         foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
             if ($declaration['type'] === 'datetime' && $this->$property) {
-                $values[$property] = $this->$property->format(self::DATETIME_FORMAT);
+                $values[$property] = $this->$property->format($declaration['format']);
             } else {
                 $values[$property] = $this->$property;
             }
@@ -222,7 +238,7 @@ class Model
                 if ($type === 'integer' && filter_var($value, FILTER_VALIDATE_INT) !== false) {
                     $value = intval($value);
                 } elseif ($type === 'datetime' && is_string($value)) {
-                    $date = date_create_from_format(self::DATETIME_FORMAT, $value);
+                    $date = date_create_from_format($declaration['format'], $value);
                     if ($date !== false) {
                         $value = $date;
                     }
