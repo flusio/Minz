@@ -9,7 +9,12 @@ class ModelTest extends TestCase
 {
     public function testPropertyDeclarations()
     {
-        $property_declarations = models\SimpleId::propertyDeclarations();
+        Model::declareProperties(
+            models\SimpleId::class,
+            models\SimpleId::PROPERTIES
+        );
+
+        $property_declarations = Model::propertyDeclarations(models\SimpleId::class);
 
         $this->assertSame([
             'id' => [
@@ -22,7 +27,14 @@ class ModelTest extends TestCase
 
     public function testPropertyDeclarationsWithValidTypes()
     {
-        $property_declarations = models\ValidPropertyTypes::propertyDeclarations();
+        Model::declareProperties(
+            models\ValidPropertyTypes::class,
+            models\ValidPropertyTypes::PROPERTIES
+        );
+
+        $property_declarations = Model::propertyDeclarations(
+            models\ValidPropertyTypes::class
+        );
 
         $this->assertSame([
             'integer' => [
@@ -54,7 +66,10 @@ class ModelTest extends TestCase
         $this->expectExceptionCode(Model::ERROR_PROPERTY_TYPE_INVALID);
         $this->expectExceptionMessage('`not a type` is not a valid property type.');
 
-        models\BadType::propertyDeclarations();
+        Model::declareProperties(
+            models\BadType::class,
+            models\BadType::PROPERTIES
+        );
     }
 
     public function testPropertyDeclarationsFailsIfValidatorIsUncallable()
@@ -63,7 +78,10 @@ class ModelTest extends TestCase
         $this->expectExceptionCode(Model::ERROR_PROPERTY_VALIDATOR_INVALID);
         $this->expectExceptionMessage('`not_callable` validator cannot be called.');
 
-        models\BadValidator::propertyDeclarations();
+        Model::declareProperties(
+            models\BadValidator::class,
+            models\BadValidator::PROPERTIES
+        );
     }
 
     public function testToValues()

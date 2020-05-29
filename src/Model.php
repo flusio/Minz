@@ -83,33 +83,42 @@ class Model
     public const ERROR_PROPERTY_VALIDATOR_INVALID = 'property_validator_invalid';
 
     /** @var array Cache the property declarations of models */
-    protected static $property_declarations_cache = [];
+    protected static $property_declarations = [];
 
     /**
-     * Return the complete property declarations, based on the PROPERTIES const.
+     * Return the complete property declarations for a model.
      *
-     * The PROPERTIES const can be incomplete (a string only, or without the
-     * required or validator options). This method checks PROPERTIES is valid
-     * and return the complete declarations.
+     * @param string $model_class_name
      *
-     * The complete declarations are cached in the static $property_declarations_cache
-     * variable.
+     * @return array
+     */
+    public static function propertyDeclarations($model_class_name)
+    {
+        if (isset(self::$property_declarations[$model_class_name])) {
+            return self::$property_declarations[$model_class_name];
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Declare properties of the given model.
+     *
+     * The $properties var can be incomplete (a string only, or without the
+     * required or validator options). This method checks the properties are
+     * valid and cache the complete declarations.
+     *
+     * @param string $model_class_name
+     * @param array $properties
      *
      * @throws \Minz\Errors\ModelPropertyError if a type is invalid
      * @throws \Minz\Errors\ModelPropertyError if validator is declared but cannot
      *                                         be called
-     *
-     * @return array
-     */
-    public static function propertyDeclarations()
+     **/
+    public static function declareProperties($model_class_name, $properties)
     {
-        $current_class_name = get_called_class();
-        if (isset(self::$property_declarations_cache[$current_class_name])) {
-            return self::$property_declarations_cache[$current_class_name];
-        }
-
-        self::$property_declarations_cache[$current_class_name] = [];
-        foreach (static::PROPERTIES as $property => $declaration) {
+        self::$property_declarations[$model_class_name] = [];
+        foreach ($properties as $property => $declaration) {
             if (!is_array($declaration)) {
                 $declaration = ['type' => $declaration];
             }
@@ -138,10 +147,8 @@ class Model
                 );
             }
 
-            self::$property_declarations_cache[$current_class_name][$property] = $declaration;
+            self::$property_declarations[$model_class_name][$property] = $declaration;
         }
-
-        return self::$property_declarations_cache[$current_class_name];
     }
 
     /**
@@ -151,11 +158,19 @@ class Model
      */
     public function __construct($values = [])
     {
-        foreach (self::propertyDeclarations() as $property => $declaration) {
+        $model_class_name = get_called_class();
+        $already_declared = isset(self::$property_declarations[$model_class_name]);
+        if (!$already_declared && defined('static::PROPERTIES')) {
+            self::declareProperties($model_class_name, static::PROPERTIES);
+        }
+
+        foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
             $this->$property = null;
         }
 
-        $this->fromValues($values);
+        if ($values) {
+            $this->fromValues($values);
+        }
     }
 
     /**
@@ -168,7 +183,7 @@ class Model
     public function toValues()
     {
         $values = [];
-        foreach (self::propertyDeclarations() as $property => $declaration) {
+        foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
             if ($declaration['type'] === 'datetime' && $this->$property) {
                 $values[$property] = $this->$property->format(self::DATETIME_FORMAT);
             } else {
@@ -190,7 +205,7 @@ class Model
      */
     public function fromValues($values)
     {
-        $property_declarations = self::propertyDeclarations();
+        $property_declarations = self::propertyDeclarations(get_called_class());
         foreach ($values as $property => $value) {
             if (!isset($property_declarations[$property])) {
                 throw new Errors\ModelPropertyError(
@@ -237,7 +252,7 @@ class Model
     public function validate()
     {
         $errors = [];
-        foreach (self::propertyDeclarations() as $property => $declaration) {
+        foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
             $type = $declaration['type'];
             $value = $this->$property;
 
