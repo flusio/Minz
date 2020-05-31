@@ -425,4 +425,14 @@ class ModelTest extends TestCase
             $errors
         );
     }
+
+    public function testValidateDoesNotCallValidatorIfStringValueIsEmpty()
+    {
+        $model = new models\Validator();
+        $model->status = '';
+
+        $errors = $model->validate();
+
+        $this->assertEmpty($errors);
+    }
 }

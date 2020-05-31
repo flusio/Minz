@@ -7,7 +7,6 @@ class Validator extends \Minz\Model
     public const PROPERTIES = [
         'status' => [
             'type' => 'string',
-            'required' => true,
             'validator' => '\AppTest\models\Validator::validateStatus',
         ],
     ];

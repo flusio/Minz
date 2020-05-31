@@ -281,7 +281,7 @@ class Model
                 continue;
             }
 
-            if ($value !== null) {
+            if (!$is_empty) {
                 if ($type === 'integer' && !is_int($value)) {
                     $errors[$property] = [
                         'code' => self::ERROR_VALUE_TYPE_INVALID,
