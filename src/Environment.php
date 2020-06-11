@@ -46,14 +46,21 @@ class Environment
     {
         $url_options = Configuration::$url_options;
         session_name(Configuration::$app_name);
-        session_set_cookie_params([
+        $cookie_params = [
             'lifetime' => Configuration::$session_lifetime * 24 * 60 * 60,
             'path' => $url_options['path'],
-            'domain' => $url_options['host'],
             'secure' => $url_options['protocol'] === 'https',
             'httponly' => true,
             'samesite' => 'Strict',
-        ]);
+        ];
+
+        // Some browsers don't accept cookies if domain is localhost
+        // @see https://stackoverflow.com/a/1188145
+        if ($url_options['host'] !== 'localhost') {
+            $cookie_params['domain'] = $url_options['host'];
+        }
+
+        session_set_cookie_params($cookie_params);
         session_start();
     }
 }
