@@ -268,6 +268,20 @@ class DatabaseModelTest extends TestCase
         $this->assertSame('Joël', $joels[1]['name']);
     }
 
+    public function testListByWithArrayOfValues()
+    {
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Joël']);
+        $dao->create(['name' => 'Michel']);
+        $dao->create(['name' => 'Monique']);
+
+        $friends = $dao->listBy(['name' => ['Joël', 'Monique']]);
+
+        $this->assertSame(2, count($friends));
+        $this->assertSame('Joël', $friends[0]['name']);
+        $this->assertSame('Monique', $friends[1]['name']);
+    }
+
     public function testListByWithNoMatchingData()
     {
         $dao = new models\dao\Friend();

@@ -179,7 +179,11 @@ class DatabaseModel
     /**
      * Return a list of rows matching the given values.
      *
-     * @param mixed[] $values The values which must match
+     * The $values array keys must match with valid properties. The $values
+     * array values can either be a single value or an array (in which case the
+     * where condition will be IN instead of =).
+     *
+     * @param array $values The values which must match
      *
      * @throws \Minz\Errors\DatabaseModelError if values is empty
      * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
@@ -196,7 +200,23 @@ class DatabaseModel
             );
         }
 
-        $properties = array_keys($values);
+        $properties = [];
+        $parameters = [];
+        $where_statement_as_array = [];
+        foreach ($values as $property => $parameter) {
+            $properties[] = $property;
+
+            if (is_array($parameter)) {
+                $parameters = array_merge($parameters, $parameter);
+                $question_marks = array_fill(0, count($parameter), '?');
+                $in_statement = implode(',', $question_marks);
+                $where_statement_as_array[] = "{$property} IN ({$in_statement})";
+            } else {
+                $parameters[] = $parameter;
+                $where_statement_as_array[] = "{$property} = ?";
+            }
+        }
+
         $undeclared_property = $this->findUndeclaredProperty($properties);
         if ($undeclared_property) {
             $class = get_called_class();
@@ -205,16 +225,9 @@ class DatabaseModel
             );
         }
 
-        $where_statement_as_array = [];
-        foreach ($properties as $property) {
-            $where_statement_as_array[] = "{$property} = ?";
-        }
         $where_statement = implode(' AND ', $where_statement_as_array);
-
         $sql = "SELECT * FROM {$this->table_name} WHERE {$where_statement}";
-
         $statement = $this->prepare($sql);
-        $parameters = array_values($values);
         $result = $statement->execute($parameters);
         if (!$result) {
             throw self::sqlStatementError($statement);
