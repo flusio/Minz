@@ -316,6 +316,37 @@ class DatabaseModelTest extends TestCase
         $dao->listBy(['not_property' => 'foo']);
     }
 
+    public function testExists()
+    {
+        $dao = new models\dao\Friend();
+        $friend_id = $dao->create(['name' => 'Joël']);
+
+        $exists = $dao->exists($friend_id);
+
+        $this->assertTrue($exists);
+    }
+
+    public function testExistsWithMultipleValues()
+    {
+        $dao = new models\dao\Friend();
+        $friend_id_1 = $dao->create(['name' => 'Joël']);
+        $friend_id_2 = $dao->create(['name' => 'Monique']);
+
+        $exists = $dao->exists([$friend_id_1, $friend_id_2]);
+
+        $this->assertTrue($exists);
+    }
+
+    public function testExistsReturnsFalseIfAtLeastOneValueDoesNotExist()
+    {
+        $dao = new models\dao\Friend();
+        $friend_id = $dao->create(['name' => 'Joël']);
+
+        $exists = $dao->exists([$friend_id, 'does not exist']);
+
+        $this->assertFalse($exists);
+    }
+
     public function testUpdate()
     {
         $dao = new models\dao\Friend();

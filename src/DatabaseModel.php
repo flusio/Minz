@@ -242,6 +242,25 @@ class DatabaseModel
     }
 
     /**
+     * Return whether all the given values exist in database.
+     *
+     * @param mixed[] $primary_keys
+     *
+     * @return boolean
+     */
+    public function exists($primary_keys)
+    {
+        if (!is_array($primary_keys)) {
+            $primary_keys = [$primary_keys];
+        }
+
+        $matching_rows = $this->listBy([
+            $this->primary_key_name => $primary_keys
+        ]);
+        return count($matching_rows) === count($primary_keys);
+    }
+
+    /**
      * Update a row
      *
      * @param mixed[] $values The list of properties with associated values
