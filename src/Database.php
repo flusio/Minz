@@ -204,6 +204,7 @@ class Database extends \PDO
         // Force some options values
         $options[\PDO::ATTR_DEFAULT_FETCH_MODE] = \PDO::FETCH_ASSOC;
         $options[\PDO::ATTR_EMULATE_PREPARES] = false;
+        $options[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
 
         try {
             parent::__construct($dsn, $username, $password, $options);

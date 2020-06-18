@@ -106,8 +106,7 @@ class DatabaseModelTest extends TestCase
 
     public function testCreateFailsIfRequiredPropertyIsntSet()
     {
-        $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage('Error in SQL statement');
+        $this->expectException(\PDOException::class);
 
         $dao = new models\dao\Friend();
 
@@ -133,8 +132,7 @@ class DatabaseModelTest extends TestCase
 
     public function testCreateFailsIfDependencyNotMet()
     {
-        $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage('Error in SQL statement');
+        $this->expectException(\PDOException::class);
 
         $dao = new models\dao\Rabbit();
 

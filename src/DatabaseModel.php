@@ -45,7 +45,7 @@ class DatabaseModel
      * @throws \Minz\Errors\DatabaseModelError if values is empty
      * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
      *                                         declared by the model
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \PDOException if an error occured in the SQL syntax
      *
      * @return integer|string|boolean Return the id as an integer if cast is
      *                                possible, as a string otherwise. Return
@@ -79,12 +79,10 @@ class DatabaseModel
         $statement = $this->prepare($sql);
         $result = $statement->execute(array_values($values));
 
-        if ($result && isset($values[$this->primary_key_name])) {
+        if (isset($values[$this->primary_key_name])) {
             return $values[$this->primary_key_name];
-        } elseif ($result) {
-            return $this->lastInsertId();
         } else {
-            throw self::sqlStatementError($statement);
+            return $this->lastInsertId();
         }
     }
 
@@ -96,7 +94,7 @@ class DatabaseModel
      *
      * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
      *                                         declared by the model
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \PDOException if an error occured in the SQL syntax
      *
      * @return array
      */
@@ -119,12 +117,7 @@ class DatabaseModel
         $sql = "SELECT {$select_sql} FROM {$this->table_name}";
 
         $statement = $this->query($sql);
-        $result = $statement->fetchAll();
-        if ($result !== false) {
-            return $result;
-        } else {
-            throw self::sqlStatementError($statement);
-        }
+        return $statement->fetchAll();
     }
 
     /**
@@ -132,7 +125,7 @@ class DatabaseModel
      *
      * @param integer|string $primary_key The value of the row's primary key to find
      *
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \PDOException if an error occured in the SQL syntax
      *
      * @return array|null Return the corresponding row data, null otherwise
      */
@@ -141,11 +134,7 @@ class DatabaseModel
         $sql = "SELECT * FROM {$this->table_name} WHERE {$this->primary_key_name} = ?";
 
         $statement = $this->prepare($sql);
-        $result = $statement->execute([$primary_key]);
-        if (!$result) {
-            throw self::sqlStatementError($statement);
-        }
-
+        $statement->execute([$primary_key]);
         $result = $statement->fetch();
         if ($result) {
             return $result;
@@ -188,7 +177,7 @@ class DatabaseModel
      * @throws \Minz\Errors\DatabaseModelError if values is empty
      * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
      *                                         declared by the model
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \PDOException if an error occured in the SQL syntax
      *
      * @return array Return the corresponding row data, null otherwise
      */
@@ -228,17 +217,8 @@ class DatabaseModel
         $where_statement = implode(' AND ', $where_statement_as_array);
         $sql = "SELECT * FROM {$this->table_name} WHERE {$where_statement}";
         $statement = $this->prepare($sql);
-        $result = $statement->execute($parameters);
-        if (!$result) {
-            throw self::sqlStatementError($statement);
-        }
-
-        $result = $statement->fetchAll();
-        if ($result !== false) {
-            return $result;
-        } else {
-            throw self::sqlStatementError($statement);
-        }
+        $statement->execute($parameters);
+        return $statement->fetchAll();
     }
 
     /**
@@ -269,7 +249,7 @@ class DatabaseModel
      * @throws \Minz\Errors\DatabaseModelError if values is empty
      * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
      *                                         declared by the model
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \PDOException if an error occured in the SQL syntax
      */
     public function update($primary_key, $values)
     {
@@ -301,10 +281,7 @@ class DatabaseModel
         $statement = $this->prepare($sql);
         $parameters = array_values($values);
         $parameters[] = $primary_key;
-        $result = $statement->execute($parameters);
-        if (!$result) {
-            throw self::sqlStatementError($statement);
-        }
+        return $statement->execute($parameters);
     }
 
     /**
@@ -312,7 +289,7 @@ class DatabaseModel
      *
      * @param integer|string $primary_key The value of the row's primary key to delete
      *
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \PDOException if an error occured in the SQL syntax
      */
     public function delete($pk_values)
     {
@@ -327,10 +304,7 @@ class DatabaseModel
 
         $sql = "DELETE FROM {$this->table_name} WHERE {$where_statement}";
         $statement = $this->prepare($sql);
-        $result = $statement->execute($pk_values);
-        if (!$result) {
-            throw self::sqlStatementError($statement);
-        }
+        return $statement->execute($pk_values);
     }
 
     /**
@@ -353,21 +327,13 @@ class DatabaseModel
      *
      * @param string $sql_statement
      *
-     * @throws \Minz\DatabaseModelError if the query fails
-     * @throws \Minz\Errors\DatabaseError if the database initialization fails
-     *
-     * @see \Minz\Database::_construct()
+     * @throws \PDOException if an error occured in the SQL syntax
      *
      * @return \PDOStatement
      */
     protected function query($sql_statement)
     {
-        $statement = $this->database->query($sql_statement);
-        if (!$statement) {
-            throw self::sqlStatementError($this->database);
-        }
-
-        return $statement;
+        return $this->database->query($sql_statement);
     }
 
     /**
@@ -375,18 +341,13 @@ class DatabaseModel
      *
      * @param string $sql_statement
      *
-     * @throws \Minz\DatabaseModelError if the query fails
+     * @throws \PDOException if an error occured in the SQL syntax
      *
      * @return \PDOStatement
      */
     protected function prepare($sql_statement)
     {
-        $statement = $this->database->prepare($sql_statement);
-        if (!$statement) {
-            throw self::sqlStatementError($this->database);
-        }
-
-        return $statement;
+        return $this->database->prepare($sql_statement);
     }
 
     /**
@@ -478,26 +439,5 @@ class DatabaseModel
             );
         }
         $this->primary_key_name = $primary_key_name;
-    }
-
-    /**
-     * Return an error representing a SQL error.
-     *
-     * It is just a helper method because I found it was annoying to always do
-     * the same. I don't understand why they choose this pattern for PDO
-     * (probably some good reasons), but I don't find it's a great programing
-     * API.
-     *
-     * @param \PDO|\PDOStatement $error_info_like_object The object from which we should
-     *                                                   get the `errorInfo()`
-     *
-     * @return \Minz\Errors\DatabaseModelError
-     */
-    protected static function sqlStatementError($error_info_like_object)
-    {
-        $error_info = $error_info_like_object->errorInfo();
-        return new Errors\DatabaseModelError(
-            "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
-        );
     }
 }
