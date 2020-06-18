@@ -140,6 +140,13 @@ class ResponseTest extends TestCase
         $this->assertSame(202, $response->code());
     }
 
+    public function testNoContent()
+    {
+        $response = Response::noContent();
+
+        $this->assertSame(204, $response->code());
+    }
+
     public function testFound()
     {
         $response = Response::found('https://example.com');

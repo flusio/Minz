@@ -89,6 +89,21 @@ class Response
     }
 
     /**
+     * Create a no content response (HTTP 204) with a Output\View.
+     *
+     * @param string $view_pointer
+     * @param mixed[] $variables
+     *
+     * @throws \Minz\Errors\OutputError
+     *
+     * @return \Minz\Response
+     */
+    public static function noContent()
+    {
+        return new Response(204);
+    }
+
+    /**
      * Create a found response (HTTP 302).
      *
      * @param string $url
