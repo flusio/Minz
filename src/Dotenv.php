@@ -49,6 +49,11 @@ class Dotenv
                 $value = '';
             }
 
+            if (substr($name, 0, 1) === '#') {
+                // Ignore the comments
+                continue;
+            }
+
             $value_from_env = getenv($name);
             if ($value_from_env !== false) {
                 $value = $value_from_env;

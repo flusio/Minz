@@ -87,4 +87,16 @@ class DotenvTest extends TestCase
 
         $this->assertSame('foo', $variable);
     }
+
+    public function testPopIgnoresComments()
+    {
+        $dotenv_path = Configuration::$app_path . '/dotenv';
+        $dotenv = new Dotenv($dotenv_path);
+
+        $variable = $dotenv->pop('#COMMENTED');
+        $this->assertNull($variable);
+
+        $variable = $dotenv->pop('COMMENTED');
+        $this->assertNull($variable);
+    }
 }
