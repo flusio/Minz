@@ -48,6 +48,17 @@ class DotenvTest extends TestCase
         $this->assertSame('spam', $variable);
     }
 
+    public function testPopWithEnvSetButNotInDotenv()
+    {
+        putenv('NOT_DEFINED=spam');
+        $dotenv_path = Configuration::$app_path . '/dotenv';
+        $dotenv = new Dotenv($dotenv_path);
+
+        $variable = $dotenv->pop('NOT_DEFINED');
+
+        $this->assertSame('spam', $variable);
+    }
+
     public function testPopTrimsNamesAndValues()
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';

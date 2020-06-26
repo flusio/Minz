@@ -54,18 +54,13 @@ class Dotenv
                 continue;
             }
 
-            $value_from_env = getenv($name);
-            if ($value_from_env !== false) {
-                $value = $value_from_env;
-            } else {
-                $value_length = strlen($value);
-                if ($value_length > 0) {
-                    $single_quoted = $value[0] === "'" && $value[$value_length - 1] === "'";
-                    $double_quoted = $value[0] === '"' && $value[$value_length - 1] === '"';
+            $value_length = strlen($value);
+            if ($value_length > 0) {
+                $single_quoted = $value[0] === "'" && $value[$value_length - 1] === "'";
+                $double_quoted = $value[0] === '"' && $value[$value_length - 1] === '"';
 
-                    if ($single_quoted || $double_quoted) {
-                        $value = substr($value, 1, $value_length - 2);
-                    }
+                if ($single_quoted || $double_quoted) {
+                    $value = substr($value, 1, $value_length - 2);
                 }
             }
 
@@ -84,7 +79,10 @@ class Dotenv
      */
     public function pop($name, $default = null)
     {
-        if (isset($this->variables[$name])) {
+        $value_from_env = getenv($name);
+        if ($value_from_env !== false) {
+            return $value_from_env;
+        } elseif (isset($this->variables[$name])) {
             $value = $this->variables[$name];
             unset($this->variables[$name]);
             return $value;
