@@ -14,6 +14,11 @@ namespace Minz;
  */
 class Engine
 {
+    private const DEFAULT_OPTIONS = [
+        'not_found_view_pointer' => null,
+        'internal_server_error_view_pointer' => null,
+    ];
+
     /** @var \Minz\Router */
     private $router;
 
@@ -26,25 +31,35 @@ class Engine
     }
 
     /**
-     * This method always return a response to the user. If an error happens in
-     * the logic of the application, the adequate HTTP code with a pertinent
-     * view.
+     * This method tries to always return a response to the user. If an error
+     * happens in the logic of the application, a response with the adequate
+     * HTTP code and a pertinent view is returned.
+     *
+     * "Not found" and "Internal server" errors views can be chosen via the
+     * options. You should make sure the view pointers you pass exist. By
+     * default, the errors are returned as text.
      *
      * @param \Minz\Request $request The actual request from the user.
+     * @param array An optional array of options (see self::DEFAULT_OPTIONS)
      *
      * @return \Minz\Response A response to return to the user.
      */
-    public function run($request)
+    public function run($request, $options = [])
     {
+        $options = array_merge(self::DEFAULT_OPTIONS, $options);
+
         try {
             list(
                 $to,
                 $parameters
             ) = $this->router->match($request->method(), $request->path());
         } catch (Errors\RouteNotFoundError $e) {
-            try {
-                $output = new Output\View('not_found.phtml', ['error' => $e]);
-            } catch (Errors\OutputError $_) {
+            if ($options['not_found_view_pointer']) {
+                $output = new Output\View(
+                    $options['not_found_view_pointer'],
+                    ['error' => $e]
+                );
+            } else {
                 $output = new Output\Text((string)$e);
             }
             return new Response(404, $output);
@@ -54,17 +69,17 @@ class Engine
             $request->setParam($param_name, $param_value);
         }
 
-        $action_controller = new ActionController($to);
         try {
+            $action_controller = new ActionController($to);
             return $action_controller->execute($request);
         } catch (\Exception $e) {
             Log::error((string)$e);
-            try {
+            if ($options['internal_server_error_view_pointer']) {
                 $output = new Output\View(
-                    'internal_server_error.phtml',
+                    $options['internal_server_error_view_pointer'],
                     ['error' => $e]
                 );
-            } catch (Errors\OutputError $_) {
+            } else {
                 $output = new Output\Text((string)$e);
             }
             return new Response(500, $output);

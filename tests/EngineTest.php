@@ -43,7 +43,9 @@ class EngineTest extends TestCase
         $engine = new \Minz\Engine($router);
         $request = new \Minz\Request('GET', '/not-found');
 
-        $response = $engine->run($request);
+        $response = $engine->run($request, [
+            'not_found_view_pointer' => 'not_found.phtml',
+        ]);
 
         $this->assertSame(404, $response->code());
         $this->assertSame('not_found.phtml', $response->output()->pointer());
@@ -56,7 +58,9 @@ class EngineTest extends TestCase
         $engine = new \Minz\Engine($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
-        $response = $engine->run($request);
+        $response = $engine->run($request, [
+            'internal_server_error_view_pointer' => 'internal_server_error.phtml',
+        ]);
 
         $this->assertSame(500, $response->code());
         $this->assertSame('internal_server_error.phtml', $response->output()->pointer());
@@ -69,7 +73,9 @@ class EngineTest extends TestCase
         $engine = new \Minz\Engine($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
-        $response = $engine->run($request);
+        $response = $engine->run($request, [
+            'internal_server_error_view_pointer' => 'internal_server_error.phtml',
+        ]);
 
         $this->assertSame(500, $response->code());
         $this->assertSame('internal_server_error.phtml', $response->output()->pointer());
@@ -82,7 +88,9 @@ class EngineTest extends TestCase
         $engine = new \Minz\Engine($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
-        $response = $engine->run($request);
+        $response = $engine->run($request, [
+            'internal_server_error_view_pointer' => 'internal_server_error.phtml',
+        ]);
 
         $this->assertSame(500, $response->code());
         $this->assertSame('internal_server_error.phtml', $response->output()->pointer());
