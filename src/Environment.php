@@ -47,7 +47,7 @@ class Environment
         $url_options = Configuration::$url_options;
         session_name(Configuration::$app_name);
         $cookie_params = [
-            'lifetime' => Configuration::$session_lifetime * 24 * 60 * 60,
+            'lifetime' => 0,
             'path' => $url_options['path'],
             'secure' => $url_options['protocol'] === 'https',
             'httponly' => true,
