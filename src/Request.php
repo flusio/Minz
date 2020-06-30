@@ -132,4 +132,27 @@ class Request
             return $default;
         }
     }
+
+    /**
+     * Return the value of a cookie.
+     *
+     * Cookies must be passed during Request initialization as
+     * $headers['COOKIE'] parameter to be returned.
+     *
+     * @param string $name The name of the cookie to get
+     * @param mixed $default A default value to return if the cookie doesn't exist
+     *
+     * @return mixed
+     */
+    public function cookie($name, $default = null)
+    {
+        if (
+            isset($this->headers['COOKIE']) &&
+            isset($this->headers['COOKIE'][$name])
+        ) {
+            return $this->headers['COOKIE'][$name];
+        } else {
+            return $default;
+        }
+    }
 }

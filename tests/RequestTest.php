@@ -148,6 +148,28 @@ class RequestTest extends TestCase
         $this->assertSame('foo', $protocol);
     }
 
+    public function testCookie()
+    {
+        $request = new Request('GET', '/', [], [
+            'COOKIE' => [
+                'foo' => 'bar',
+            ],
+        ]);
+
+        $foo = $request->cookie('foo');
+
+        $this->assertSame('bar', $foo);
+    }
+
+    public function testCookieWithDefaultValue()
+    {
+        $request = new Request('GET', '/', [], []);
+
+        $foo = $request->cookie('foo', 'baz');
+
+        $this->assertSame('baz', $foo);
+    }
+
     public function requestToPathProvider()
     {
         return [

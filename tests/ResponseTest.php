@@ -119,6 +119,73 @@ class ResponseTest extends TestCase
         );
     }
 
+    public function testSetCookie()
+    {
+        $response = new Response(200);
+
+        $response->setCookie('foo', 'bar');
+
+        $cookie = $response->cookies()['foo'];
+        $this->assertSame('foo', $cookie['name']);
+        $this->assertSame('bar', $cookie['value']);
+        $this->assertSame([
+            'expires' => 0,
+            'path' => '/',
+            'secure' => false,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ], $cookie['options']);
+    }
+
+    public function testSetCookieWithExpires()
+    {
+        $response = new Response(200);
+        $expires = Time::fromNow(1, 'month')->getTimestamp();
+
+        $response->setCookie('foo', 'bar', [
+            'expires' => $expires,
+        ]);
+
+        $cookie = $response->cookies()['foo'];
+        $this->assertSame($expires, $cookie['options']['expires']);
+    }
+
+    public function testSetCookieWithProductionConfiguration()
+    {
+        $old_url_options = Configuration::$url_options;
+        Configuration::$url_options['host'] = 'mydomain.com';
+        Configuration::$url_options['protocol'] = 'https';
+        $response = new Response(200);
+
+        $response->setCookie('foo', 'bar');
+
+        Configuration::$url_options = $old_url_options;
+        $cookie = $response->cookies()['foo'];
+        $this->assertSame('foo', $cookie['name']);
+        $this->assertSame('bar', $cookie['value']);
+        $this->assertSame([
+            'expires' => 0,
+            'path' => '/',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Strict',
+            'domain' => 'mydomain.com',
+        ], $cookie['options']);
+    }
+
+    public function testRemoveCookie()
+    {
+        $response = new Response(200);
+
+        $response->removeCookie('foo');
+
+        $cookie = $response->cookies()['foo'];
+        $this->assertSame('foo', $cookie['name']);
+        $this->assertSame('', $cookie['value']);
+        $expires = $cookie['options']['expires'];
+        $this->assertTrue($expires < Time::now()->getTimestamp());
+    }
+
     public function testOk()
     {
         $response = Response::ok();

@@ -252,6 +252,9 @@ class Response
     /** @var string[] */
     private $headers = [];
 
+    /** @var array */
+    private $cookies = [];
+
     /** @var \Minz\Output\Output */
     private $output;
 
@@ -344,6 +347,80 @@ class Response
             $headers[] = "{$header}: {$header_value}";
         }
         return $headers;
+    }
+
+    /**
+     * Set a cookie to the response.
+     *
+     * Parameters are similar to setcookie PHP function but default options are
+     * more robust to improve the security.
+     *
+     * Default options are:
+     *
+     * - expires: 0
+     * - domain: the value from url_options configuration (unless if it's
+     *   localhost)
+     * - path: the value from url_options configuration
+     * - secure: true if url_options protocol is https
+     * - httponly: true
+     * - samesite: Strict
+     *
+     * Also, the cookies are not immediately sent to let the developer to
+     * choose the correct moment.
+     *
+     * @see https://www.php.net/manual/function.setcookie.php
+     *
+     * @param string $name
+     * @param string $value
+     * @param array $options
+     */
+    public function setCookie($name, $value, $options = [])
+    {
+        $url_options = Configuration::$url_options;
+        $default_options = [
+            'expires' => 0,
+            'path' => $url_options['path'],
+            'secure' => $url_options['protocol'] === 'https',
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ];
+
+        // Some browsers don't accept cookies if domain is localhost
+        // @see https://stackoverflow.com/a/1188145
+        if ($url_options['host'] !== 'localhost') {
+            $default_options['domain'] = $url_options['host'];
+        }
+
+        $this->cookies[$name] = [
+            'name' => $name,
+            'value' => $value,
+            'options' => array_merge($default_options, $options),
+        ];
+    }
+
+    /**
+     * Send instructions to the browser to remove a cookie.
+     *
+     * @param string $name
+     * @param array $options
+     */
+    public function removeCookie($name, $options = [])
+    {
+        $options['expires'] = Time::ago(1, 'year')->getTimestamp();
+        $this->setCookie($name, '', $options);
+    }
+
+    /**
+     * Return the list of cookies
+     *
+     * The cookies are represented as an array with the following keys: name,
+     * value and options. They can be passed as setcookie function arguments.
+     *
+     * @return array
+     */
+    public function cookies()
+    {
+        return $this->cookies;
     }
 
     /**
