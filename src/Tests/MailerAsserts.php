@@ -38,6 +38,17 @@ trait MailerAsserts
     }
 
     /**
+     * Assert a mailer to declare the given "from" email.
+     *
+     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
+     * @param string $from
+     */
+    public function assertEmailFrom($mailer, $from)
+    {
+        $this->assertSame($from, $mailer->From);
+    }
+
+    /**
      * Assert a mailer to declare the given "to" email.
      *
      * @param \PHPMailer\PHPMailer\PHPMailer $mailer
