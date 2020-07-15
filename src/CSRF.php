@@ -57,4 +57,25 @@ class CSRF
             return false;
         }
     }
+
+    /**
+     * Force the value of the CSRF token
+     *
+     * @param string $token
+     */
+    public function setToken($token)
+    {
+        $_SESSION['CSRF'] = $token;
+    }
+
+    /**
+     * Generate a new CSRF token
+     *
+     * @return string
+     */
+    public function resetToken()
+    {
+        unset($_SESSION['CSRF']);
+        return $this->generateToken();
+    }
 }

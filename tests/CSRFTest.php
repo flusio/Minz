@@ -92,4 +92,29 @@ class CSRFTest extends TestCase
 
         $this->assertTrue($valid);
     }
+
+    public function testSetToken()
+    {
+        $csrf = new CSRF();
+        $token = 'foo';
+
+        $csrf->setToken($token);
+
+        $valid = $csrf->validateToken($token);
+        $this->assertTrue($valid);
+    }
+
+    public function testResetToken()
+    {
+        $csrf = new CSRF();
+        $initial_token = $csrf->generateToken();
+
+        $new_token = $csrf->resetToken();
+
+        $this->assertNotSame($initial_token, $new_token);
+        $valid = $csrf->validateToken($initial_token);
+        $this->assertFalse($valid);
+        $valid = $csrf->validateToken($new_token);
+        $this->assertTrue($valid);
+    }
 }
