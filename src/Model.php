@@ -65,6 +65,17 @@ namespace Minz;
  *
  *     $errors = $my_model->validate();
  *
+ * Finally, a property can be computed from the database (e.g. to count related
+ * items for instance), in which case we might want the `fromValues()` method
+ * to load the property in the model, but `toValues()` must NOT export it
+ * because this would fail (i.e. the column doesn't exist). Such a property can
+ * be declared as the following:
+ *
+ *     'count_comments' => [
+ *         'type' => 'integer',
+ *         'computed' => true,
+ *     ]
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -76,6 +87,7 @@ class Model
         'type' => null,
         'required' => false,
         'validator' => null,
+        'computed' => false,
     ];
 
     // This is almost ISO 8601 format, only the middle T is replaced by a space
@@ -202,7 +214,7 @@ class Model
         foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
             if ($declaration['type'] === 'datetime' && $this->$property) {
                 $values[$property] = $this->$property->format($declaration['format']);
-            } else {
+            } elseif (!$declaration['computed']) {
                 $values[$property] = $this->$property;
             }
         }

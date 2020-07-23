@@ -21,6 +21,7 @@ class ModelTest extends TestCase
                 'type' => 'integer',
                 'required' => false,
                 'validator' => null,
+                'computed' => false,
             ],
         ], $property_declarations);
     }
@@ -41,22 +42,26 @@ class ModelTest extends TestCase
                 'type' => 'integer',
                 'required' => false,
                 'validator' => null,
+                'computed' => false,
             ],
             'string' => [
                 'type' => 'string',
                 'required' => false,
                 'validator' => null,
+                'computed' => false,
             ],
             'datetime' => [
                 'type' => 'datetime',
                 'required' => false,
                 'validator' => null,
+                'computed' => false,
                 'format' => Model::DATETIME_FORMAT,
             ],
             'boolean' => [
                 'type' => 'boolean',
                 'required' => false,
                 'validator' => null,
+                'computed' => false,
             ],
         ], $property_declarations);
     }
@@ -143,6 +148,16 @@ class ModelTest extends TestCase
         $values = $model->toValues();
 
         $this->assertNull($values['created_at']);
+    }
+
+    public function testToValuesWithComputedProperty()
+    {
+        $model = new models\Computed();
+        $model->computed = 42;
+
+        $values = $model->toValues();
+
+        $this->assertSame([], $values);
     }
 
     public function testFromValuesWithString()
@@ -251,6 +266,15 @@ class ModelTest extends TestCase
         $model->fromValues(['boolean' => 'not a boolean']);
 
         $this->assertSame('not a boolean', $model->boolean);
+    }
+
+    public function testFromValuesWithComputedProperty()
+    {
+        $model = new models\Computed();
+
+        $model->fromValues(['count' => '42']);
+
+        $this->assertSame(42, $model->count);
     }
 
     public function testFromValuesFailsIfUndeclaredProperty()
