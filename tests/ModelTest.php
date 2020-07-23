@@ -101,7 +101,7 @@ class ModelTest extends TestCase
 
         $values = $model->toValues();
 
-        $this->assertArrayNotHasKey('id', $values);
+        $this->assertNull($values['id']);
     }
 
     public function testToValuesWithUndeclaredProperty()
@@ -142,7 +142,7 @@ class ModelTest extends TestCase
 
         $values = $model->toValues();
 
-        $this->assertArrayNotHasKey('created_at', $values);
+        $this->assertNull($values['created_at']);
     }
 
     public function testFromValuesWithString()

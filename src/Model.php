@@ -202,7 +202,7 @@ class Model
         foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
             if ($declaration['type'] === 'datetime' && $this->$property) {
                 $values[$property] = $this->$property->format($declaration['format']);
-            } elseif ($this->$property !== null) {
+            } else {
                 $values[$property] = $this->$property;
             }
         }
