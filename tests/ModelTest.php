@@ -160,6 +160,26 @@ class ModelTest extends TestCase
         $this->assertSame([], $values);
     }
 
+    public function testToValuesWithTrueBooleanProperty()
+    {
+        $model = new models\ValidPropertyTypes();
+        $model->boolean = true;
+
+        $values = $model->toValues();
+
+        $this->assertSame(1, $values['boolean']);
+    }
+
+    public function testToValuesWithFalseBooleanProperty()
+    {
+        $model = new models\ValidPropertyTypes();
+        $model->boolean = false;
+
+        $values = $model->toValues();
+
+        $this->assertSame(0, $values['boolean']);
+    }
+
     public function testFromValuesWithString()
     {
         $model = new models\ValidPropertyTypes();
@@ -191,8 +211,7 @@ class ModelTest extends TestCase
     {
         $model = new models\ValidPropertyTypes();
 
-        // @todo check value returned by SQLite and PGSQL
-        $model->fromValues(['boolean' => 'true']);
+        $model->fromValues(['boolean' => 1]);
 
         $this->assertTrue($model->boolean);
     }
@@ -201,8 +220,7 @@ class ModelTest extends TestCase
     {
         $model = new models\ValidPropertyTypes();
 
-        // @todo check value returned by SQLite and PGSQL
-        $model->fromValues(['boolean' => 'false']);
+        $model->fromValues(['boolean' => 0]);
 
         $this->assertFalse($model->boolean);
     }

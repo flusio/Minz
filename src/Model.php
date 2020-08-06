@@ -212,9 +212,15 @@ class Model
     {
         $values = [];
         foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
+            if ($declaration['computed']) {
+                continue;
+            }
+
             if ($declaration['type'] === 'datetime' && $this->$property) {
                 $values[$property] = $this->$property->format($declaration['format']);
-            } elseif (!$declaration['computed']) {
+            } elseif ($declaration['type'] === 'boolean' && $this->$property !== null) {
+                $values[$property] = (int)$this->$property;
+            } else {
                 $values[$property] = $this->$property;
             }
         }
@@ -248,7 +254,7 @@ class Model
                 $type = $declaration['type'];
 
                 if ($type === 'integer' && filter_var($value, FILTER_VALIDATE_INT) !== false) {
-                    $value = intval($value);
+                    $value = filter_var($value, FILTER_VALIDATE_INT);
                 } elseif ($type === 'datetime' && is_string($value)) {
                     $date = date_create_from_format($declaration['format'], $value);
                     if ($date !== false) {
@@ -258,7 +264,7 @@ class Model
                     $type === 'boolean' &&
                     filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) !== null
                 ) {
-                    $value = $value === 'true';
+                    $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
                 }
             }
 
