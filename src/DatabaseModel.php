@@ -375,6 +375,42 @@ class DatabaseModel
     }
 
     /**
+     * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
+     *
+     * @throws \PDOException if there is already an active transaction.
+     *
+     * @return boolean
+     */
+    protected function beginTransaction()
+    {
+        return $this->database->beginTransaction();
+    }
+
+    /**
+     * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
+     *
+     * @throws \PDOException if there is no active transaction.
+     *
+     * @return boolean
+     */
+    protected function commit()
+    {
+        return $this->database->commit();
+    }
+
+    /**
+     * @see \PDO::rollBack https://www.php.net/manual/pdo.rollback.php
+     *
+     * @throws \PDOException if there is no active transaction.
+     *
+     * @return boolean
+     */
+    protected function rollBack()
+    {
+        return $this->database->rollBack();
+    }
+
+    /**
      * Return one (and only one) undeclared property.
      *
      * The properties must be declared in the `$properties` attribute. If
