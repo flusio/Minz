@@ -16,8 +16,26 @@ class MigratorTest extends TestCase
 
         $migrations = $migrator->migrations();
         $this->assertArrayHasKey('foo', $migrations);
-        $result = $migrations['foo']();
+        $result = $migrations['foo']['migration']();
         $this->assertTrue($result);
+    }
+
+    public function testAddMigrationAcceptsAnOptionalRollbackFunction()
+    {
+        $migrator = new Migrator();
+
+        $migrator->addMigration('foo', function () {
+            return 'returned by migration';
+        }, function () {
+            return 'returned by rollback';
+        });
+
+        $migrations = $migrator->migrations();
+        $this->assertArrayHasKey('foo', $migrations);
+        $result = $migrations['foo']['migration']();
+        $this->assertSame('returned by migration', $result);
+        $result = $migrations['foo']['rollback']();
+        $this->assertSame('returned by rollback', $result);
     }
 
     public function testAddMigrationFailsIfUncallableMigration()
@@ -188,6 +206,170 @@ class MigratorTest extends TestCase
         $this->assertNull($migrator->version());
         $this->assertSame([
             'foo' => 'Oops, it failed.',
+        ], $result);
+    }
+
+    public function testRollback()
+    {
+        $migrator = new Migrator();
+        $spy = false;
+        $migrator->addMigration('foo', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = true;
+            return true;
+        });
+        $migrator->migrate();
+
+        $this->assertSame('foo', $migrator->version());
+
+        $result = $migrator->rollback(1);
+
+        $this->assertTrue($spy);
+        $this->assertNull($migrator->version());
+        $this->assertSame([
+            'foo' => true,
+        ], $result);
+    }
+
+    public function testRollbackStopsAfterMaxSteps()
+    {
+        $migrator = new Migrator();
+        $spy = '';
+        $migrator->addMigration('foo1', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo1';
+            return true;
+        });
+        $migrator->addMigration('foo2', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo2';
+            return true;
+        });
+        $migrator->addMigration('foo3', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo3';
+            return true;
+        });
+        $migrator->migrate();
+
+        $result = $migrator->rollback(2);
+
+        $this->assertSame('foo2', $spy);
+        $this->assertSame('foo1', $migrator->version());
+        $this->assertSame([
+            'foo3' => true,
+            'foo2' => true,
+        ], $result);
+    }
+
+    public function testRollbackStartsFromCurrentVersion()
+    {
+        $migrator = new Migrator();
+        $spy = false;
+        $migrator->addMigration('foo1', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo1';
+            return true;
+        });
+        $migrator->addMigration('foo2', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo2';
+            return true;
+        });
+        $migrator->setVersion('foo1');
+
+        $result = $migrator->rollback(1);
+
+        $this->assertSame('foo1', $spy);
+        $this->assertNull($migrator->version());
+        $this->assertSame([
+            'foo1' => true,
+        ], $result);
+    }
+
+    public function testRollbackDoesNothingIfVersionIsNull()
+    {
+        $migrator = new Migrator();
+        $spy = false;
+        $migrator->addMigration('foo', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = true;
+            return true;
+        });
+
+        $this->assertNull($migrator->version());
+
+        $result = $migrator->rollback(1);
+
+        $this->assertFalse($spy);
+        $this->assertNull($migrator->version());
+        $this->assertSame([], $result);
+    }
+
+    public function testRollbackWithCallbackReturningFalseDoesNotExecuteNextRollback()
+    {
+        $migrator = new Migrator();
+        $migrator->addMigration('foo1', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo1';
+            return true;
+        });
+        $migrator->addMigration('foo2', function () {
+            return true;
+        }, function () use (&$spy) {
+            $spy = 'foo2';
+            return false;
+        });
+        $migrator->migrate();
+
+        $result = $migrator->rollback(2);
+
+        $this->assertSame('foo2', $spy);
+        $this->assertSame('foo2', $migrator->version());
+        $this->assertSame([
+            'foo2' => false,
+        ], $result);
+    }
+
+    public function testRollbackWithFailingCallback()
+    {
+        $migrator = new Migrator();
+        $migrator->addMigration('foo', function () {
+            return true;
+        }, function () use (&$spy) {
+            throw new \Exception('Oops, it failed.');
+        });
+        $migrator->migrate();
+
+        $result = $migrator->rollback(1);
+
+        $this->assertSame('foo', $migrator->version());
+        $this->assertSame([
+            'foo' => 'Oops, it failed.',
+        ], $result);
+    }
+
+    public function testRollbackWithNoCallback()
+    {
+        $migrator = new Migrator();
+        $migrator->addMigration('foo', function () {
+            return true;
+        });
+        $migrator->migrate();
+
+        $result = $migrator->rollback(1);
+
+        $this->assertSame('foo', $migrator->version());
+        $this->assertSame([
+            'foo' => 'No rollback!',
         ], $result);
     }
 

@@ -12,4 +12,12 @@ class Migration_20191222_225428_Bar
     {
         return true;
     }
+
+    /**
+     * @return boolean true if the rollback was successful, false otherwise
+     */
+    public function rollback()
+    {
+        return true;
+    }
 }
