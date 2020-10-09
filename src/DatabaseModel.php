@@ -200,6 +200,8 @@ class DatabaseModel
                 $question_marks = array_fill(0, count($parameter), '?');
                 $in_statement = implode(',', $question_marks);
                 $where_statement_as_array[] = "{$property} IN ({$in_statement})";
+            } elseif ($parameter === null) {
+                $where_statement_as_array[] = "{$property} IS NULL";
             } else {
                 $parameters[] = $parameter;
                 $where_statement_as_array[] = "{$property} = ?";
