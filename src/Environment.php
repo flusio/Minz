@@ -41,8 +41,11 @@ class Environment
 
     /**
      * Set the session name to the app name, and start the session.
+     *
+     * @param string $samesite Either Lax, Strict or None (default is "Lax")
+     * @see https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
      */
-    public static function startSession()
+    public static function startSession($samesite = 'Lax')
     {
         $url_options = Configuration::$url_options;
         session_name(Configuration::$app_name);
@@ -51,7 +54,7 @@ class Environment
             'path' => $url_options['path'],
             'secure' => $url_options['protocol'] === 'https',
             'httponly' => true,
-            'samesite' => 'Strict',
+            'samesite' => $samesite,
         ];
 
         // Some browsers don't accept cookies if domain is localhost
