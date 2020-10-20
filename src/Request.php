@@ -34,8 +34,6 @@ class Request
     public function __construct($method, $uri, $parameters = [], $headers = [])
     {
         $method = strtolower($method);
-        $uri_components = parse_url($uri);
-
         if (!in_array($method, Router::VALID_VIAS)) {
             $vias_as_string = implode(', ', Router::VALID_VIAS);
             throw new Errors\RequestError(
@@ -43,12 +41,46 @@ class Request
             );
         }
 
-        if (!$uri_components || !$uri_components['path']) {
-            throw new Errors\RequestError("{$uri} URI path cannot be parsed.");
+        if (!$uri) {
+            throw new Errors\RequestError('URI cannot be empty.');
         }
 
-        if ($uri_components['path'][0] !== '/') {
-            throw new Errors\RequestError("{$uri} URI path must start with a slash.");
+        if ($uri[0] === '/') {
+            // parse_url() has issues to parse URLs starting with multiple
+            // leading slashes:
+            // - it considers legitimately "foo" is the domain in "//foo", but
+            //   it's very unlikely that the server will pass such a domain
+            //   without expliciting the protocol;
+            // - it simply fails for URLs starting with 3 slashes or more.
+            // For these reasons, we consider all URIs starting by a slash to
+            // be a path and we remove query and hash manually.
+            $path = $uri;
+            $pos_query = strpos($path, '?');
+            if ($pos_query !== false) {
+                $path = substr($path, 0, $pos_query);
+            }
+            $pos_hash = strpos($path, '#');
+            if ($pos_hash !== false) {
+                $path = substr($path, 0, $pos_hash);
+            }
+        } else {
+            // In other cases, the URI probably contains the protocol and
+            // domain, so we let parse_url to do its job.
+            $uri_components = parse_url($uri);
+
+            if (!$uri_components) {
+                throw new Errors\RequestError("{$uri} URI path cannot be parsed.");
+            }
+
+            if (empty($uri_components['path'])) {
+                $path = '/';
+            } else {
+                $path = $uri_components['path'];
+            }
+
+            if ($path[0] !== '/') {
+                throw new Errors\RequestError("{$uri} URI path must start with a slash.");
+            }
         }
 
         if (!is_array($parameters)) {
@@ -56,7 +88,7 @@ class Request
         }
 
         $this->method = $method;
-        $this->path = $uri_components['path'];
+        $this->path = $path;
         $this->parameters = $parameters;
         $this->headers = $headers;
     }

@@ -20,14 +20,23 @@ class RequestTest extends TestCase
     }
 
     /**
-     * @dataProvider invalidUriProvider
+     * @dataProvider emptyUriProvider
      */
-    public function testConstructorFailsIfInvalidUri($invalidUri)
+    public function testConstructorFailsIfUriIsEmpty($empty_uri)
     {
         $this->expectException(Errors\RequestError::class);
-        $this->expectExceptionMessage("{$invalidUri} URI path cannot be parsed.");
+        $this->expectExceptionMessage('URI cannot be empty.');
 
-        new Request('GET', $invalidUri);
+        new Request('GET', $empty_uri);
+    }
+
+    public function testConstructorFailsIfUriIsInvalid()
+    {
+        $invalid_uri = 'http:///';
+        $this->expectException(Errors\RequestError::class);
+        $this->expectExceptionMessage("{$invalid_uri} URI path cannot be parsed.");
+
+        new Request('GET', $invalid_uri);
     }
 
     public function testConstructorFailsIfUriPathDoesntStartWithSlash()
@@ -175,8 +184,18 @@ class RequestTest extends TestCase
         return [
             ['/', '/'],
             ['/rabbits', '/rabbits'],
+            ['//rabbits', '//rabbits'],
+            ['///rabbits', '///rabbits'],
             ['/rabbits/details.html', '/rabbits/details.html'],
+            ['/rabbits//details.html', '/rabbits//details.html'],
             ['/rabbits?id=42', '/rabbits'],
+            ['/rabbits#hash', '/rabbits'],
+            ['http://domain.com', '/'],
+            ['http://domain.com/', '/'],
+            ['http://domain.com/rabbits', '/rabbits'],
+            ['http://domain.com//rabbits', '//rabbits'],
+            ['http://domain.com/rabbits?id=42', '/rabbits'],
+            ['http://domain.com/rabbits#hash', '/rabbits'],
         ];
     }
 
@@ -191,12 +210,11 @@ class RequestTest extends TestCase
         ];
     }
 
-    public function invalidUriProvider()
+    public function emptyUriProvider()
     {
         return [
             [''],
             [null],
-            ['/////'],
         ];
     }
 }
