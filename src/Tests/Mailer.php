@@ -22,7 +22,7 @@ class Mailer
      */
     public static function store($phpmailer)
     {
-        self::$emails[] = $phpmailer;
+        self::$emails[] = clone($phpmailer);
     }
 
     /**

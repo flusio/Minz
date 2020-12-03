@@ -6,6 +6,16 @@ use PHPUnit\Framework\TestCase;
 
 class MailerTest extends TestCase
 {
+    use Tests\MailerAsserts;
+
+    /**
+     * @before
+     */
+    public function resetTestMailer()
+    {
+        Tests\Mailer::clear();
+    }
+
     public function testDefaultConfiguration()
     {
         $mailer = new Mailer();
@@ -17,8 +27,9 @@ class MailerTest extends TestCase
         $this->assertSame('mail', $phpmailer->Mailer);
     }
 
-    public function testConfigurationWithSMTP()
+    public function testConfigurationWithSmtp()
     {
+        $initial_config_mailer = Configuration::$mailer;
         Configuration::$mailer['type'] = 'smtp';
         Configuration::$mailer['smtp'] = [
             'domain' => 'example.org',
@@ -32,6 +43,8 @@ class MailerTest extends TestCase
         ];
 
         $mailer = new Mailer();
+
+        Configuration::$mailer = $initial_config_mailer;
 
         $phpmailer = $mailer->mailer;
         $this->assertSame('smtp', $phpmailer->Mailer);
@@ -62,5 +75,51 @@ class MailerTest extends TestCase
         $this->assertStringContainsString('Pompom', $phpmailer->AltBody);
         $this->assertSame('utf-8', $phpmailer->CharSet);
         $this->assertSame('text/html', $phpmailer->ContentType);
+    }
+
+    public function testSend()
+    {
+        $mailer = new Mailer();
+        $mailer->setBody(
+            'rabbits/items.phtml',
+            'rabbits/items.txt',
+            [
+                'rabbits' => ['Pompom'],
+            ]
+        );
+
+        $this->assertEmailsCount(0);
+
+        $result = $mailer->send('joe@doe.com', 'The subject');
+
+        $this->assertTrue($result);
+        $this->assertEmailsCount(1);
+        $email_sent = \Minz\Tests\Mailer::take(0);
+        $this->assertEmailSubject($email_sent, 'The subject');
+        $this->assertEmailEqualsTo($email_sent, ['joe@doe.com']);
+        $this->assertEmailContainsBody($email_sent, 'Pompom');
+    }
+
+    public function testSendClearAddressesBetweenTwoSend()
+    {
+        $mailer = new Mailer();
+        $mailer->setBody(
+            'rabbits/items.phtml',
+            'rabbits/items.txt',
+            [
+                'rabbits' => ['Pompom'],
+            ]
+        );
+
+        $this->assertEmailsCount(0);
+
+        $mailer->send('joe@doe.com', 'The subject');
+        $mailer->send('jane@doe.com', 'The subject');
+
+        $this->assertEmailsCount(2);
+        $email_sent_1 = \Minz\Tests\Mailer::take(0);
+        $this->assertEmailEqualsTo($email_sent_1, ['joe@doe.com']);
+        $email_sent_2 = \Minz\Tests\Mailer::take(1);
+        $this->assertEmailEqualsTo($email_sent_2, ['jane@doe.com']);
     }
 }

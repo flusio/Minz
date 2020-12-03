@@ -85,6 +85,7 @@ class Mailer
     public function send($to, $subject)
     {
         try {
+            $this->mailer->clearAddresses();
             $this->mailer->addAddress($to);
             $this->mailer->Subject = $subject;
             if (Configuration::$mailer['type'] === 'test') {

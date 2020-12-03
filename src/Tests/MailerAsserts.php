@@ -54,9 +54,26 @@ trait MailerAsserts
      * @param \PHPMailer\PHPMailer\PHPMailer $mailer
      * @param string $to
      */
+    public function assertEmailEqualsTo($mailer, $to)
+    {
+        $to_addresses = array_map(function ($address_array) {
+            return $address_array[0];
+        }, $mailer->getToAddresses());
+        $this->assertEquals($to, $to_addresses);
+    }
+
+    /**
+     * Assert a mailer to contain the given "to" email.
+     *
+     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
+     * @param string $to
+     */
     public function assertEmailContainsTo($mailer, $to)
     {
-        $this->assertContains($to, $mailer->getToAddresses()[0]);
+        $to_addresses = array_map(function ($address_array) {
+            return $address_array[0];
+        }, $mailer->getToAddresses());
+        $this->assertContains($to, $to_addresses);
     }
 
     /**
