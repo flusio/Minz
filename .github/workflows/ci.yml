@@ -1,0 +1,57 @@
+name: Continuous Integration
+
+on: push
+
+env:
+    APP_ENVIRONMENT: test
+    DB_HOST: localhost
+    DB_USERNAME: postgres
+    DB_PASSWORD: postgres
+    COVERAGE: --coverage-text
+
+jobs:
+    build:
+        name: PHP ${{ matrix.php-versions }} CI on ${{ matrix.operating-system }}
+
+        runs-on: ${{ matrix.operating-system }}
+
+        strategy:
+            matrix:
+                operating-system: [ubuntu-latest]
+                php-versions: ['7.2', '7.3', '7.4']
+
+        services:
+            postgres:
+                image: postgres:12-alpine
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: minz_test
+                ports:
+                    - 5432/tcp
+                options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
+
+        steps:
+        - uses: actions/checkout@v2
+          with:
+              submodules: true
+
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+              php-version: ${{ matrix.php-versions }}
+              coverage: xdebug
+              extensions: pdo, pdo_pgsql
+
+        - name: Run the linters
+          run: make lint
+
+        - name: Run the test suite (SQLite)
+          run: make test
+          env:
+              DB_DSN: 'sqlite::memory:'
+
+        - name: Run the test suite (PGSQL)
+          run: make test
+          env:
+              DB_DSN: pgsql:host=localhost;dbname=minz_test;port=${{ job.services.postgres.ports[5432] }}
