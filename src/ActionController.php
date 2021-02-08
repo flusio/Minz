@@ -83,7 +83,10 @@ class ActionController
 
         $response = $controller->$action($request);
 
-        if (!($response instanceof Response)) {
+        // Response can be yield, but in this case, its up to the developer to
+        // check what is yield. I would not recommend to use that (it's not
+        // even tested!), but eh, it can be convenient :)
+        if (!($response instanceof Response) && !($response instanceof \Generator)) {
             throw new Errors\ActionError(
                 "{$action} action in {$this->controller_name} controller does not return a Response."
             );
