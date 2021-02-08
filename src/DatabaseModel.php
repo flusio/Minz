@@ -339,6 +339,20 @@ class DatabaseModel
     }
 
     /**
+     * Call exec method on a database object.
+     *
+     * @param string $sql_statement
+     *
+     * @throws \PDOException if an error occured in the SQL syntax
+     *
+     * @return \PDOStatement
+     */
+    protected function exec($sql_statement)
+    {
+        return $this->database->exec($sql_statement);
+    }
+
+    /**
      * Call prepare method on a database object.
      *
      * @param string $sql_statement
