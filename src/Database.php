@@ -2,23 +2,45 @@
 
 namespace Minz;
 
-class Database extends \PDO
+/**
+ * Handle the database requests.
+ *
+ * @author Marien Fressinaud <dev@marienfressinaud.fr>
+ * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
+ */
+class Database
 {
     /** @var \Minz\Database */
     private static $instance;
 
+    /** @var \PDO */
+    private $pdo_connection;
+
     /**
-     * Return an instance of Database.
+     * Initialize a database. Note it is private, you must use `\Minz\Database::get`
+     * to get an instance.
      *
-     * @param boolean $with_dbname Indicates if dbname must be included in the DSN
-     *                             (it has no effects with SQLite)
+     * @param boolean $connect_to_db
+     *     Indicates if the connection must be done on the database. Else, the
+     *     dbname will not be included in the DSN. It is useful if you need to
+     *     drop or create a database. It has no effects with SQLite.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occured during initialization
-     *
-     * @return \Minz\Database
      */
-    public static function get($with_dbname = true)
+    private function __construct($connect_to_db = true)
+    {
+        $this->connect_to_db = $connect_to_db;
+        $this->start();
+    }
+
+    /**
+     * Start the PDO connection.
+     *
+     * @throws \Minz\Errors\DatabaseError if database is not configured
+     * @throws \Minz\Errors\DatabaseError if an error occured during initialization
+     */
+    public function start()
     {
         $database_configuration = Configuration::$database;
         if (!$database_configuration) {
@@ -27,12 +49,177 @@ class Database extends \PDO
             );
         }
 
+        $dsn = self::buildDsn($database_configuration, $this->connect_to_db);
+        $username = $database_configuration['username'];
+        $password = $database_configuration['password'];
+        $options = $database_configuration['options'];
+        $database_type = strstr($dsn, ':', true);
+
+        // Force some options values
+        $options[\PDO::ATTR_DEFAULT_FETCH_MODE] = \PDO::FETCH_ASSOC;
+        $options[\PDO::ATTR_EMULATE_PREPARES] = false;
+        $options[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
+
+        try {
+            $this->pdo_connection = new \PDO($dsn, $username, $password, $options);
+            if ($database_type === 'sqlite') {
+                $this->pdo_connection->exec('PRAGMA foreign_keys = ON;');
+            }
+        } catch (\PDOException $e) {
+            throw new Errors\DatabaseError(
+                "An error occured during database initialization: {$e->getMessage()}."
+            );
+        }
+    }
+
+    /**
+     * Close the PDO connection.
+     */
+    public function close()
+    {
+        // When unassigning a PDO object, it closes the connection to the
+        // database.
+        $this->pdo_connection = null;
+    }
+
+    /**
+     * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
+     */
+    public function beginTransaction()
+    {
+        return $this->pdoCall('beginTransaction');
+    }
+
+    /**
+     * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
+     */
+    public function commit()
+    {
+        return $this->pdoCall('commit');
+    }
+
+    /**
+     * @see \PDO::errorCode https://www.php.net/manual/pdo.errorcode.php
+     */
+    public function errorCode()
+    {
+        return $this->pdoCall('errorCode');
+    }
+
+    /**
+     * @see \PDO::errorInfo https://www.php.net/manual/pdo.errorinfo.php
+     */
+    public function errorInfo()
+    {
+        return $this->pdoCall('errorInfo');
+    }
+
+    /**
+     * @see \PDO::exec() https://www.php.net/manual/pdo.exec.php
+     */
+    public function exec($sql_statement)
+    {
+        return $this->pdoCall('exec', $sql_statement);
+    }
+
+    /**
+     * @see \PDO::getAttribute() https://www.php.net/manual/pdo.getattribute.php
+     */
+    public function getAttribute($attribute)
+    {
+        return $this->pdoCall('getAttribute', $attribute);
+    }
+
+    /**
+     * @see \PDO::inTransaction() https://www.php.net/manual/pdo.intransaction.php
+     */
+    public function inTransaction()
+    {
+        return $this->pdoCall('inTransaction', $sql_statement);
+    }
+
+    /**
+     * @see \PDO::lastInsertId() https://www.php.net/manual/pdo.lastinsertid.php
+     */
+    public function lastInsertId()
+    {
+        return $this->pdoCall('lastInsertId');
+    }
+
+    /**
+     * @see \PDO::prepare() https://www.php.net/manual/pdo.prepare.php
+     */
+    public function prepare($sql_statement)
+    {
+        return $this->pdoCall('prepare', $sql_statement);
+    }
+
+    /**
+     * @see \PDO::query() https://www.php.net/manual/pdo.query.php
+     */
+    public function query($sql_statement)
+    {
+        return $this->pdoCall('query', $sql_statement);
+    }
+
+    /**
+     * @see \PDO::quote https://www.php.net/manual/pdo.quote.php
+     */
+    public function quote($string, $parameter_type = \PDO::PARAM_STR)
+    {
+        return $this->pdoCall('quote', $string, $parameter_type);
+    }
+
+    /**
+     * @see \PDO::rollBack https://www.php.net/manual/pdo.rollback.php
+     */
+    public function rollBack()
+    {
+        return $this->pdoCall('rollBack');
+    }
+
+    /**
+     * @see \PDO::setAttribute() https://www.php.net/manual/pdo.setattribute.php
+     */
+    public function setAttribute($attribute, $value)
+    {
+        return $this->pdoCall('setAttribute', $attribute, $value);
+    }
+
+    /**
+     * Transfer method calls to the PDO connection. It starts the connection if
+     * it has been stopped.
+     *
+     * @param string $name Method name to transfer
+     * @param mixed $arguments,... Arguments to pass to the method
+     *
+     * @return mixed
+     */
+    public function pdoCall($name, ...$arguments)
+    {
+        if (!$this->pdo_connection) {
+            $this->start();
+        }
+
+        if (!is_callable([$this->pdo_connection, $name])) {
+            throw new BadMethodCallException('Call to undefined method ' . get_called_class() . '::' . $name);
+        }
+
+        return $this->pdo_connection->$name(...$arguments);
+    }
+
+    /**
+     * Return an instance of Database.
+     *
+     * @throws \Minz\Errors\DatabaseError if database is not configured
+     * @throws \Minz\Errors\DatabaseError if an error occured during initialization
+     *
+     * @return \Minz\Database
+     */
+    public static function get()
+    {
         if (!self::$instance) {
-            $dsn = self::buildDsn($database_configuration, $with_dbname);
-            $username = $database_configuration['username'];
-            $password = $database_configuration['password'];
-            $options = $database_configuration['options'];
-            self::$instance = new self($dsn, $username, $password, $options);
+            self::$instance = new self();
         }
 
         return self::$instance;
@@ -40,9 +227,6 @@ class Database extends \PDO
 
     /**
      * Drop the entire database. Hell yeah!
-     *
-     * It's useful for tests. Take care of getting a new database object after
-     * calling this method.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on drop
@@ -58,9 +242,13 @@ class Database extends \PDO
             );
         }
 
-        $database_type = $database_configuration['type'];
-        self::$instance = null;
+        if (self::$instance) {
+            // We'll drop the database, so we must be sure the current
+            // connection is closed
+            self::$instance->close();
+        }
 
+        $database_type = $database_configuration['type'];
         if ($database_type === 'sqlite') {
             $database_path = $database_configuration['path'];
             if ($database_path === ':memory:') {
@@ -69,21 +257,9 @@ class Database extends \PDO
                 return @unlink($database_path);
             }
         } elseif ($database_type === 'pgsql') {
-            $dsn = self::buildDsn($database_configuration, false);
-            $username = $database_configuration['username'];
-            $password = $database_configuration['password'];
-            $options = $database_configuration['options'];
-
-            $pdo = new self($dsn, $username, $password, $options);
-            $result = $pdo->exec("DROP DATABASE IF EXISTS {$database_configuration['dbname']}");
-
-            if ($result === false) {
-                $error_info = $pdo->errorInfo();
-                throw new Errors\DatabaseError(
-                    "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
-                );
-            }
-
+            $database = new self(false);
+            $result = $database->exec("DROP DATABASE IF EXISTS {$database_configuration['dbname']}");
+            $database->close();
             return true;
         } else {
             return false;
@@ -92,9 +268,6 @@ class Database extends \PDO
 
     /**
      * Create a database.
-     *
-     * It's useful for tests. Take care of getting a new database object after
-     * calling this method.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on create
@@ -111,8 +284,6 @@ class Database extends \PDO
         }
 
         $database_type = $database_configuration['type'];
-        self::$instance = null;
-
         if ($database_type === 'sqlite') {
             $database_path = $database_configuration['path'];
             if ($database_path === ':memory:') {
@@ -121,21 +292,9 @@ class Database extends \PDO
                 return @touch($database_path);
             }
         } elseif ($database_type === 'pgsql') {
-            $dsn = self::buildDsn($database_configuration, false);
-            $username = $database_configuration['username'];
-            $password = $database_configuration['password'];
-            $options = $database_configuration['options'];
-
-            $pdo = new self($dsn, $username, $password, $options);
-            $result = $pdo->exec("CREATE DATABASE {$database_configuration['dbname']} ENCODING 'UTF8'");
-
-            if ($result === false) {
-                $error_info = $pdo->errorInfo();
-                throw new Errors\DatabaseError(
-                    "Error in SQL statement: {$error_info[2]} ({$error_info[0]})."
-                );
-            }
-
+            $database = new self(false);
+            $result = $database->exec("CREATE DATABASE {$database_configuration['dbname']} ENCODING 'UTF8'");
+            $database->close();
             return true;
         } else {
             return false;
@@ -150,8 +309,6 @@ class Database extends \PDO
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on create
-     *
-     * @return boolean Return true if the database was created, false otherwise
      */
     public static function reset()
     {
@@ -186,36 +343,19 @@ class Database extends \PDO
     }
 
     /**
-     * Initialize a PDO database.
+     * Reset the Database instance.
      *
-     * @see \PDO
+     * You must probably DON'T want to use this method: it's only useful to
+     * test the `get()` method.
      *
-     * @param string $dsn
-     * @param string $username (optional if sqlite)
-     * @param string $password (optional if sqlite)
-     * @param array $options (optional)
-     *
-     * @throws \Minz\Errors\DatabaseError if an error occured during initialization
+     * It tries to stop the PDO connection as well, but it seems it doesn't
+     * work because I unassign the instance just after. Damn you PDO!
      */
-    private function __construct($dsn, $username = null, $password = null, $options = [])
+    public static function resetInstance()
     {
-        $database_type = strstr($dsn, ':', true);
-
-        // Force some options values
-        $options[\PDO::ATTR_DEFAULT_FETCH_MODE] = \PDO::FETCH_ASSOC;
-        $options[\PDO::ATTR_EMULATE_PREPARES] = false;
-        $options[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
-
-        try {
-            parent::__construct($dsn, $username, $password, $options);
-
-            if ($database_type === 'sqlite') {
-                $this->exec('PRAGMA foreign_keys = ON;');
-            }
-        } catch (\PDOException $e) {
-            throw new Errors\DatabaseError(
-                "An error occured during database initialization: {$e->getMessage()}."
-            );
+        if (self::$instance) {
+            self::$instance->close();
+            self::$instance = null;
         }
     }
 }

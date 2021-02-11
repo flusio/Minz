@@ -21,13 +21,13 @@ class DatabaseTest extends TestCase
 
     public function testGetWithSqlite()
     {
+        Database::resetInstance();
         Configuration::$database['type'] = 'sqlite';
         Configuration::$database['path'] = ':memory:';
 
         $database = Database::get();
 
         $foreign_keys_pragma = $database->query('PRAGMA foreign_keys')->fetchColumn();
-        $this->assertInstanceOf(\PDO::class, $database);
         $this->assertSame('sqlite', $database->getAttribute(\PDO::ATTR_DRIVER_NAME));
         $this->assertSame(
             \PDO::FETCH_ASSOC,
@@ -38,6 +38,7 @@ class DatabaseTest extends TestCase
 
     public function testGetAlwaysReturnSameInstance()
     {
+        Database::resetInstance();
         $initial_database = Database::get();
 
         $database = Database::get();
@@ -47,6 +48,7 @@ class DatabaseTest extends TestCase
 
     public function testGetFailsIfDatabaseIsntConfigured()
     {
+        Database::resetInstance();
         $this->expectException(Errors\DatabaseError::class);
         $this->expectExceptionMessage(
             'The database is not set in the configuration file.'
@@ -59,6 +61,7 @@ class DatabaseTest extends TestCase
 
     public function testConstructorFailsIfDatabaseIsBadlyConfigured()
     {
+        Database::resetInstance();
         $this->expectException(Errors\DatabaseError::class);
         $this->expectExceptionMessage(
             'An error occured during database initialization: invalid data source name.'
@@ -96,7 +99,6 @@ SQL;
         $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
         $table = $statement->fetchColumn();
         $this->assertTrue($result);
-        $this->assertNotSame($database, $new_database);
         $this->assertFalse($table);
     }
 
@@ -125,7 +127,6 @@ SQL;
         $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
         $table = $statement->fetchColumn();
         $this->assertTrue($result);
-        $this->assertNotSame($database, $new_database);
         $this->assertFalse($table);
     }
 
