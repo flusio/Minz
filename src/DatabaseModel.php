@@ -449,6 +449,30 @@ class DatabaseModel
     }
 
     /**
+     * @return string
+     */
+    public function tableName()
+    {
+        return $this->table_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function primaryKeyName()
+    {
+        return $this->primary_key_name;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function properties()
+    {
+        return $this->properties;
+    }
+
+    /**
      * @throws \Minz\DatabaseModelError if the table name is invalid
      */
     private function setTableName($table_name)
