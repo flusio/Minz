@@ -185,7 +185,7 @@ class View implements Output
      *
      * It must be called from within the view file directly.
      *
-     * @param string $layout_name The name of the file under src/_layouts/
+     * @param string $layout_name The name of the file under src/views/_layouts/
      * @param mixed[] $layout_variables A list of variables to pass to the layout
      *
      * @throws \Minz\Errors\OutputError if the layout file doesn't exist
@@ -208,6 +208,22 @@ class View implements Output
 
         $this->layout_name = $layout_name;
         $this->layout_variables = $layout_variables;
+    }
+
+    /**
+     * Render a subview inside current view
+     *
+     * It must be called from within the view file directly.
+     *
+     * @param string $name The name of the file under src/views/
+     * @param mixed[] $variables A list of variables to pass to the included view
+     *
+     * @throws \Minz\Errors\OutputError if the included pointer file doesn't exist
+     */
+    private function include($pointer, $variables)
+    {
+        $view = new View($pointer, $variables);
+        return $view->render();
     }
 
     /**
