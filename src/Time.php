@@ -27,7 +27,24 @@ class Time
     }
 
     /**
-     * Return a timestamp from the future.
+     * Return a datetime relative to now()
+     *
+     * @see https://www.php.net/manual/datetime.modify.php
+     * @see https://www.php.net/manual/datetime.formats.relative.php
+     *
+     * @param string $modifier
+     *
+     * @return \DateTime
+     */
+    public static function relative($modifier)
+    {
+        $datetime = self::now();
+        $datetime->modify($modifier);
+        return $datetime;
+    }
+
+    /**
+     * Return a datetime from the future.
      *
      * @see https://www.php.net/manual/en/datetime.formats.relative.php
      *
@@ -38,13 +55,11 @@ class Time
      */
     public static function fromNow($number, $unit)
     {
-        $from_now = self::now();
-        $from_now->modify("+{$number} {$unit}");
-        return $from_now;
+        return self::relative("+{$number} {$unit}");
     }
 
     /**
-     * Return a timestamp from the past.
+     * Return a datetime from the past.
      *
      * @see https://www.php.net/manual/en/datetime.formats.relative.php
      *
@@ -55,19 +70,17 @@ class Time
      */
     public static function ago($number, $unit)
     {
-        $ago = self::now();
-        $ago->modify("-{$number} {$unit}");
-        return $ago;
+        return self::relative("-{$number} {$unit}");
     }
 
     /**
-     * Freeze the time at a given timestamp.
+     * Freeze the time at a given datetime (can also be a timestamp)
      *
-     * @param \DateTime|integer $timestamp
+     * @param \DateTime|integer $datetime
      */
-    public static function freeze($timestamp)
+    public static function freeze($datetime)
     {
-        self::$freezed_timestamp = $timestamp;
+        self::$freezed_timestamp = $datetime;
     }
 
     /**
