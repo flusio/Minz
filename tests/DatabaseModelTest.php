@@ -442,4 +442,16 @@ class DatabaseModelTest extends TestCase
 
         $this->assertSame(0, $dao->count());
     }
+
+    public function testDeleteAll()
+    {
+        $dao = new models\dao\Friend();
+        $id_1 = $dao->create(['name' => 'Joël']);
+        $id_2 = $dao->create(['name' => 'Pat']);
+        $this->assertSame(2, $dao->count());
+
+        $dao->deleteAll();
+
+        $this->assertSame(0, $dao->count());
+    }
 }

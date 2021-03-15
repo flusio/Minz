@@ -287,6 +287,18 @@ class DatabaseModel
     }
 
     /**
+     * Delete all rows.
+     *
+     * @throws \PDOException if an error occured in the SQL syntax
+     *
+     * @return integer The number of deleted rows.
+     */
+    public function deleteAll()
+    {
+        return $this->exec("DELETE FROM {$this->table_name}");
+    }
+
+    /**
      * Delete a row.
      *
      * @param integer|string $primary_key The value of the row's primary key to delete
