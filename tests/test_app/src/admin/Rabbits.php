@@ -14,7 +14,7 @@ class Rabbits
             'Jean-Jean',
         ];
 
-        return Response::ok('rabbits/items.phtml', [
+        return Response::ok('admin/rabbits/items.phtml', [
             'rabbits' => $rabbits,
         ]);
     }

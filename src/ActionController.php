@@ -16,19 +16,31 @@ namespace Minz;
 class ActionController
 {
     /** @var string */
+    private $controller_namespace;
+
+    /** @var string */
     private $controller_name;
 
     /** @var string */
     private $action_name;
 
     /**
-     * @param string $to A string representation of controller#action
+     * @param string $to
+     *     A string representation of controller#action
+     * @param string $namespace
+     *     Namespace where to find the controller (default is \$app_name)
      */
-    public function __construct($to)
+    public function __construct($to, $namespace = null)
     {
         list($controller_name, $action_name) = explode('#', $to);
         $controller_name = str_replace('/', '\\', $controller_name);
 
+        if ($namespace === null) {
+            $app_name = Configuration::$app_name;
+            $namespace = "\\{$app_name}";
+        }
+
+        $this->controller_namespace = $namespace;
         $this->controller_name = $controller_name;
         $this->action_name = $action_name;
     }
@@ -64,7 +76,7 @@ class ActionController
     public function execute($request)
     {
         $app_name = Configuration::$app_name;
-        $namespaced_controller = "\\{$app_name}\\{$this->controller_name}";
+        $namespaced_controller = "{$this->controller_namespace}\\{$this->controller_name}";
         $action = $this->action_name;
 
         try {

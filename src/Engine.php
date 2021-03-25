@@ -70,7 +70,8 @@ class Engine
         }
 
         try {
-            $action_controller = new ActionController($to);
+            $namespace = $options['controller_namespace'] ?? null;
+            $action_controller = new ActionController($to, $namespace);
             return $action_controller->execute($request);
         } catch (\Exception $e) {
             Log::error((string)$e);

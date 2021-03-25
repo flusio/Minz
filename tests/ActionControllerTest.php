@@ -39,7 +39,18 @@ class ActionControllerTest extends TestCase
         $response = $action_controller->execute($request);
 
         $this->assertSame(200, $response->code());
-        $this->assertSame('rabbits/items.phtml', $response->output()->pointer());
+        $this->assertSame('admin/rabbits/items.phtml', $response->output()->pointer());
+    }
+
+    public function testExecuteWithNamespace()
+    {
+        $request = new Request('GET', '/');
+        $action_controller = new ActionController('Rabbits#items', '\\AppTest\\admin');
+
+        $response = $action_controller->execute($request);
+
+        $this->assertSame(200, $response->code());
+        $this->assertSame('admin/rabbits/items.phtml', $response->output()->pointer());
     }
 
     public function testExecuteFailsIfControllerDoesntExist()
