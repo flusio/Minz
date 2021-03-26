@@ -9,13 +9,27 @@
  */
 
 /**
+ * Alias for htmlspecialchars
+ *
+ * @see https://www.php.net/manual/function.htmlspecialchars.php
+ *
+ * @param string $variable
+ *
+ * @return string
+ */
+function protect($variable)
+{
+    return htmlspecialchars($variable, ENT_COMPAT, 'UTF-8');
+}
+
+/**
  * Alias for \Minz\Url::for
  *
  * @see \Minz\Url::for
  */
 function url($action_pointer, $parameters = [])
 {
-    return \Minz\Url::for($action_pointer, $parameters);
+    return protect(\Minz\Url::for($action_pointer, $parameters));
 }
 
 /**
@@ -25,7 +39,7 @@ function url($action_pointer, $parameters = [])
  */
 function url_full($action_pointer, $parameters = [])
 {
-    return \Minz\Url::absoluteFor($action_pointer, $parameters);
+    return protect(\Minz\Url::absoluteFor($action_pointer, $parameters));
 }
 
 /**
@@ -42,9 +56,9 @@ function url_static($filename)
 
     $file_url = \Minz\Url::path() . '/static/' . $filename;
     if ($modification_time) {
-        return $file_url . '?' . $modification_time;
+        return protect($file_url . '?' . $modification_time);
     } else {
-        return $file_url;
+        return protect($file_url);
     }
 }
 
@@ -70,7 +84,7 @@ function url_full_static($filename)
  */
 function url_public($filename)
 {
-    return \Minz\Url::path() . '/' . $filename;
+    return protect(\Minz\Url::path() . '/' . $filename);
 }
 
 /**
