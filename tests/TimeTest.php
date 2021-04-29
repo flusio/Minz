@@ -52,4 +52,16 @@ class TimeTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals('2021-01-19', $result->format('Y-m-d'));
     }
+
+    public function testSleepWithFreezedTime()
+    {
+        $freezed_datetime = new \DateTime('2021-01-20');
+        Time::freeze($freezed_datetime);
+
+        $result = Time::sleep(10);
+
+        $now = \Minz\Time::now();
+        $this->assertTrue($result);
+        $this->assertEquals(10, $now->getTimestamp() - $freezed_datetime->getTimestamp());
+    }
 }
