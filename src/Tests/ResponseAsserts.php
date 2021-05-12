@@ -13,7 +13,7 @@ namespace Minz\Tests;
 trait ResponseAsserts
 {
     /**
-     * Assert that a Response is matching the given conditions.
+     * Assert that a Response is matching the given conditions (deprecated).
      *
      * @param \Minz\Response $response
      * @param integer $code The HTTP code that the response must match with
@@ -32,6 +32,59 @@ trait ResponseAsserts
         } elseif ($output !== null) {
             $this->assertStringContainsString($output, $response_output);
         }
+    }
+
+    /**
+     * Assert that a Response code is matching the given one.
+     *
+     * @param \Minz\Response $response
+     * @param integer $code The HTTP code that the response must match with
+     * @param string $location If code is 301 or 302, the location must match this variable
+     */
+    public function assertResponseCode($response, $code, $location = null)
+    {
+        $this->assertEquals($code, $response->code());
+
+        if ($location !== null && ($code === 301 || $code === 302)) {
+            $response_headers = $response->headers(true);
+            $this->assertEquals($location, $response_headers['Location']);
+        }
+    }
+
+    /**
+     * Assert that a Response output equals to the given string
+     *
+     * @param \Minz\Response $response
+     * @param string $string The string the output must equal
+     */
+    public function assertResponseEquals($response, $string)
+    {
+        $output = $response->render();
+        $this->assertEquals($string, $output);
+    }
+
+    /**
+     * Assert that a Response output contains the given string
+     *
+     * @param \Minz\Response $response
+     * @param string $string The string the output must contain
+     */
+    public function assertResponseContains($response, $string)
+    {
+        $output = $response->render();
+        $this->assertStringContainsString($string, $output);
+    }
+
+    /**
+     * Assert that a Response output doesn’t contain the given string
+     *
+     * @param \Minz\Response $response
+     * @param string $string The string the output must not contain
+     */
+    public function assertResponseNotContains($response, $string)
+    {
+        $output = $response->render();
+        $this->assertStringNotContainsString($string, $output);
     }
 
     /**
