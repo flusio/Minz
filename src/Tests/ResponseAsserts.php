@@ -93,15 +93,23 @@ trait ResponseAsserts
      * @param \Minz\Response $response
      * @param string[] $headers
      */
-    public function assertHeaders($response, $headers)
+    public function assertResponseHeaders($response, $headers)
     {
         // I would use assertArraySubset, but it's deprecated in PHPUnit 8
         // and will be removed in PHPUnit 9.
         $response_headers = $response->headers(true);
         foreach ($headers as $header => $value) {
             $this->assertArrayHasKey($header, $response_headers);
-            $this->assertSame($value, $response_headers[$header]);
+            $this->assertEquals($value, $response_headers[$header]);
         }
+    }
+
+    /**
+     * Alias for assertResponseHeaders (deprecated).
+     */
+    public function assertHeaders($response, $headers)
+    {
+        $this->assertResponseHeaders($response, $headers);
     }
 
     /**
@@ -110,9 +118,17 @@ trait ResponseAsserts
      * @param \Minz\Response $response
      * @param string $expected_pointer
      */
-    public function assertPointer($response, $expected_pointer)
+    public function assertResponsePointer($response, $expected_pointer)
     {
         $pointer = $response->output()->pointer();
-        $this->assertSame($expected_pointer, $pointer);
+        $this->assertEquals($expected_pointer, $pointer);
+    }
+
+    /**
+     * Alias for assertResponsePointer (deprecated).
+     */
+    public function assertPointer($response, $expected_pointer)
+    {
+        $this->assertResponsePointer($response, $expected_pointer);
     }
 }
