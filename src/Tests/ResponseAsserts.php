@@ -120,7 +120,10 @@ trait ResponseAsserts
      */
     public function assertResponsePointer($response, $expected_pointer)
     {
-        $pointer = $response->output()->pointer();
+        $output = $response->output();
+        $this->assertNotNull($output, 'Response has no output');
+        $this->assertTrue(is_callable([$output, 'pointer']), 'Response has no pointer');
+        $pointer = $output->pointer();
         $this->assertEquals($expected_pointer, $pointer);
     }
 
