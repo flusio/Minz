@@ -41,6 +41,13 @@ class CSRFTest extends TestCase
         $this->assertSame($_SESSION['CSRF'], $token);
     }
 
+    public function testGenerateIsAliasOfGenerateToken()
+    {
+        $token = CSRF::generate();
+
+        $this->assertSame($_SESSION['CSRF'], $token);
+    }
+
     public function testValidateToken()
     {
         $csrf = new CSRF();
@@ -93,6 +100,15 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
+    public function testValidateIsAliasOfValidateToken()
+    {
+        $token = CSRF::generate();
+
+        $valid = CSRF::validate($token);
+
+        $this->assertTrue($valid);
+    }
+
     public function testSetToken()
     {
         $csrf = new CSRF();
@@ -101,6 +117,16 @@ class CSRFTest extends TestCase
         $csrf->setToken($token);
 
         $valid = $csrf->validateToken($token);
+        $this->assertTrue($valid);
+    }
+
+    public function testSetIsAliasOfSetToken()
+    {
+        $token = 'foo';
+
+        CSRF::set($token);
+
+        $valid = CSRF::validate($token);
         $this->assertTrue($valid);
     }
 

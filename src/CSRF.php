@@ -13,6 +13,47 @@ namespace Minz;
 class CSRF
 {
     /**
+     * Static alias of generateToken
+     *
+     * @see \Minz\CSRF::generateToken
+     *
+     * @return string
+     */
+    public static function generate()
+    {
+        $csrf = new \Minz\CSRF();
+        return $csrf->generateToken();
+    }
+
+    /**
+     * Static alias of validateToken
+     *
+     * @see \Minz\CSRF::validateToken
+     *
+     * @param string $token
+     *
+     * @return boolean
+     */
+    public static function validate($token)
+    {
+        $csrf = new \Minz\CSRF();
+        return $csrf->validateToken($token);
+    }
+
+    /**
+     * Static alias of setToken
+     *
+     * @see \Minz\CSRF::setToken
+     *
+     * @param string $token
+     */
+    public static function set($token)
+    {
+        $csrf = new \Minz\CSRF();
+        $csrf->setToken($token);
+    }
+
+    /**
      * Store a CSRF hexadecimal token in session and return it.
      *
      * No tokens are generated if $_SESSION['CSRF'] already contains a token.
