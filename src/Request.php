@@ -132,17 +132,71 @@ class Request
     public function param($name, $default = null)
     {
         if (isset($this->parameters[$name])) {
-            if (is_array($default) && is_array($this->parameters[$name])) {
-                return array_merge($default, $this->parameters[$name]);
-            } elseif (is_array($default) && !is_array($this->parameters[$name])) {
-                \Minz\Log::warning(
-                    "{$name} param is expected to be an array, but it isn’t."
-                    . ' Returning default value instead.'
-                );
-                return $default;
-            } else {
-                return $this->parameters[$name];
+            return $this->parameters[$name];
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Return a parameter value from $_GET or $_POST as a boolean.
+     *
+     * @param string $name
+     *     The name of the parameter to get.
+     * @param boolean $default
+     *     A default value to return if the parameter doesn't exist (default is
+     *     false).
+     *
+     * @return boolean
+     */
+    public function paramBoolean($name, $default = false)
+    {
+        if (isset($this->parameters[$name])) {
+            return filter_var($this->parameters[$name], FILTER_VALIDATE_BOOLEAN);
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Return a parameter value from $_GET or $_POST as an integer.
+     *
+     * @param string $name
+     *     The name of the parameter to get.
+     * @param integer $default
+     *     A default value to return if the parameter doesn't exist (default is
+     *     null).
+     *
+     * @return boolean
+     */
+    public function paramInteger($name, $default = null)
+    {
+        if (isset($this->parameters[$name])) {
+            return intval($this->parameters[$name]);
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Return a parameter value from $_GET or $_POST as an array.
+     *
+     * @param string $name The name of the parameter to get
+     * @param array $default
+     *     A default value to return if the parameter doesn't exist (default is
+     *     empty array). Array is merged with the parameter value.
+     *
+     * @return array
+     */
+    public function paramArray($name, $default = [])
+    {
+        if (isset($this->parameters[$name])) {
+            $value = $this->parameters[$name];
+            if (!is_array($value)) {
+                $value = [$value];
             }
+
+            return array_merge($default, $value);
         } else {
             return $default;
         }

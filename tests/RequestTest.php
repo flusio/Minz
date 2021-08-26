@@ -96,13 +96,75 @@ class RequestTest extends TestCase
         $this->assertSame('bar', $foo);
     }
 
-    public function testParamWithArrayDefaultValue()
+    public function testParamBoolean()
+    {
+        $request = new Request('GET', '/', [
+            'foo' => 'true'
+        ]);
+
+        $foo = $request->paramBoolean('foo');
+
+        $this->assertTrue($foo);
+    }
+
+    public function testParamBooleanWithDefaultValue()
+    {
+        $request = new Request('GET', '/', []);
+
+        $foo = $request->paramBoolean('foo', true);
+
+        $this->assertTrue($foo);
+    }
+
+    public function testParamInteger()
+    {
+        $request = new Request('GET', '/', [
+            'foo' => '42'
+        ]);
+
+        $foo = $request->paramInteger('foo');
+
+        $this->assertSame(42, $foo);
+    }
+
+    public function testParamIntegerWithDefaultValue()
+    {
+        $request = new Request('GET', '/', []);
+
+        $foo = $request->paramInteger('foo', 42);
+
+        $this->assertSame(42, $foo);
+    }
+
+    public function testParamArray()
     {
         $request = new Request('GET', '/', [
             'foo' => ['bar' => 'baz'],
         ]);
 
-        $foo = $request->param('foo', ['spam' => 'egg']);
+        $foo = $request->paramArray('foo');
+
+        $this->assertSame([
+            'bar' => 'baz',
+        ], $foo);
+    }
+
+    public function testParamArrayWithDefaultValue()
+    {
+        $request = new Request('GET', '/', []);
+
+        $foo = $request->paramArray('foo', ['spam' => 'egg']);
+
+        $this->assertSame(['spam' => 'egg'], $foo);
+    }
+
+    public function testParamArrayWithDefaultValueMergesValues()
+    {
+        $request = new Request('GET', '/', [
+            'foo' => ['bar' => 'baz'],
+        ]);
+
+        $foo = $request->paramArray('foo', ['spam' => 'egg']);
 
         $this->assertSame([
             'spam' => 'egg',
@@ -110,19 +172,17 @@ class RequestTest extends TestCase
         ], $foo);
     }
 
-    public function testParamWithUnexpectedNonArrayValue()
+    public function testParamWithNonArrayValue()
     {
         // here, we set foo as a simple string (i.e. bar)
         $request = new Request('GET', '/', [
             'foo' => 'bar',
         ]);
 
-        // but we set the default value to an array
-        $foo = $request->param('foo', ['spam' => 'egg']);
+        $foo = $request->paramArray('foo');
 
-        // because the two types don't match, we consider returning the correct
-        // type is more important than returning the real value
-        $this->assertSame(['spam' => 'egg'], $foo);
+        // but paramArray is always returning an array
+        $this->assertSame(['bar'], $foo);
     }
 
     public function testSetParam()
