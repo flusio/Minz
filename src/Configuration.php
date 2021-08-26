@@ -82,6 +82,9 @@ class Configuration
     /** @var string The path to the current configuration file */
     public static $configuration_filepath;
 
+    /** @var string The path to a tmp directory */
+    public static $tmp_path;
+
     /** @var string The path to the data directory */
     public static $data_path;
 
@@ -204,6 +207,12 @@ class Configuration
         if (!isset(self::$url_options['port'])) {
             self::$url_options['port'] = self::$url_options['protocol'] === 'https' ? 443 : 80;
         }
+
+        self::$tmp_path = self::getDefault(
+            $raw_configuration,
+            'tmp_path',
+            sys_get_temp_dir() . '/' . self::$app_name . '/' . md5(rand())
+        );
 
         self::$data_path = self::getDefault(
             $raw_configuration,

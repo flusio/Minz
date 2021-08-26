@@ -203,6 +203,26 @@ class Request
     }
 
     /**
+     * Return a parameter value from $_FILES as a File.
+     *
+     * @param string $name The name of the parameter to get
+     *
+     * @return \Minz\File|null
+     */
+    public function paramFile($name)
+    {
+        if (!isset($this->parameters[$name])) {
+            return null;
+        }
+
+        try {
+            return new File($this->parameters[$name]);
+        } catch (\RuntimeException $e) {
+            return null;
+        }
+    }
+
+    /**
      * Return a parameter value from the headers array.
      *
      * @param string $name The name of the parameter to get

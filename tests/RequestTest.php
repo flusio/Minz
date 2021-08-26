@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class RequestTest extends TestCase
 {
+    use Tests\FilesHelper;
+
     /**
      * @dataProvider invalidMethodProvider
      */
@@ -183,6 +185,45 @@ class RequestTest extends TestCase
 
         // but paramArray is always returning an array
         $this->assertSame(['bar'], $foo);
+    }
+
+    public function testParamFile()
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $request = new Request('GET', '/', [
+            'foo' => [
+                'tmp_name' => $tmp_filepath,
+                'error' => UPLOAD_ERR_OK,
+            ],
+        ]);
+
+        $foo = $request->paramFile('foo');
+
+        $this->assertSame($tmp_filepath, $foo->filepath);
+        $this->assertNull($foo->error);
+    }
+
+    public function testParamFileReturnsNullIfFileInvalid()
+    {
+        $request = new Request('GET', '/', [
+            'foo' => [
+                'error' => UPLOAD_ERR_OK,
+            ],
+        ]);
+
+        $foo = $request->paramFile('foo');
+
+        $this->assertNull($foo);
+    }
+
+    public function testParamFileReturnsNullIfParamIsMissing()
+    {
+        $request = new Request('GET', '/', []);
+
+        $foo = $request->paramFile('foo');
+
+        $this->assertNull($foo);
     }
 
     public function testSetParam()
