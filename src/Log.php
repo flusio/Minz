@@ -13,22 +13,16 @@ class Log
 {
     public static function notice($message)
     {
-        if (!Configuration::$no_syslog) {
-            syslog(LOG_NOTICE, $message);
-        }
+        syslog(LOG_NOTICE, $message);
     }
 
     public static function warning($message)
     {
-        if (!Configuration::$no_syslog) {
-            syslog(LOG_WARNING, $message);
-        }
+        syslog(LOG_WARNING, $message);
     }
 
     public static function error($message)
     {
-        if (!Configuration::$no_syslog) {
-            syslog(LOG_ERR, $message);
-        }
+        syslog(LOG_ERR, $message);
     }
 }

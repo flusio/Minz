@@ -19,7 +19,12 @@ class Environment
     {
         // Configure system logger
         $app_name = Configuration::$app_name;
-        openlog($app_name, LOG_PERROR | LOG_PID, LOG_USER);
+
+        if (Configuration::$no_syslog_output) {
+            openlog($app_name, LOG_PID, LOG_USER);
+        } else {
+            openlog($app_name, LOG_PERROR | LOG_PID, LOG_USER);
+        }
 
         // Configure error reporting
         $environment = Configuration::$environment;

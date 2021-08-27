@@ -25,5 +25,5 @@ return [
         'from' => 'root@localhost',
     ],
 
-    'no_syslog' => !getenv('APP_SYSLOG_ENABLED'),
+    'no_syslog_output' => true,
 ];

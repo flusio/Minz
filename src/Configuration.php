@@ -59,8 +59,7 @@ namespace Minz;
  *     - secure: '', 'ssl' or 'tls', default ''
  * - application: you can set options specific to your application here,
  *   default to empty array
- * - no_syslog: `true` to silent calls to \Minz\Log (wrapper aroung syslog function),
- *   default to `false`
+ * - no_syslog_output: `true` to not output logs to the console, default to `false`
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
@@ -112,8 +111,8 @@ class Configuration
     /** @var array An array for options spectific to the application */
     public static $application;
 
-    /** @var boolean Indicate if syslog must be called via \Minz\Log calls */
-    public static $no_syslog;
+    /** @var boolean Indicate if syslog must output \Minz\Log calls to the console */
+    public static $no_syslog_output;
 
     /**
      * Load the application's configuration, for a given environment.
@@ -314,7 +313,7 @@ class Configuration
 
         self::$application = self::getDefault($raw_configuration, 'application', []);
 
-        self::$no_syslog = self::getDefault($raw_configuration, 'no_syslog', false);
+        self::$no_syslog_output = self::getDefault($raw_configuration, 'no_syslog_output', false);
     }
 
     /**
