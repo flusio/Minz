@@ -16,6 +16,7 @@ class File implements Output
         'css' => 'text/css',
         'js' => 'text/javascript',
         'pdf' => 'application/pdf',
+        'zip' => 'application/zip',
     ];
 
     /** @var string */
