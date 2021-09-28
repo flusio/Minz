@@ -78,6 +78,19 @@ class RequestTest extends TestCase
         $this->assertSame($expectedPath, $path);
     }
 
+    public function testPathWithUrlOptionsPath()
+    {
+        $old_url_path = \Minz\Configuration::$url_options['path'];
+        \Minz\Configuration::$url_options['path'] = '/minz';
+        $request = new Request('GET', '/minz/rabbits');
+
+        $path = $request->path();
+
+        \Minz\Configuration::$url_options['path'] = $old_url_path;
+
+        $this->assertSame('/rabbits', $path);
+    }
+
     public function testParam()
     {
         $request = new Request('GET', '/', [

@@ -87,6 +87,14 @@ class Request
             throw new Errors\RequestError('Parameters are not in an array.');
         }
 
+        $url_options_path = Configuration::$url_options['path'];
+        if (
+            $url_options_path !== '/' &&
+            substr($path, 0, strlen($url_options_path)) === $url_options_path
+        ) {
+            $path = substr($path, strlen($url_options_path));
+        }
+
         $this->method = $method;
         $this->path = $path;
         $this->parameters = $parameters;
