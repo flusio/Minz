@@ -63,9 +63,16 @@ class DatabaseTest extends TestCase
     {
         Database::resetInstance();
         $this->expectException(Errors\DatabaseError::class);
-        $this->expectExceptionMessage(
-            'An error occured during database initialization: invalid data source name.'
-        );
+        if (PHP_VERSION_ID < 80000) {
+            $this->expectExceptionMessage(
+                'An error occured during database initialization: invalid data source name.'
+            );
+        } else {
+            $this->expectExceptionMessage(
+                'An error occured during database initialization: ' .
+                'PDO::__construct(): Argument #1 ($dsn) must be a valid data source name.'
+            );
+        }
 
         Configuration::$database['type'] = 'not a correct type';
 
