@@ -5,8 +5,8 @@ spl_autoload_register(function ($class_name) {
         $class_name = substr($class_name, 5);
         include(__DIR__ . '/src/' . str_replace('\\', '/', $class_name) . '.php');
     } elseif (strpos($class_name, 'PHPMailer') === 0) {
-        $class_name = substr($class_name, 10);
-        include(__DIR__ . '/lib/' . str_replace('\\', '/', $class_name) . '.php');
+        $class_name = substr($class_name, 20);
+        include(__DIR__ . '/lib/PHPMailer/src/' . str_replace('\\', '/', $class_name) . '.php');
     } elseif (strpos($class_name, 'AppTest') === 0) {
         $class_name = substr($class_name, 8);
         $class_path = str_replace('\\', '/', $class_name) . '.php';
