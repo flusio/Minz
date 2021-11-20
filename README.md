@@ -1,19 +1,30 @@
 # Minz
 
-Minz is yet another PHP 7.2+ framework. **It has no big ambitions and is
-designed to my personal purposes.**
+Minz is yet another PHP 7.3+ framework. **It has no big ambitions and it is
+designed with my personal needs in mind.**
 
 What I like in Minz is:
 
-- I know its code perfectly (I wrote it)
-- it's powerful enough for my needs
-- it has a relative small size
+- I know the code perfectly (I wrote it);
+- it's powerful enough for my needs;
+- it has a relative small size;
 - it grows ONLY when I need it (the consequence is basic features might be
-  missing)
-- it's easy to perform integration tests
-- it provides a common interface for both Web and CLI requests
-- it has very few dependencies (only one at the moment, which is PHPMailer)
-- I learnt a LOT by coding it and it was quite fun
+  missing);
+- it's easy to perform integration tests;
+- it provides a common interface for both Web and CLI requests;
+- it has very few dependencies (only one at the moment, i.e. PHPMailer);
+- I learnt a LOT by coding it and it was quite fun.
+
+## Install
+
+Download the repository into your project and include the autoload file. For
+instance, if you've put Minz under a `lib/` folder:
+
+```php
+<?php
+
+include(__DIR__ . '/lib/Minz/autoload.php');
+```
 
 ## Contributing
 
@@ -28,24 +39,10 @@ it for Composer.
 
 However, I'll be glad to accept patches for bugs and security flaws.
 
-## Install
-
-Download the repository into your project and include the autoload file. For
-instance, if you've put Minz under a `lib/` folder:
-
-```php
-<?php
-
-include(__DIR__ . '/lib/Minz/autoload.php');
-```
-
-You can also keep only the `src/` folder files and change the autoload file.
-That's what it is designed for: adapt to your needs.
-
 ## A bit of Minz-story
 
 When I was a student, my professors introduced me to the [Zend Framework](https://framework.zend.com/)
-(now [Laminas project](https://getlaminas.org/)). At the time, I felt it very
+(now [Laminas project](https://getlaminas.org/)). At the time, it was very
 frustrating: too big, too abstracted and complicated for the young student I
 was. I've finally been able to use it, but I wasn't able to explain "how"
 things were working.
@@ -67,6 +64,17 @@ this repository, but please remember I'm not a PHP expert (I mainly used Python
 and Ruby these last years).
 
 It's still fun to develop a framework from scratch… and it takes some time too.
+
+Today, I use Minz in several project:
+
+- [flusio](https://github.com/flusio/flusio): a feed aggregator and social
+  bookmarking tool;
+- [flus.fr](https://github.com/flusio/flus.fr): the website of the Web service
+  I provide for flusio;
+- [taust](https://github.com/flusio/taust): a monitoring system easy to setup
+  (provided as a proof of concept);
+- [Webubbub](https://github.com/flusio/Webubbub): a simple [WebSub](https://www.w3.org/TR/websub/)
+  hub.
 
 ## License
 
