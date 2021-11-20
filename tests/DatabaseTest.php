@@ -88,11 +88,11 @@ class DatabaseTest extends TestCase
 
         $database = Database::get();
         $schema = <<<'SQL'
-CREATE TABLE rabbits (
-    id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name varchar(255) NOT NULL
-)
-SQL;
+            CREATE TABLE rabbits (
+                id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                name varchar(255) NOT NULL
+            )
+        SQL;
         $result = $database->exec($schema);
         $error_if_any = $database->errorInfo()[2];
         $this->assertTrue(
@@ -116,11 +116,11 @@ SQL;
 
         $database = Database::get();
         $schema = <<<'SQL'
-CREATE TABLE rabbits (
-    id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name varchar(255) NOT NULL
-)
-SQL;
+            CREATE TABLE rabbits (
+                id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                name varchar(255) NOT NULL
+            )
+        SQL;
         $result = $database->exec($schema);
         $error_if_any = $database->errorInfo()[2];
         $this->assertTrue(
