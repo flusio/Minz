@@ -251,6 +251,30 @@ class RequestTest extends TestCase
         $this->assertSame('baz', $foo);
     }
 
+    /**
+     * @dataProvider isAcceptingProvider
+     */
+    public function testIsAccepting($header, $media, $expected)
+    {
+        $request = new Request('GET', '/', [], [
+            'HTTP_ACCEPT' => $header,
+        ]);
+
+        $is_accepting = $request->isAccepting($media);
+
+        $this->assertSame($expected, $is_accepting);
+    }
+
+    public function testIsAcceptingWithNoAcceptHeader()
+    {
+        // Equivalent to */*
+        $request = new Request('GET', '/', [], []);
+
+        $is_accepting = $request->isAccepting('text/html');
+
+        $this->assertTrue($is_accepting);
+    }
+
     public function testHeader()
     {
         $request = new Request('GET', '/', [], [
@@ -329,6 +353,24 @@ class RequestTest extends TestCase
         return [
             [''],
             [null],
+        ];
+    }
+
+    public function isAcceptingProvider()
+    {
+        return [
+            ['text/html', 'text/html', true],
+            ['text/html; q=0.2', 'text/html', true],
+            ['text/plain; q=0.5, text/html', 'text/html', true],
+            ['*/*', 'text/html', true],
+            ['*/*', 'application/json', true],
+            ['text/*', 'text/html', true],
+            ['text/*', 'text/plain', true],
+            ['text/*; q=0.5, text/plain', 'text/html', true],
+            ['text/html', 'text/plain', false],
+            ['text/*', 'application/json', false],
+            ['text/*; q=0.5, text/plain', 'application/json', false],
+            ['*/plain', 'text/plain', false], // this format is invalid and rejected
         ];
     }
 }

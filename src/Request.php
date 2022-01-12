@@ -231,6 +231,42 @@ class Request
     }
 
     /**
+     * Return whether the given media is accepted by the client.
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc7231#section-5.3.2
+     *
+     * @param string $media
+     *
+     * @return boolean
+     */
+    public function isAccepting($media)
+    {
+        $accept_header = $this->header('HTTP_ACCEPT', '*/*');
+        $accept_medias = explode(',', $accept_header);
+
+        foreach ($accept_medias as $accept_media) {
+            $semicolon_position = strpos($accept_media, ';');
+            if ($semicolon_position !== false) {
+                $accept_media = substr($accept_media, 0, $semicolon_position);
+            }
+            $accept_media = trim($accept_media);
+
+            list($accept_type, $accept_subtype) = explode('/', $accept_media);
+            list($media_type, $media_subtype) = explode('/', $media);
+
+            if (
+                ($accept_type === $media_type && $accept_subtype === '*') ||
+                $accept_media === '*/*' ||
+                $accept_media === $media
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Return a parameter value from the headers array.
      *
      * @param string $name The name of the parameter to get
