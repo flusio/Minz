@@ -17,12 +17,12 @@ use Minz\Errors;
 class View implements Output
 {
     /** @var string[] */
-    public const EXTENSION_TO_CONTENT_TYPE = [
-        'html' => 'text/html',
-        'json' => 'application/json',
-        'phtml' => 'text/html',
-        'txt' => 'text/plain',
-        'xml' => 'text/xml',
+    public static $extensions_to_content_types = [
+        '.html' => 'text/html',
+        '.json' => 'application/json',
+        '.phtml' => 'text/html',
+        '.txt' => 'text/plain',
+        '.xml' => 'text/xml',
     ];
 
     /** @var string */
@@ -69,8 +69,6 @@ class View implements Output
      * @param string $pointer
      * @param mixed[] $variables (optional)
      *
-     * @throws \Minz\Errors\OutputError if the pointed file extension is not
-     *                                  associated to a supported one
      * @throws \Minz\Errors\OutputError if the pointed file doesn't exist
      */
     public function __construct($pointer, $variables = [])
@@ -130,13 +128,13 @@ class View implements Output
      */
     public function setContentType($pointer)
     {
-        $file_extension = pathinfo($pointer, PATHINFO_EXTENSION);
-        if (!isset(self::EXTENSION_TO_CONTENT_TYPE[$file_extension])) {
-            throw new Errors\OutputError(
-                "{$file_extension} is not a supported view file extension."
-            );
+        foreach (self::$extensions_to_content_types as $ext => $content_type) {
+            $ext_length = strlen($ext);
+            $ends_with_extension = substr($pointer, -$ext_length, $ext_length) === $ext;
+            if ($ends_with_extension) {
+                $this->content_type = $content_type;
+            }
         }
-        $this->content_type = self::EXTENSION_TO_CONTENT_TYPE[$file_extension];
     }
 
     /**
