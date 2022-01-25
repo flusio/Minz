@@ -54,10 +54,97 @@ class DatabaseModelTest extends TestCase
     public function testCount()
     {
         $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix']);
+
+        $number_of_friends = $dao->count();
+
+        $this->assertSame(1, $number_of_friends);
+    }
+
+    public function testCountWithNoData()
+    {
+        $dao = new models\dao\Friend();
 
         $number_of_friends = $dao->count();
 
         $this->assertSame(0, $number_of_friends);
+    }
+
+    public function testCountBy()
+    {
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix']);
+        $dao->create(['name' => 'Benedict']);
+
+        $number_of_friends = $dao->countBy([
+            'name' => 'Alix',
+        ]);
+
+        $this->assertSame(1, $number_of_friends);
+    }
+
+    public function testCountByWithNullValue()
+    {
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix', 'address' => 'rue du Gratin']);
+        $dao->create(['name' => 'Benedict', 'address' => null]);
+
+        $number_of_friends = $dao->countBy([
+            'address' => null,
+        ]);
+
+        $this->assertSame(1, $number_of_friends);
+    }
+
+    public function testCountByWithArrayOfValues()
+    {
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix']);
+        $dao->create(['name' => 'Benedict']);
+        $dao->create(['name' => 'Charlie']);
+
+        $number_of_friends = $dao->countBy([
+            'name' => ['Alix', 'Charlie'],
+        ]);
+
+        $this->assertSame(2, $number_of_friends);
+    }
+
+    public function testCountByWithNoMatchingData()
+    {
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix']);
+        $dao->create(['name' => 'Benedict']);
+
+        $number_of_friends = $dao->countBy([
+            'name' => 'Charlie',
+        ]);
+
+        $this->assertSame(0, $number_of_friends);
+    }
+
+    public function testCountByFailsWithEmptyValues()
+    {
+        $this->expectException(Errors\DatabaseModelError::class);
+        $this->expectExceptionMessage('It is expected values not to be empty.');
+
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix']);
+
+        $dao->countBy([]);
+    }
+
+    public function testCountByFailsIfUnsupportedProperty()
+    {
+        $this->expectException(Errors\DatabaseModelError::class);
+        $this->expectExceptionMessage(
+            'not_property is not declared in the AppTest\models\dao\Friend model.'
+        );
+
+        $dao = new models\dao\Friend();
+        $dao->create(['name' => 'Alix']);
+
+        $dao->countBy(['not_property' => 'foo']);
     }
 
     public function testCreate()

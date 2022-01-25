@@ -337,6 +337,72 @@ class DatabaseModel
     }
 
     /**
+     * Return the number of rows matching the given values.
+     *
+     * The $values array keys must be existing properties. The $values array
+     * values can either be a single value or an array (in which case the where
+     * condition will be IN instead of =).
+     *
+     * @param array $values The values which must match
+     *
+     * @throws \Minz\Errors\DatabaseModelError
+     *     if values is empty
+     * @throws \Minz\Errors\DatabaseModelError
+     *     if at least one property isn't declared by the model
+     * @throws \PDOException
+     *     if an error occured in the SQL syntax
+     *
+     * @throws \Minz\DatabaseModelError if the query fails
+     *
+     * @return integer
+     */
+    public function countBy($values)
+    {
+        if (!$values) {
+            throw new Errors\DatabaseModelError(
+                'It is expected values not to be empty.'
+            );
+        }
+
+        $properties = [];
+        $parameters = [];
+        $where_statement_as_array = [];
+        foreach ($values as $property => $parameter) {
+            $properties[] = $property;
+
+            if (is_array($parameter)) {
+                $parameters = array_merge($parameters, $parameter);
+                $question_marks = array_fill(0, count($parameter), '?');
+                $in_statement = implode(',', $question_marks);
+                $where_statement_as_array[] = "{$property} IN ({$in_statement})";
+            } elseif ($parameter === null) {
+                $where_statement_as_array[] = "{$property} IS NULL";
+            } else {
+                $parameters[] = $parameter;
+                $where_statement_as_array[] = "{$property} = ?";
+            }
+        }
+
+        $undeclared_property = $this->findUndeclaredProperty($properties);
+        if ($undeclared_property) {
+            $class = get_called_class();
+            throw new Errors\DatabaseModelError(
+                "{$undeclared_property} is not declared in the {$class} model."
+            );
+        }
+
+        $where_statement = implode(' AND ', $where_statement_as_array);
+        $sql = <<<SQL
+            SELECT COUNT(*) FROM {$this->table_name}
+            WHERE {$where_statement}
+        SQL;
+
+        $statement = $this->prepare($sql);
+        $statement->execute($parameters);
+        return intval($statement->fetchColumn());
+    }
+
+    /**
      * Call query method on a database object.
      *
      * @param string $sql_statement
