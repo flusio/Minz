@@ -33,7 +33,10 @@ class Request
      */
     public function __construct($method, $uri, $parameters = [], $headers = [])
     {
-        $method = strtolower($method);
+        if ($method) {
+            $method = strtolower($method);
+        }
+
         if (!in_array($method, Router::VALID_VIAS)) {
             $vias_as_string = implode(', ', Router::VALID_VIAS);
             throw new Errors\RequestError(

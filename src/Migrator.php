@@ -38,7 +38,7 @@ class Migrator
      */
     public function __construct($directory = null)
     {
-        if (!is_dir($directory)) {
+        if (!$directory || !is_dir($directory)) {
             return;
         }
 

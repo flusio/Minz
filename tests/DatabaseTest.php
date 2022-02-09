@@ -33,7 +33,7 @@ class DatabaseTest extends TestCase
             \PDO::FETCH_ASSOC,
             $database->getAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE)
         );
-        $this->assertSame('1', $foreign_keys_pragma);
+        $this->assertSame(1, intval($foreign_keys_pragma));
     }
 
     public function testGetAlwaysReturnSameInstance()
