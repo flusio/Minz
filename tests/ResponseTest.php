@@ -272,6 +272,18 @@ class ResponseTest extends TestCase
         $this->assertSame('Foo bar', $response->render());
     }
 
+    public function testJson()
+    {
+        $response = Response::json(200, [
+            'foo' => 'bar',
+        ]);
+
+        $this->assertSame(200, $response->code());
+        $this->assertSame('{"foo":"bar"}', $response->render());
+        $headers = $response->headers(true);
+        $this->assertSame('application/json', $headers['Content-Type']);
+    }
+
     public function testRender()
     {
         $rabbits = [

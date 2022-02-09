@@ -226,6 +226,23 @@ class Response
     }
 
     /**
+     * Create a Json response with the given HTTP code.
+     *
+     * @param integer $code
+     * @param mixed $value The value to encode with json_encode
+     *
+     * @return \Minz\Response
+     */
+    public static function json($code, $value)
+    {
+        $json = json_encode($value);
+        $output = new \Minz\Output\Text($json);
+        $response = new Response($code, $output);
+        $response->setHeader('Content-Type', 'application/json');
+        return $response;
+    }
+
+    /**
      * Create a Response from a HTTP status code.
      *
      * @param integer $code The HTTP code to set for the response
