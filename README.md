@@ -29,6 +29,7 @@ include(__DIR__ . '/lib/Minz/autoload.php');
 ## Guide
 
 - [Getting started: setup a project](/docs/getting_started.md)
+- [An overview of Minz classes](/docs/overview.md)
 
 ## Contributing
 

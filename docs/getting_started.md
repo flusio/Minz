@@ -508,10 +508,10 @@ returns a response which is then outputed by the index file. Finally, Minz
 provides a bunch of useful methods to help you to test your controllers
 easily.**
 
-For now, there is no more documentation about Minz, except comments in source
-code. I’ll do my best to provide more information in the future. Next steps to
-learn Minz:
+Next steps to learn Minz:
 
-- read the source code and get used to it;
-- explore the source code of [my applications](/README.md#projects-using-minz) wrote with Minz;
+- get [an overview of its classes](/docs/overview.md);
+- read [its source code](/src) and get used to it;
+- read the source code of [the applications](/README.md#projects-using-minz)
+  that I wrote with Minz;
 - if you have any question, [open an issue on GitHub](https://github.com/flusio/Minz/issues).
