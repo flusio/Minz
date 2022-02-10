@@ -214,6 +214,15 @@ class ResponseTest extends TestCase
         $this->assertSame(204, $response->code());
     }
 
+    public function testMovedPermanently()
+    {
+        $response = Response::movedPermanently('https://example.com');
+
+        $this->assertSame(301, $response->code());
+        $headers = $response->headers(true);
+        $this->assertSame('https://example.com', $headers['Location']);
+    }
+
     public function testFound()
     {
         $response = Response::found('https://example.com');

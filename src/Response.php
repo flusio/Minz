@@ -104,6 +104,20 @@ class Response
     }
 
     /**
+     * Create a moved permanently response (HTTP 301).
+     *
+     * @param string $url
+     *
+     * @return \Minz\Response
+     */
+    public static function movedPermanently($url)
+    {
+        $response = new Response(301);
+        $response->setHeader('Location', $url);
+        return $response;
+    }
+
+    /**
      * Create a found response (HTTP 302).
      *
      * @param string $url
