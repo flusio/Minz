@@ -76,6 +76,19 @@ trait ResponseAsserts
     }
 
     /**
+     * Assert that a Response output contains the given string (ignoring
+     * differences in casing).
+     *
+     * @param \Minz\Response $response
+     * @param string $string The string the output must contain
+     */
+    public function assertResponseContainsIgnoringCase($response, $string)
+    {
+        $output = $response->render();
+        $this->assertStringContainsStringIgnoringCase($string, $output);
+    }
+
+    /**
      * Assert that a Response output doesn’t contain the given string
      *
      * @param \Minz\Response $response
