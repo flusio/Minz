@@ -26,6 +26,10 @@ instance, if you've put Minz under a `lib/` folder:
 include(__DIR__ . '/lib/Minz/autoload.php');
 ```
 
+## Guide
+
+- [Getting started: setup a project](/docs/getting_started.md)
+
 ## Contributing
 
 I'm not intended to develop features that I have no uses (sorry!) That being
@@ -64,6 +68,8 @@ this repository, but please remember I'm not a PHP expert (I mainly used Python
 and Ruby these last years).
 
 It's still fun to develop a framework from scratch… and it takes some time too.
+
+## Projects using Minz
 
 Today, I use Minz in several project:
 
