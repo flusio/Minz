@@ -3,4 +3,5 @@ FOO=bar
 TRUE_VALUE
 SINGLE_QUOTES='foo'
 DOUBLE_QUOTES="foo"
+= a var with no name
 #COMMENTED=meh

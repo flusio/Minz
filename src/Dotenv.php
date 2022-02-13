@@ -3,26 +3,80 @@
 namespace Minz;
 
 /**
- * The Dotenv class allows to load variables from a file, generally named `.env`
- * It is usually used to load the production configuration.
+ * The Dotenv class loads variables from an environment file, generally named `.env`.
  *
- * It doesn't load the variables to any `$_ENV` or `$_SERVER`. However, if a
- * variable defined in the .env is already set, the value from the .env file is
- * skipped.
+ * An environment file contains the configuration of an application in the form
+ * of key=value. For instance:
  *
- * Also, the only method to get the values is `pop`, which deletes the variable
- * from the Dotenv object. This is done to avoid to duplicate critical secrets
- * in too many variables.
+ * ```env
+ * DB_HOST=localhost
+ * DB_PORT=5432
+ * DB_NAME=myapp_db
+ * ```
+ *
+ * It can be read easily with Dotenv:
+ *
+ * ```php
+ * $dotenv = new \Minz\Dotenv('/path/to/.env');
+ * $db_host = $dotenv->pop('DB_HOST');
+ * $db_port = intval($dotenv->pop('DB_PORT', '5432'));
+ * $db_name = $dotenv->pop('DB_NAME', 'myapp_production');
+ * ```
+ *
+ * Dotenv is generally used in the configuration files. If a `.env` file exists
+ * at the root of the application, `\Minz\Configuration` will automatically
+ * load it and give access to a `$dotenv` variable to these files.
+ *
+ * The only method available to get values from a Dotenv object is `pop()`. It
+ * returns a value and deletes the variable from the object. This avoids to
+ * duplicate critical secrets in too many places.
+ *
+ * Dotenv doesn’t modify the global environment variables (i.e. `putenv()` is
+ * never called). Variables defined in the global environment have the priority
+ * over the values defined in the `.env` file. In particular, it allows to
+ * override the configuration at the runtime.
+ *
+ * The syntax supported by Dotenv is deliberately simple:
+ *
+ * ```env
+ * # Comments start with a `#`
+ * BASIC_SYNTAX=foo
+ * SINGLE_QUOTES_SYNTAX='foo'
+ * DOUBLE_QUOTES_SYNTAX="foo"
+ * WITH_SPACES_SYNTAX = foo
+ * EMPTY_VALUE_SYNTAX
+ * ```
+ *
+ * The last example sets an empty string to the variable `EMPTY_VALUE_SYNTAX`.
+ * The other variables will all have the string `foo` as value.
+ *
+ * For security reasons, you should never commit your `.env` file in a version
+ * control tool. If you use Git, add it to your `.gitignore`! Provide a
+ * `env.sample` file instead, containing an example of supported variables. In
+ * production, make sure to restrict permissions on the file:
+ *
+ * ```console
+ * $ chown www-data:www-data /path/to/.env
+ * $ chmod 400 /path/to/.env
+ * ```
+ *
+ * @see \Minz\Configuration
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Dotenv
 {
-    /** @var array */
+    /** @var array The list of the variables loaded from the env file */
     private $variables = [];
 
     /**
+     * Load an env file.
+     *
+     * If the file cannot be read, Dotenv will return immediately and log a
+     * warning. Note: an exception handled by the Configuration class might be
+     * better here. It’s not a critical issue though.
+     *
      * @param string $dotenv_path
      */
     public function __construct($dotenv_path)
@@ -33,27 +87,30 @@ class Dotenv
             return;
         }
 
+        // Each line is parsed one by one
         $dotenv_lines = preg_split("/\r\n|\n|\r/", $dotenv_content);
         foreach ($dotenv_lines as $line) {
-            if (!trim($line)) {
+            $line = trim($line);
+            if (!$line) {
                 continue;
             }
 
+            // Extract the variable name and value from the line
             if (strpos($line, '=') !== false) {
-                list(
-                    $name,
-                    $value
-                ) = array_map('trim', explode('=', $line, 2));
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
             } else {
                 $name = $line;
                 $value = '';
             }
 
-            if (substr($name, 0, 1) === '#') {
-                // Ignore the comments
+            if (!$name || $name[0] === '#') {
+                // Ignore variables with no name and the comments
                 continue;
             }
 
+            // Extract the value from a single or double quoted string
             $value_length = strlen($value);
             if ($value_length > 0) {
                 $single_quoted = $value[0] === "'" && $value[$value_length - 1] === "'";
@@ -71,11 +128,15 @@ class Dotenv
     /**
      * Return the value of the given variable and drop it.
      *
-     * @param string $name
-     * @param string|null $default The default value to return if variable doesn't
-     *                             exist (default is null)
+     * Note that variables defined in the global environment have the priority
+     * over the values defined in the env file.
      *
-     * @return string
+     * @param string $name
+     * @param string|null $default
+     *     The default value to return if variable doesn’t exist (default is
+     *     null).
+     *
+     * @return string|null
      */
     public function pop($name, $default = null)
     {
