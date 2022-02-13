@@ -277,35 +277,8 @@ class Configuration
 
         // Then, get the required variables from the configuration file
         self::$app_name = self::getRequired($raw_configuration, 'app_name');
-
-        self::$secret_key = self::getRequired($raw_configuration, 'secret_key');
-        if ($environment === 'production' && strlen(self::$secret_key) < 64) {
-            throw new Errors\ConfigurationError(
-                'The secret_key must be at least 64 chars long and be cryptographically secure.'
-            );
-        }
-
-        $url_options = self::getRequired($raw_configuration, 'url_options');
-        if (!is_array($url_options)) {
-            throw new Errors\ConfigurationError(
-                'URL options configuration must be an array, containing at least a host key.'
-            );
-        }
-
-        if (!isset($url_options['host'])) {
-            throw new Errors\ConfigurationError(
-                'URL options configuration must contain at least a host key.'
-            );
-        }
-
-        $default_url_options = [
-            'path' => '/',
-            'protocol' => 'http',
-        ];
-        self::$url_options = array_merge($default_url_options, $url_options);
-        if (!isset(self::$url_options['port'])) {
-            self::$url_options['port'] = self::$url_options['protocol'] === 'https' ? 443 : 80;
-        }
+        self::$secret_key = self::getSecretKey($raw_configuration, $environment);
+        self::$url_options = self::getUrlOptions($raw_configuration);
 
         // And, finally, get the optional variables
         self::$application = self::getDefault($raw_configuration, 'application', []);
@@ -324,94 +297,8 @@ class Configuration
             'tmp_path',
             sys_get_temp_dir() . '/' . self::$app_name . '/' . md5(rand())
         );
-
-        $database = self::getDefault($raw_configuration, 'database', null);
-        if ($database !== null) {
-            if (!is_array($database)) {
-                throw new Errors\ConfigurationError(
-                    'Database configuration must be an array, containing at least a dsn key.'
-                );
-            }
-
-            if (!isset($database['dsn'])) {
-                throw new Errors\ConfigurationError(
-                    'Database configuration must contain at least a dsn key.'
-                );
-            }
-
-            $info_from_dsn = self::extractDsnInfo($database['dsn']);
-            $default_db_info = [
-                'username' => null,
-                'password' => null,
-                'options' => [],
-            ];
-            $database = array_merge($default_db_info, $database, $info_from_dsn);
-
-            if (!in_array($database['type'], self::VALID_DATABASE_TYPES)) {
-                throw new Errors\ConfigurationError(
-                    "{$database['type']} database is not supported."
-                );
-            }
-
-            if ($database['type'] === 'pgsql') {
-                if (!isset($database['host'])) {
-                    throw new Errors\ConfigurationError(
-                        'pgsql connection requires a `host` key, check your dsn string.'
-                    );
-                }
-
-                if (!isset($database['port'])) {
-                    throw new Errors\ConfigurationError(
-                        'pgsql connection requires a `port` key, check your dsn string.'
-                    );
-                }
-
-                if (!isset($database['dbname'])) {
-                    throw new Errors\ConfigurationError(
-                        'pgsql connection requires a `dbname` key, check your dsn string.'
-                    );
-                }
-            }
-        }
-
-        self::$database = $database;
-
-        $default_mailer_options = [
-            'type' => 'mail',
-            'from' => 'root@localhost',
-            'debug' => $environment === 'development' ? 2 : 0,
-        ];
-        $mailer = array_merge(
-            $default_mailer_options,
-            self::getDefault($raw_configuration, 'mailer', [])
-        );
-
-        if (!in_array($mailer['type'], self::VALID_MAILER_TYPES)) {
-            throw new Errors\ConfigurationError(
-                "{$mailer['type']} is not a valid mailer type."
-            );
-        }
-
-        if ($mailer['type'] === 'smtp') {
-            $default_smtp_options = [
-                'domain' => '', // the domain used in the Message-ID header
-                'host' => 'localhost', // the SMTP server address
-                'port' => 25,
-                'auth' => false,
-                'auth_type' => '', // 'CRAM-MD5', 'LOGIN', 'PLAIN', 'XOAUTH2' or ''
-                'username' => '',
-                'password' => '',
-                'secure' => '', // '', 'ssl' or 'tls'
-            ];
-            if (!isset($mailer['smtp']) || !is_array($mailer['smtp'])) {
-                $mailer['smtp'] = [];
-            }
-            $smtp_options = array_merge($default_smtp_options, $mailer['smtp']);
-            $mailer['smtp'] = $smtp_options;
-        }
-
-        self::$mailer = $mailer;
-
+        self::$database = self::getDatabase($raw_configuration);
+        self::$mailer = self::getMailer($raw_configuration);
         self::$no_syslog_output = self::getDefault($raw_configuration, 'no_syslog_output', false);
     }
 
@@ -456,6 +343,140 @@ class Configuration
     }
 
     /**
+     * Return the secret_key option.
+     *
+     * @param mixed[] $array
+     * @param string $environment
+     *
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the secret_key is missing, or if its length is less than
+     *     64 chars in production.
+     *
+     * @return string
+     */
+    private static function getSecretKey($array, $environment)
+    {
+        $secret_key = self::getRequired($array, 'secret_key');
+
+        if ($environment === 'production' && strlen($secret_key) < 64) {
+            throw new Errors\ConfigurationError(
+                'The secret_key must be at least 64 chars long and be cryptographically secure.'
+            );
+        }
+
+        return $secret_key;
+    }
+
+    /**
+     * Return the final url_options configuration.
+     *
+     * @param mixed[] $array
+     *
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the url_options is missing, if it’s not an array, or if it
+     *     doesn’t contain a host option.
+     *
+     * @return array
+     */
+    private static function getUrlOptions($array)
+    {
+        $url_options = self::getRequired($array, 'url_options');
+
+        if (!is_array($url_options)) {
+            throw new Errors\ConfigurationError(
+                'URL options configuration must be an array, containing at least a host key.'
+            );
+        }
+
+        if (!isset($url_options['host'])) {
+            throw new Errors\ConfigurationError(
+                'URL options configuration must contain at least a host key.'
+            );
+        }
+
+        $default_url_options = [
+            'path' => '/',
+            'protocol' => 'http',
+        ];
+        $url_options = array_merge($default_url_options, $url_options);
+
+        if (!isset($url_options['port'])) {
+            $protocol = $url_options['protocol'];
+            $url_options['port'] = $protocol === 'https' ? 443 : 80;
+        }
+
+        return $url_options;
+    }
+
+    /**
+     * Return the final database configuration.
+     *
+     * @param mixed[] $array
+     *
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the database option is not an array, if the dsn key is
+     *     missing, or if the database type is invalid. Also if host, port or
+     *     dbname are missing from the DSN if type is pgsql.
+     *
+     * @return array|null
+     */
+    private static function getDatabase($array)
+    {
+        $database = self::getDefault($array, 'database', null);
+        if ($database === null) {
+            return null;
+        }
+
+        if (!is_array($database)) {
+            throw new Errors\ConfigurationError(
+                'Database configuration must be an array, containing at least a dsn key.'
+            );
+        }
+
+        if (!isset($database['dsn'])) {
+            throw new Errors\ConfigurationError(
+                'Database configuration must contain at least a dsn key.'
+            );
+        }
+
+        $info_from_dsn = self::extractDsnInfo($database['dsn']);
+        $default_db_info = [
+            'username' => null,
+            'password' => null,
+            'options' => [],
+        ];
+        $database = array_merge($default_db_info, $database, $info_from_dsn);
+
+        if (!in_array($database['type'], self::VALID_DATABASE_TYPES)) {
+            throw new Errors\ConfigurationError(
+                "{$database['type']} database is not supported."
+            );
+        }
+
+        if ($database['type'] === 'pgsql') {
+            if (!isset($database['host'])) {
+                throw new Errors\ConfigurationError(
+                    'pgsql connection requires a `host` key, check your dsn string.'
+                );
+            }
+
+            if (!isset($database['port'])) {
+                throw new Errors\ConfigurationError(
+                    'pgsql connection requires a `port` key, check your dsn string.'
+                );
+            }
+
+            if (!isset($database['dbname'])) {
+                throw new Errors\ConfigurationError(
+                    'pgsql connection requires a `dbname` key, check your dsn string.'
+                );
+            }
+        }
+
+        return $database;
+    }
+
+    /**
      * Split a DSN string and return the information as an array.
      *
      * @param string $dsn
@@ -483,5 +504,60 @@ class Configuration
         $info['type'] = $database_type;
 
         return $info;
+    }
+
+    /**
+     * Return the final mailer configuration.
+     *
+     * @param mixed[] $array
+     *
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the mailer option is not an array, or if the type key is
+     *     invalid.
+     *
+     * @return array
+     */
+    private static function getMailer($array)
+    {
+        $mailer = self::getDefault($array, 'mailer', []);
+
+        if (!is_array($mailer)) {
+            throw new Errors\ConfigurationError(
+                'Mailer configuration must be an array.'
+            );
+        }
+
+        $default_mailer_options = [
+            'type' => 'mail',
+            'from' => 'root@localhost',
+            'debug' => $environment === 'development' ? 2 : 0,
+        ];
+        $mailer = array_merge($default_mailer_options, $mailer);
+
+        if (!in_array($mailer['type'], self::VALID_MAILER_TYPES)) {
+            throw new Errors\ConfigurationError(
+                "{$mailer['type']} is not a valid mailer type."
+            );
+        }
+
+        if ($mailer['type'] === 'smtp') {
+            $default_smtp_options = [
+                'domain' => '', // the domain used in the Message-ID header
+                'host' => 'localhost', // the SMTP server address
+                'port' => 25,
+                'auth' => false,
+                'auth_type' => '', // 'CRAM-MD5', 'LOGIN', 'PLAIN', 'XOAUTH2' or ''
+                'username' => '',
+                'password' => '',
+                'secure' => '', // '', 'ssl' or 'tls'
+            ];
+            if (!isset($mailer['smtp']) || !is_array($mailer['smtp'])) {
+                $mailer['smtp'] = [];
+            }
+            $smtp_options = array_merge($default_smtp_options, $mailer['smtp']);
+            $mailer['smtp'] = $smtp_options;
+        }
+
+        return $mailer;
     }
 }
