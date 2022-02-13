@@ -298,7 +298,7 @@ class Configuration
             sys_get_temp_dir() . '/' . self::$app_name . '/' . md5(rand())
         );
         self::$database = self::getDatabase($raw_configuration);
-        self::$mailer = self::getMailer($raw_configuration);
+        self::$mailer = self::getMailer($raw_configuration, $environment);
         self::$no_syslog_output = self::getDefault($raw_configuration, 'no_syslog_output', false);
     }
 
@@ -510,6 +510,7 @@ class Configuration
      * Return the final mailer configuration.
      *
      * @param mixed[] $array
+     * @param string $environment
      *
      * @throws \Minz\Errors\ConfigurationError
      *     Raised if the mailer option is not an array, or if the type key is
@@ -517,7 +518,7 @@ class Configuration
      *
      * @return array
      */
-    private static function getMailer($array)
+    private static function getMailer($array, $environment)
     {
         $mailer = self::getDefault($array, 'mailer', []);
 
