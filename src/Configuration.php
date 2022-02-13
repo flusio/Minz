@@ -3,143 +3,237 @@
 namespace Minz;
 
 /**
- * Represent the configuration of the application.
+ * The Configuration class represents the configuration of the application.
  *
- * `\Minz\Configuration::load($env, $app_path)` must be called at the very
- * beginning of the app initialization.
+ * It must be loaded at the very beginning of any initialization of Minz-based
+ * applications and scripts (e.g. `public/index.php`, `cli`, `tests/bootstrap.php`).
+ * It’s done with the `load()` method. For instance, in `public/index.php`:
  *
- * Configurations must be declared under a `configuration/` directory. They are
- * loaded for a given environment (either "development", "test" or
- * "production") and from a `configuration/environment_<environment>.php`
- * file, where `<environment>` is replaced by the value of the current env.
- * These files must return a PHP array and have access to the $app_path
- * variable. If a `.env` file exists at the root path, the files will also have
- * access to a $dotenv variable.
+ * ```php
+ * $app_path = realpath(__DIR__ . '/..');
+ * include $app_path . '/autoload.php';
+ * \Minz\Configuration::load('development', $app_path);
+ * ```
  *
- * An `environment` and an `app_path` values are automatically set from the
- * parameters of the `load` method.
+ * The first argument is the environment name. Valid values are `development`,
+ * `test` and `production`. It also can be set to `dotenv`, in which case Minz
+ * will look for an `APP_ENVIRONMENT` environment variable (either with PHP
+ * `getenv()` function or in a `.env` file). The second argument, `$app_path`,
+ * must point to the root directory of your application.
  *
- * Required parameters are:
- * - app_name: it must be the same as the base namespace of the application
- * - secret_key: a cryptographically secure string, it must be at least 64
- *               chars long in production
- * - url_options, with:
- *   - host: the domain name pointing to your server
- *   - port: the listening port of your server (default is set to 443 if
- *           protocol is https, else 80)
- *   - path: URI path to your application (default is /)
- *   - protocol: the protocol used by your server (default is http)
+ * Configuration is loaded from a `$app_path/configuration/environment_$environment.php`
+ * where `$app_path` and `$environment` are replaced by their corresponding
+ * variables (e.g. `/path/to/myapp/configuration/environment_development.php`).
+ * These files must return a PHP array and have access to the `$app_path`
+ * variable. If a `.env` file exists at the root path, the files also have
+ * access to a `$dotenv` variable. For instance, for an application named
+ * `myapp`:
  *
- * Other automated values are:
- * - configuration_path: the path to the configuration directory
- * - configuration_filepath: the path to the current configuration file
+ * ```php
+ * return [
+ *     'app_name' => 'myapp',
+ *     'secret_key' => $dotenv->pop('APP_SECRET_KEY'),
+ *     'url_options' => [
+ *         'host' => $dotenv->pop('APP_HOST', 'localhost'),
+ *     ],
+ *     'data_path' => $dotenv->pop('APP_DATA_PATH', $app_path . '/data'),
+ * ];
+ * ```
  *
- * Other optional keys are:
- * - data_path: the path to the data directory, default to $app_path/data
- * - schema_path: the path to the SQL schema file, default to $app_path/src/schema.sql
- * - database: an array specifying:
- *   - dsn
- *   - username (optional if database is sqlite)
- *   - password (optional if database is sqlite)
- *   - options (optional)
- *   See https://www.php.net/manual/fr/pdo.construct.php
- * - mailer: an array specifying mailing options, with:
- *   - type: either `mail`, `smtp` or `test`, default 'mail'
- *   - from: a valid email address, default 'root@localhost'
- *   - debug: optional, default is 2 if environment is set to `development`, 0
- *     otherwise
- *   - smtp: only if type is set to `stmp` (optional), with:
- *     - domain: the domain used in the Message-ID header, default ''
- *     - host: the SMTP server address, default 'localhost'
- *     - port: default 25
- *     - auth: whether to use SMTP authentication, default false
-       - auth_type: 'CRAM-MD5', 'LOGIN', 'PLAIN', 'XOAUTH2' or '', default ''
- *     - username: default ''
- *     - password: default ''
- *     - secure: '', 'ssl' or 'tls', default ''
- * - application: you can set options specific to your application here,
- *   default to empty array
- * - no_syslog_output: `true` to not output logs to the console, default to `false`
+ * Configuration can then be accessed from anywhere in your application:
+ *
+ * ```php
+ * echo 'Application name is: ' . \Minz\Configuration::$app_name;
+ * echo 'Data path is: ' . \Minz\Configuration::$data_path;
+ * echo 'Environment is: ' . \Minz\Configuration::$environment;
+ * ```
+ *
+ * Available configuration variables are described below. Please note that some
+ * are automatically generated, some must be declared, and the last are
+ * optional.
+ *
+ * @see \Minz\Dotenv
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Configuration
 {
-    /** @var string[] */
     private const VALID_ENVIRONMENTS = ['development', 'test', 'production'];
 
-    /** @var string The environment in which the application is run */
-    public static $environment;
+    private const VALID_DATABASE_TYPES = ['sqlite', 'pgsql'];
 
-    /** @var string The base path of the application */
-    public static $app_path;
-
-    /** @var string The path to the configuration directory */
-    public static $configuration_path;
-
-    /** @var string The path to the current configuration file */
-    public static $configuration_filepath;
-
-    /** @var string The path to a tmp directory */
-    public static $tmp_path;
-
-    /** @var string The path to the data directory */
-    public static $data_path;
-
-    /** @var string The path to the schema.sql file */
-    public static $schema_path;
-
-    /** @var string A cryptographically secret key generated by the administrator */
-    public static $secret_key;
+    private const VALID_MAILER_TYPES = ['mail', 'smtp', 'test'];
 
     /**
-     * @var string The name of the application. It must be identical to the
-     *             application's namespace.
+     * AUTOMATIC VARIABLES
+     *
+     * These variables are accessible in the configuration files, but you
+     * really don’t want to overwrite their values. No, you don’t.
+     */
+
+    /**
+     * @var string The environment in which the application run
+     */
+    public static $environment;
+
+    /**
+     * @var string The path to the root directory of the application
+     */
+    public static $app_path;
+
+    /**
+     * @var string The path to the configuration directory
+     */
+    public static $configuration_path;
+
+    /**
+     * @var string The path to the current configuration file
+     */
+    public static $configuration_filepath;
+
+    /**
+     * REQUIRED VARIABLES
+     *
+     * These variables *must* be declared in your configuration file. The
+     * initialization will fail if they are not.
+     */
+
+    /**
+     * @var string
+     *     The name of the application. It must be identical to the application
+     *     namespace (e.g. if your base namespace is `myapp\`, its value must
+     *     be set to `myapp`).
      */
     public static $app_name;
 
-    /** @var array The web server information to build URLs */
+    /**
+     * @var string
+     *     A cryptographically secret key generated by the administrator, it
+     *     must be at least 64 chars long in production.
+     */
+    public static $secret_key;
+
+    /**
+     * @var array
+     *     The web server information to build URLs. It’s an array where keys
+     *     are:
+     *     - host: the domain name serving your application (required)
+     *     - port: the port of your server (default is set to `443` if protocol
+     *       is https, else `80`)
+     *     - path: the path to your application (default is `/`)
+     *     - protocol: the protocol used by your server (default is `http`)
+     */
     public static $url_options;
 
-    /** @var array An array containing mailer configuration */
-    public static $mailer;
+    /**
+     * OPTIONAL VARIABLES
+     *
+     * Loading configuration will not fail if these variables aren’t declared
+     * in your file. It doesn’t mean your application will work as expected
+     * though.
+     */
 
-    /** @var string[] An array containing database configuration */
-    public static $database;
-
-    /** @var array An array for options spectific to the application */
+    /**
+     * @var array
+     *     Declare options specific to your application (default is an empty array)
+     */
     public static $application;
 
-    /** @var boolean Indicate if syslog must output \Minz\Log calls to the console */
+    /**
+     * @var string
+     *     The path to the data directory (default is `$app_path/data`)
+     */
+    public static $data_path;
+
+    /**
+     * @var string
+     *     The path to the SQL schema of your application (default is
+     *     `$app_path/src/schema.sql`)
+     */
+    public static $schema_path;
+
+    /**
+     * @var string
+     *     The path to a temporary directory (default is a random directory
+     *     created under `sys_get_temp_dir()/$app_name`)
+     */
+    public static $tmp_path;
+
+    /**
+     * @var array
+     *     The information to access your database. It’s an array where keys are:
+     *     - dsn: the Data Source Name containing the info to connect to the
+     *       database. Only `pgsql` and `sqlite` drivers are supported. A
+     *       connection to a Postgres database requires that `host`, `port` and
+     *       `dbname` are declared in the DSN. It is recommended to pass
+     *       username and password separately. Username and password from the
+     *       DSN have priority over the ones from the configuration.
+     *     - username: the username to connect to the database (optional)
+     *     - password: the password to connect to the database (optional)
+     *     - options: options to pass to the \PDO constructor (optional)
+     * @see https://www.php.net/manual/pdo.construct.php
+     */
+    public static $database;
+
+    /**
+     * @var array
+     *     The information to send emails. It’s an array where keys are:
+     *     - type: either `mail` (default), `smtp` or `test`
+     *     - from: a valid email address (default is `root@localhost`)
+     *     - debug: the level of verbosity of PHPMailer (default is `2` in
+     *       development environment, `0` otherwise)
+     *     - smtp: information to connect to a SMTP server (only used if type is `stmp`).
+     *       It’s an array where keys are:
+     *         - domain: the domain used in the Message-ID header (default is ``)
+     *         - host: the SMTP server address (default is `localhost`)
+     *         - port: the SMTP port (default is `25`)
+     *         - auth: if SMTP authentication should be used (default is `false`)
+     *         - auth_type: possible values are `CRAM-MD5`, `LOGIN`, `PLAIN`,
+     *           `XOAUTH2` or `` (default)
+     *         - username: the username to connect to the SMTP server (default is ``)
+     *         - password: the password to connect to the SMTP server (default is ``)
+     *         - secure: possible values are `ssl`, `tls` or `` (default)
+     * @see \PHPMailer\PHPMailer\PHPMailer
+     */
+    public static $mailer;
+
+    /**
+     * @var boolean
+     *     Specify if syslog must output \Minz\Log calls to the console
+     *     (default is `false`)
+     */
     public static $no_syslog_output;
 
     /**
-     * Load the application's configuration, for a given environment.
+     * Load the application configuration for a given environment.
      *
-     * @param string $environment Can be set to development, production, test
-     *                            or dotenv. In the last case, a `APP_ENVIRONMENT`
-     *                            is searched either in the environment
-     *                            variables or in a `.env` file.
+     * @param string $environment
+     *     Can be set to development, production, test or dotenv. In the last
+     *     case, a `APP_ENVIRONMENT` is searched either in the environment
+     *     variables or in a `.env` file.
      * @param string $app_path
+     *     The path to the root directory of the application.
      *
-     * @throws \Minz\Errors\ConfigurationError if the environment is not part
-     *                                         of the valid environments
-     * @throws \Minz\Errors\ConfigurationError if the corresponding environment
-     *                                         configuration file doesn't exist
-     * @throws \Minz\Errors\ConfigurationError if a required value is missing
-     * @throws \Minz\Errors\ConfigurationError if a value doesn't match with
-     *                                         the required format
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the environment is not part of the valid environments, if
+     *     the corresponding environment configuration file doesn't exist, if a
+     *     required value is missing, or if a value doesn't match the required
+     *     format.
      *
      * @return void
      */
     public static function load($environment, $app_path)
     {
+        // If the app declares a .env file, we initialize a $dotenv variable
+        // (it will be accessible in the configuration file then).
         $dotenv_path = $app_path . '/.env';
         if (file_exists($dotenv_path)) {
             $dotenv = new Dotenv($dotenv_path);
         }
 
+        // If environment is set to dotenv, we look for an APP_ENVIRONMENT
+        // environment variable to find the "real" value of the environment.
         if ($environment === 'dotenv') {
             if (isset($dotenv)) {
                 $environment = $dotenv->pop('APP_ENVIRONMENT');
@@ -160,6 +254,8 @@ class Configuration
             );
         }
 
+        // Load the configuration file and make sure that it exists. A missing
+        // file would be problematic to load required variables :)
         $configuration_path = $app_path . '/configuration';
         $configuration_filename = "environment_{$environment}.php";
         $configuration_filepath = $configuration_path . '/' . $configuration_filename;
@@ -169,13 +265,17 @@ class Configuration
             );
         }
 
+        // The consequence of including the configuration file this way is that
+        // it has access to the variable declare above: that's what we want!
         $raw_configuration = include($configuration_filepath);
 
+        // Initialize the automatic variables
         self::$environment = $environment;
         self::$app_path = $app_path;
         self::$configuration_path = $configuration_path;
         self::$configuration_filepath = $configuration_filepath;
 
+        // Then, get the required variables from the configuration file
         self::$app_name = self::getRequired($raw_configuration, 'app_name');
 
         self::$secret_key = self::getRequired($raw_configuration, 'secret_key');
@@ -207,22 +307,22 @@ class Configuration
             self::$url_options['port'] = self::$url_options['protocol'] === 'https' ? 443 : 80;
         }
 
-        self::$tmp_path = self::getDefault(
-            $raw_configuration,
-            'tmp_path',
-            sys_get_temp_dir() . '/' . self::$app_name . '/' . md5(rand())
-        );
-
+        // And, finally, get the optional variables
+        self::$application = self::getDefault($raw_configuration, 'application', []);
         self::$data_path = self::getDefault(
             $raw_configuration,
             'data_path',
             $app_path . '/data'
         );
-
         self::$schema_path = self::getDefault(
             $raw_configuration,
             'schema_path',
             $app_path . '/src/schema.sql'
+        );
+        self::$tmp_path = self::getDefault(
+            $raw_configuration,
+            'tmp_path',
+            sys_get_temp_dir() . '/' . self::$app_name . '/' . md5(rand())
         );
 
         $database = self::getDefault($raw_configuration, 'database', null);
@@ -240,16 +340,20 @@ class Configuration
             }
 
             $info_from_dsn = self::extractDsnInfo($database['dsn']);
-            $additional_default_values = [
+            $default_db_info = [
                 'username' => null,
                 'password' => null,
                 'options' => [],
             ];
-            $database = array_merge($additional_default_values, $database, $info_from_dsn);
+            $database = array_merge($default_db_info, $database, $info_from_dsn);
 
-            if ($database['type'] === 'sqlite') {
-                // all should be good, do nothing
-            } elseif ($database['type'] === 'pgsql') {
+            if (!in_array($database['type'], self::VALID_DATABASE_TYPES)) {
+                throw new Errors\ConfigurationError(
+                    "{$database['type']} database is not supported."
+                );
+            }
+
+            if ($database['type'] === 'pgsql') {
                 if (!isset($database['host'])) {
                     throw new Errors\ConfigurationError(
                         'pgsql connection requires a `host` key, check your dsn string.'
@@ -267,12 +371,9 @@ class Configuration
                         'pgsql connection requires a `dbname` key, check your dsn string.'
                     );
                 }
-            } else {
-                throw new Errors\ConfigurationError(
-                    "{$database['type']} database is not supported."
-                );
             }
         }
+
         self::$database = $database;
 
         $default_mailer_options = [
@@ -285,7 +386,7 @@ class Configuration
             self::getDefault($raw_configuration, 'mailer', [])
         );
 
-        if (!in_array($mailer['type'], ['mail', 'smtp', 'test'])) {
+        if (!in_array($mailer['type'], self::VALID_MAILER_TYPES)) {
             throw new Errors\ConfigurationError(
                 "{$mailer['type']} is not a valid mailer type."
             );
@@ -311,8 +412,6 @@ class Configuration
 
         self::$mailer = $mailer;
 
-        self::$application = self::getDefault($raw_configuration, 'application', []);
-
         self::$no_syslog_output = self::getDefault($raw_configuration, 'no_syslog_output', false);
     }
 
@@ -323,7 +422,8 @@ class Configuration
      * @param mixed[] $array
      * @param string $key
      *
-     * @throws \Minz\Errors\ConfigurationError if the given key is not in the array
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the given key is not in the array
      *
      * @return mixed
      */
@@ -356,11 +456,11 @@ class Configuration
     }
 
     /**
-     * Split a DSN string and return the information as an array
+     * Split a DSN string and return the information as an array.
      *
      * @param string $dsn
      *
-     * @return array
+     * @return string[]
      */
     private static function extractDsnInfo($dsn)
     {
