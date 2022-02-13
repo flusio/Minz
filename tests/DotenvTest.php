@@ -46,6 +46,20 @@ class DotenvTest extends TestCase
         $variable = $dotenv->pop('FOO');
 
         $this->assertSame('spam', $variable);
+        putenv('FOO');
+    }
+
+    public function testPopErasesTheValueWithEnvAlreadySet()
+    {
+        putenv('FOO=spam');
+        $dotenv_path = Configuration::$app_path . '/dotenv';
+        $dotenv = new Dotenv($dotenv_path);
+
+        $dotenv->pop('FOO');
+        putenv('FOO');
+        $variable = $dotenv->pop('FOO');
+
+        $this->assertNull($variable);
     }
 
     public function testPopWithEnvSetButNotInDotenv()

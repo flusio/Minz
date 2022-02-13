@@ -141,12 +141,17 @@ class Dotenv
     public function pop($name, $default = null)
     {
         $value_from_env = getenv($name);
+        if (isset($this->variables[$name])) {
+            $value_from_file = $this->variables[$name];
+            unset($this->variables[$name]);
+        } else {
+            $value_from_file = false;
+        }
+
         if ($value_from_env !== false) {
             return $value_from_env;
-        } elseif (isset($this->variables[$name])) {
-            $value = $this->variables[$name];
-            unset($this->variables[$name]);
-            return $value;
+        } elseif ($value_from_file !== false) {
+            return $value_from_file;
         } else {
             return $default;
         }
