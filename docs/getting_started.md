@@ -512,6 +512,6 @@ Next steps to learn Minz:
 
 - get [an overview of its classes](/docs/overview.md);
 - read [its source code](/src) and get used to it;
-- read the source code of [the applications](/README.md#projects-using-minz)
+- read the source code of [the applications](/README.md#minz-in-the-real-world)
   that I wrote with Minz;
 - if you have any question, [open an issue on GitHub](https://github.com/flusio/Minz/issues).

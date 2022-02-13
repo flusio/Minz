@@ -70,9 +70,9 @@ and Ruby these last years).
 
 It's still fun to develop a framework from scratch… and it takes some time too.
 
-## Projects using Minz
+## Minz in the real world
 
-Today, I use Minz in several project:
+Today, I use Minz in several projects:
 
 - [flusio](https://github.com/flusio/flusio): a feed aggregator and social
   bookmarking tool;
