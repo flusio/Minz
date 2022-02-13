@@ -15,7 +15,7 @@ class RequestTest extends TestCase
     {
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage(
-            "{$invalidMethod} method is invalid (get, post, patch, put, delete, cli)."
+            "`{$invalidMethod}` method is invalid (accepted methods: get, post, patch, put, delete, cli)."
         );
 
         new Request($invalidMethod, '/');
@@ -49,12 +49,20 @@ class RequestTest extends TestCase
         new Request('GET', 'no_slash');
     }
 
-    public function testConstructorFailsIfParametersIsntArray()
+    public function testConstructorFailsIfParametersAreNotArray()
     {
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('Parameters are not in an array.');
 
         new Request('GET', '/', 'a parameter ?');
+    }
+
+    public function testConstructorFailsIfHeadersAreNotArray()
+    {
+        $this->expectException(Errors\RequestError::class);
+        $this->expectExceptionMessage('Headers are not in an array.');
+
+        new Request('GET', '/', [], 'a header ?');
     }
 
     public function testMethod()
