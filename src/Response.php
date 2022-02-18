@@ -3,18 +3,100 @@
 namespace Minz;
 
 /**
- * The Response represents the answer given to a Request, and returned to the
- * user.
+ * The Response represents the answer given to a Request. It is returned to a client.
  *
- * An Output can be attached to a Response. This is destined to generate the
- * content to return to the user.
+ * The response is initialized and returned by a controller action. It contains
+ * a status code, headers and optional cookies and output.
+ *
+ * The code must be a valid HTTP code, even in CLI mode.
+ *
+ * A response almost always declares a Content-Type and a Content-Security-Policy
+ * headers (except when it's not pertinent).
+ *
+ * An Output can be attached to a Response. The output is in charge of
+ * generating the content to return to the client. There are three kind of
+ * output implementing the Output interface:
+ *
+ * - \Minz\Output\File: to serve a file;
+ * - \Minz\Output\Text: to render text;
+ * - \Minz\Output\View: to generate more complex structures (e.g. HTML) based
+ *   on a simple template system.
+ *
+ * For instance, to generate a text response:
+ *
+ * ```php
+ * $text_output = new \Minz\Output\Text('some text');
+ * $response = new Response(200, $text_output);
+ *
+ * // Can be shortened in
+ * $response = Response::text(200, 'some text');
+ * ```
+ *
+ * Or to generate a HTML response:
+ *
+ * ```php
+ * $view_output = new Output\View('pointer/to/view.phtml', [
+ *     'foo' => 'bar',
+ * ]);
+ * $response = new Response(200, $view_output);
+ *
+ * // Can be shortened in
+ * $response = Response::ok('pointer/to/view.phtml', [
+ *     'foo' => 'bar',
+ * ]);
+ * ```
+ *
+ * You most probably want to use the short versions to generate responses since
+ * they are a lot easier to use. It’s important to know the mechanics though.
+ * It can be useful to create new kind of outputs for instance.
+ *
+ * @see \Minz\Output\File
+ * @see \Minz\Output\Text
+ * @see \Minz\Output\View
+ * @see \Minz\Output\Output
+ *
+ * The responses are returned to the calling script which must generate the
+ * corresponding headers, cookies and content. For instance, in `public/index.php`:
+ *
+ * ```php
+ * $application = new \myapp\Application();
+ * $response = $application->run($request);
+ *
+ * http_response_code($response->code());
+ *
+ * foreach ($response->cookies() as $cookie) {
+ *     setcookie($cookie['name'], $cookie['value'], $cookie['options']);
+ * }
+ *
+ * foreach ($response->headers() as $header) {
+ *     header($header);
+ * }
+ *
+ * echo $response->render();
+ * ```
+ *
+ * In a CLI script, it is quite different since cookies and headers aren't
+ * relevant:
+ *
+ * ```php
+ * $application = new \myapp\cli\Application();
+ * $response = $application->run($request);
+ *
+ * echo $response->render() . "\n";
+ *
+ * $code = $response->code();
+ * if ($code >= 200 && $code < 300) {
+ *     exit(0);
+ * } else {
+ *     exit(1);
+ * }
+ * ```
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Response
 {
-    /** @var integer[] */
     public const VALID_HTTP_CODES = [
         100, 101,
         200, 201, 202, 203, 204, 205, 206,
@@ -28,13 +110,31 @@ class Response
         'default-src' => "'self'",
     ];
 
+    /** @var integer */
+    private $code;
+
+    /** @var string[] */
+    private $headers = [];
+
+    /** @var array */
+    private $cookies = [];
+
+    /** @var \Minz\Output\Output */
+    private $output;
+
     /**
-     * Create a successful response (HTTP 200) with a Output\View.
+     * Create a OK response (HTTP 200) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -49,12 +149,18 @@ class Response
     }
 
     /**
-     * Create a created response (HTTP 201) with a Output\View.
+     * Create a created response (HTTP 201) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -69,12 +175,18 @@ class Response
     }
 
     /**
-     * Create an accepted response (HTTP 202) with a Output\View.
+     * Create an accepted response (HTTP 202) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -89,12 +201,7 @@ class Response
     }
 
     /**
-     * Create a no content response (HTTP 204) with a Output\View.
-     *
-     * @param string $view_pointer
-     * @param mixed[] $variables
-     *
-     * @throws \Minz\Errors\OutputError
+     * Create a no content response (HTTP 204).
      *
      * @return \Minz\Response
      */
@@ -107,6 +214,7 @@ class Response
      * Create a moved permanently response (HTTP 301).
      *
      * @param string $url
+     *     The url to redirect to.
      *
      * @return \Minz\Response
      */
@@ -121,6 +229,7 @@ class Response
      * Create a found response (HTTP 302).
      *
      * @param string $url
+     *     The url to redirect to.
      *
      * @return \Minz\Response
      */
@@ -132,26 +241,46 @@ class Response
     }
 
     /**
-     * Create a found response (HTTP 302) with internal action pointer.
+     * Create a found response (HTTP 302) to an action pointer.
      *
-     * @param string $action_pointer
+     * It is a shortcut to generate internal redirections. For instance:
+     *
+     * ```php
+     * // In Application.php
+     * $router = new \Minz\Router();
+     * $router->addRoute('get', '/', 'Pages#Home', 'home');
+     * \Minz\Url::setRouter($router);
+     *
+     * // In a controller action
+     * $response = \Minz\Response::redirect('home');
+     * ```
+     *
+     * @param string $action_pointer_or_name
+     *     An action pointer or action name declared in the router.
      * @param array $parameters
+     *     The parameters to build the action URL (empty array by default).
      *
      * @return \Minz\Response
      */
-    public static function redirect($action_pointer, $parameters = [])
+    public static function redirect($action_pointer_or_name, $parameters = [])
     {
-        $url = Url::for($action_pointer, $parameters);
+        $url = Url::for($action_pointer_or_name, $parameters);
         return self::found($url);
     }
 
     /**
-     * Create a bad request response (HTTP 400) with a Output\View.
+     * Create a bad request response (HTTP 400) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -166,12 +295,18 @@ class Response
     }
 
     /**
-     * Create an unauthorized response (HTTP 401) with a Output\View.
+     * Create an unauthorized response (HTTP 401) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -186,12 +321,18 @@ class Response
     }
 
     /**
-     * Create a not found response (HTTP 404) with a Output\View.
+     * Create a not found response (HTTP 404) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -206,12 +347,18 @@ class Response
     }
 
     /**
-     * Create an internal server error response (HTTP 500) with a Output\View.
+     * Create an internal server error response (HTTP 500) with an optional Output\View.
+     *
+     * @see \Minz\Output\View
      *
      * @param string $view_pointer
+     *     A pointer to an existing view file under src/views (default is an
+     *     empty string).
      * @param mixed[] $variables
+     *     The variables to pass to the View (default is an empty array)
      *
      * @throws \Minz\Errors\OutputError
+     *     Raised if the view file doesn't exist.
      *
      * @return \Minz\Response
      */
@@ -228,8 +375,12 @@ class Response
     /**
      * Create a text response with the given HTTP code.
      *
+     * @see \Minz\Output\Text
+     *
      * @param integer $code
+     *     The HTTP status code.
      * @param string $text
+     *     The text to render.
      *
      * @return \Minz\Response
      */
@@ -242,8 +393,12 @@ class Response
     /**
      * Create a Json response with the given HTTP code.
      *
+     * @see https://www.php.net/manual/function.json-encode.php
+     *
      * @param integer $code
-     * @param mixed $value The value to encode with json_encode
+     *     The HTTP status code.
+     * @param mixed $value
+     *     The value to encode with json_encode.
      *
      * @return \Minz\Response
      */
@@ -257,12 +412,15 @@ class Response
     }
 
     /**
-     * Create a Response from a HTTP status code.
+     * Create a Response from a HTTP status code and an optional output.
      *
-     * @param integer $code The HTTP code to set for the response
-     * @param \Minz\Output\Output $output The output to set to the response (optional)
+     * @param integer $code
+     *     The HTTP status code.
+     * @param \Minz\Output\Output $output
+     *     The Output to set to the response (optional).
      *
-     * @throws \Minz\Errors\ResponseError if the code is not a valid HTTP status code
+     * @throws \Minz\Errors\ResponseError
+     *     Raised if the code is not a valid HTTP status code.
      */
     public function __construct($code, $output = null)
     {
@@ -277,20 +435,8 @@ class Response
         $this->setHeader('Content-Security-Policy', self::DEFAULT_CSP);
     }
 
-    /** @var integer */
-    private $code;
-
-    /** @var string[] */
-    private $headers = [];
-
-    /** @var array */
-    private $cookies = [];
-
-    /** @var \Minz\Output\Output */
-    private $output;
-
     /**
-     * @return \Minz\Output\Output The current output
+     * @return \Minz\Output\Output
      */
     public function output()
     {
@@ -299,6 +445,8 @@ class Response
 
     /**
      * @param \Minz\Output\Output $output
+     *
+     * @return void
      */
     public function setOutput($output)
     {
@@ -306,7 +454,7 @@ class Response
     }
 
     /**
-     * @return integer The current HTTP code
+     * @return integer
      */
     public function code()
     {
@@ -316,7 +464,8 @@ class Response
     /**
      * @param integer $code
      *
-     * @throws \Minz\Errors\ResponseError if the code is not a valid HTTP status code
+     * @throws \Minz\Errors\ResponseError
+     *     Raised if the code is not a valid HTTP status code.
      *
      * @return void
      */
@@ -332,21 +481,32 @@ class Response
     /**
      * Add or replace a HTTP header.
      *
-     * @param string $header
+     * @param string $name
+     *     The header name to set.
      * @param string $value
+     *     The value of the header.
      *
      * @return void
      */
-    public function setHeader($header, $value)
+    public function setHeader($name, $value)
     {
-        $this->headers[$header] = $value;
+        $this->headers[$name] = $value;
     }
 
     /**
-     * Helper to change CSP header
+     * Change a Content-Security-Policy directive.
+     *
+     * `Content-Security-Policy` header allows to control resources a client is
+     * allowed to load.
+     *
+     * @see https://developer.mozilla.org/docs/Web/HTTP/Headers/Content-Security-Policy
      *
      * @param string $directive
+     *     The CSP directive name.
      * @param string $sources
+     *     The sources for which the directive is allowed.
+     *
+     * @return void
      */
     public function setContentSecurityPolicy($directive, $sources)
     {
@@ -354,11 +514,40 @@ class Response
     }
 
     /**
-     * Return the headers as strings to be passed to the PHP header function.
+     * Return the headers of the Response.
      *
-     * @param boolean $raw True to return the raw array (false by default)
+     * Headers can be returned as strings via the `$raw` parameter in order to
+     * be passed to the PHP `header()` function. For instance:
      *
-     * @return string[] The list of actual headers
+     * ```php
+     * $response->setHeader('Content-Type', 'text/plain');
+     * $response->setContentSecurityPolicy('default-src', "'self'");
+     * $response->setContentSecurityPolicy('style-src', "'self' 'unsafe-inline'");
+     *
+     * $response->headers(true);
+     * // will return
+     * [
+     *     'Content-Type' => 'text/plain',
+     *     'Content-Security-Policy' => [
+     *         'default-src' => "'self'",
+     *         'style-src' => "'self' 'unsafe-inline'",
+     *     ],
+     * ]
+     *
+     * $response->headers(false);
+     * // will return
+     * [
+     *     'Content-Type: text/plain',
+     *     "Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'",
+     * ]
+     * ```
+     *
+     * @param boolean $raw
+     *     True indicates that headers should be returned as is, false (default)
+     *     that they should be processed in order to be passed to the PHP
+     *     `header()` function.
+     *
+     * @return string[]
      */
     public function headers($raw = false)
     {
@@ -383,8 +572,8 @@ class Response
     /**
      * Set a cookie to the response.
      *
-     * Parameters are similar to setcookie PHP function but default options are
-     * more robust to improve the security.
+     * Parameters are similar to `setcookie()` PHP function but default options
+     * are more robust to improve the security.
      *
      * Default options are:
      *
@@ -396,14 +585,21 @@ class Response
      * - httponly: true
      * - samesite: Strict
      *
-     * Also, the cookies are not immediately sent to let the developer to
-     * choose the correct moment.
+     * Note that `setcookie()` is not called by this method. It must be called
+     * manually in the `public/index.php` file for instance. Per consequence,
+     * it doesn't generate a `E_WARNING` error if options are invalid and it
+     * doesn't return any boolean.
      *
      * @see https://www.php.net/manual/function.setcookie.php
      *
      * @param string $name
+     *     The name of the cookie.
      * @param string $value
+     *     The value of the cookie.
      * @param array $options
+     *     Additional options
+     *
+     * @return void
      */
     public function setCookie($name, $value, $options = [])
     {
@@ -432,8 +628,14 @@ class Response
     /**
      * Send instructions to the browser to remove a cookie.
      *
+     * To remove the cookie, the expiration date is set to 1 year in the past.
+     *
      * @param string $name
+     *     The name of the cookie to remove.
      * @param array $options
+     *     Additional options to pass to the cookie.
+     *
+     * @return void
      */
     public function removeCookie($name, $options = [])
     {
@@ -442,10 +644,13 @@ class Response
     }
 
     /**
-     * Return the list of cookies
+     * Return the list of cookies.
      *
      * The cookies are represented as an array with the following keys: name,
-     * value and options. They can be passed as setcookie function arguments.
+     * value and options. They can be passed as arguments to the `setcookie()`
+     * function.
+     *
+     * @see https://www.php.net/manual/function.setcookie.php
      *
      * @return array
      */
@@ -457,7 +662,9 @@ class Response
     /**
      * Generate and return the content of the output.
      *
-     * @return string Return the output, or an empty string if no outputs are attached.
+     * @return string
+     *     Return the output, or an empty string if the response doesn't have
+     *     any output.
      */
     public function render()
     {
