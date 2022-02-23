@@ -236,7 +236,7 @@ class View implements Output
     private function safe($variable_name)
     {
         $variables = array_merge(self::$default_variables, $this->variables);
-        if (!isset($variables[$variable_name])) {
+        if (!array_key_exists($variable_name, $variables)) {
             throw new Errors\OutputError("{$variable_name} variable does not exist.");
         }
 
