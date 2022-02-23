@@ -218,7 +218,7 @@ class View implements Output
      *
      * @throws \Minz\Errors\OutputError if the included pointer file doesn't exist
      */
-    private function include($pointer, $variables)
+    private function include($pointer, $variables = [])
     {
         $view = new View($pointer, $variables);
         return $view->render();
