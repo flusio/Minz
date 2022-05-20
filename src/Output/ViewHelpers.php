@@ -25,6 +25,8 @@ function protect($variable)
 /**
  * Alias for \Minz\Url::for
  *
+ * URL is protected against XSS attacks.
+ *
  * @see \Minz\Url::for
  */
 function url($action_pointer, $parameters = [])
@@ -35,11 +37,33 @@ function url($action_pointer, $parameters = [])
 /**
  * Alias for \Minz\Url::absoluteFor
  *
+ * URL is protected against XSS attacks.
+ *
  * @see \Minz\Url::absoluteFor
  */
 function url_full($action_pointer, $parameters = [])
 {
     return protect(\Minz\Url::absoluteFor($action_pointer, $parameters));
+}
+
+/**
+ * Alias for \Minz\Url::for
+ *
+ * @see \Minz\Url::for
+ */
+function url_unsafe($action_pointer, $parameters = [])
+{
+    return \Minz\Url::for($action_pointer, $parameters);
+}
+
+/**
+ * Alias for \Minz\Url::absoluteFor
+ *
+ * @see \Minz\Url::absoluteFor
+ */
+function url_full_unsafe($action_pointer, $parameters = [])
+{
+    return \Minz\Url::absoluteFor($action_pointer, $parameters);
 }
 
 /**
