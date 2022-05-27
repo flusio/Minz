@@ -19,6 +19,10 @@
  */
 function protect($variable)
 {
+    if (!$variable) {
+        return '';
+    }
+
     return htmlspecialchars($variable, ENT_COMPAT, 'UTF-8');
 }
 
