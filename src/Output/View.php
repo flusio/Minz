@@ -162,7 +162,7 @@ class View implements Output
             $$var_name = $var_value;
         }
 
-        include_once('ViewHelpers.php');
+        include_once('view_helpers.php');
 
         ob_start();
         include $this->filepath;
