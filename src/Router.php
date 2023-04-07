@@ -6,31 +6,49 @@ namespace Minz;
  * The Router stores the different routes of the application and is responsible
  * of matching user request path with patterns.
  *
+ * @phpstan-import-type RequestMethod from Request
+ *
+ * @phpstan-import-type RequestParameters from Request
+ *
+ * @phpstan-type Routes array<RoutePattern, RoutePointer>
+ *
+ * @phpstan-type Route array{
+ *     'method': RequestMethod,
+ *     'pattern': RoutePattern,
+ *     'action_pointer': RoutePointer,
+ * }
+ *
+ * @phpstan-type RoutePattern non-empty-string
+ *
+ * @phpstan-type RoutePointer non-empty-string
+ *
+ * @phpstan-type RouteName non-empty-string
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Router
 {
-    /** @var string[] */
-    public const VALID_VIAS = ['get', 'post', 'patch', 'put', 'delete', 'cli'];
+    /**
+     * Contains the routes of the application. First level is indexed by
+     * request methods (it is initialized in constructor), second level is
+     * indexed by the paths and values are the routes destinations.
+     *
+     * @var array<RequestMethod, Routes>
+     */
+    private array $routes = [];
 
     /**
-     * @var string[][] Contains the routes of the application. First level is
-     *                 indexed by "vias" (it is initialized in constructor),
-     *                 second level is indexed by the paths and values are the
-     *                 routes destinations.
+     * Contains the routes indexed by their names
+     *
+     * @var array<RouteName, Route>
      */
-    private $routes = [];
-
-    /**
-     * @var array Contains the routes indexed by their names
-     */
-    private $routes_by_names = [];
+    private array $routes_by_names = [];
 
     public function __construct()
     {
-        foreach (self::VALID_VIAS as $via) {
-            $this->routes[$via] = [];
+        foreach (Request::VALID_METHODS as $method) {
+            $this->routes[$method] = [];
         }
     }
 
@@ -46,32 +64,22 @@ class Router
      * action name, separated by a hash. For instance, `rabbits#items` points
      * to the `items` action of the `rabbits` controller.
      *
-     * @param string $via The valid via(s) of the route
-     * @param string $pattern The path pattern of the new route
-     * @param string $action_pointer The destination of the route
-     * @param string $route_name An optional name for the route
+     * @param RequestMethod $method
+     * @param RoutePattern $pattern
+     * @param RoutePointer $action_pointer
+     * @param ?RouteName $route_name
      *
      * @throws \Minz\Errors\RoutingError if pattern is empty
      * @throws \Minz\Errors\RoutingError if pattern doesn't start by a slash
      * @throws \Minz\Errors\RoutingError if action_pointer is empty
      * @throws \Minz\Errors\RoutingError if action_pointer contains no hash
      * @throws \Minz\Errors\RoutingError if action_pointer contains more than one hash
-     * @throws \Minz\Errors\RoutingError if via is invalid
-     *
-     * @return void
+     * @throws \Minz\Errors\RoutingError if method is invalid
      */
-    public function addRoute($via, $pattern, $action_pointer, $route_name = '')
+    public function addRoute(string $method, string $pattern, string $action_pointer, ?string $route_name = null): void
     {
-        if (!$pattern) {
-            throw new Errors\RoutingError('Route "pattern" cannot be empty.');
-        }
-
         if ($pattern[0] !== '/') {
             throw new Errors\RoutingError('Route "pattern" must start by a slash (/).');
-        }
-
-        if (!$action_pointer) {
-            throw new Errors\RoutingError('Route "action_pointer" cannot be empty.');
         }
 
         if (strpos($action_pointer, '#') === false) {
@@ -86,17 +94,17 @@ class Router
             );
         }
 
-        if (!in_array($via, self::VALID_VIAS)) {
-            $vias_as_string = implode(', ', self::VALID_VIAS);
+        if (!in_array($method, Request::VALID_METHODS)) {
+            $methods_as_string = implode(', ', Request::VALID_METHODS);
             throw new Errors\RoutingError(
-                "{$via} via is invalid ({$vias_as_string})."
+                "{$method} method is invalid ({$methods_as_string})."
             );
         }
 
-        $this->routes[$via][$pattern] = $action_pointer;
+        $this->routes[$method][$pattern] = $action_pointer;
         if ($route_name) {
             $this->routes_by_names[$route_name] = [
-                'via' => $via,
+                'method' => $method,
                 'pattern' => $pattern,
                 'action_pointer' => $action_pointer,
             ];
@@ -104,23 +112,21 @@ class Router
     }
 
     /**
-     * Return the matching action pointer for given request via and path.
+     * Return the matching action pointer for given request method and path.
      *
-     * @param string $via
-     * @param string $path
+     * @param RequestMethod $method
      *
-     * @throws \Minz\Errors\RoutingError if via is invalid
+     * @throws \Minz\Errors\RoutingError if method is invalid
      * @throws \Minz\Errors\RouteNotFoundError if no patterns match with the path
      *
-     * @return array An array of 2 elements: the first one is action pointer,
-     *               the second is the list of matching parameters
+     * @return array{RoutePointer, RequestParameters}
      */
-    public function match($via, $path)
+    public function match(string $method, string $path): array
     {
-        if (!in_array($via, self::VALID_VIAS)) {
-            $vias_as_string = implode(', ', self::VALID_VIAS);
+        if (!in_array($method, Request::VALID_METHODS)) {
+            $methods_as_string = implode(', ', Request::VALID_METHODS);
             throw new Errors\RoutingError(
-                "{$via} via is invalid ({$vias_as_string})."
+                "{$method} method is invalid ({$methods_as_string})."
             );
         }
 
@@ -128,8 +134,8 @@ class Router
             $path = rtrim($path, '/');
         }
 
-        $via_routes = $this->routes[$via];
-        foreach ($via_routes as $pattern => $action_pointer) {
+        $method_routes = $this->routes[$method];
+        foreach ($method_routes as $pattern => $action_pointer) {
             if ($this->pathMatchesPattern($path, $pattern)) {
                 $parameters = $this->extractParameters($path, $pattern);
                 $parameters['_action_pointer'] = $action_pointer;
@@ -138,28 +144,30 @@ class Router
         }
 
         throw new Errors\RouteNotFoundError(
-            "Path \"{$via} {$path}\" doesn’t match any route."
+            "Path \"{$method} {$path}\" doesn’t match any route."
         );
     }
 
     /**
-     * @return string[][] The list of registered routes
+     * Return the list of routes.
+     *
+     * @return array<RequestMethod, Routes>
      */
-    public function routes()
+    public function routes(): array
     {
         return array_filter($this->routes);
     }
 
     /**
-     * @param string $name
-     * @param array $parameters
+     * Return an URI by its name. It is generated with the given parameters.
+     *
+     * @param RouteName $name
+     * @param RequestParameters $parameters
      *
      * @throws \Minz\Errors\RoutingError if required parameters are missing
      * @throws \Minz\Errors\RouteNotFoundError if name matches with no route
-     *
-     * @return string The URI corresponding to the action
      */
-    public function uriByName($name, $parameters = [])
+    public function uriByName(string $name, array $parameters = []): string
     {
         if (!isset($this->routes_by_names[$name])) {
             throw new Errors\RouteNotFoundError(
@@ -172,47 +180,43 @@ class Router
     }
 
     /**
-     * @param string $via
-     * @param string $action_pointer
-     * @param array $parameters
+     * Return an URI by its pointer. It is generated with the given parameters.
      *
-     * @throws \Minz\Errors\RoutingError if via is invalid
+     * @param RequestMethod $method
+     * @param RoutePointer $action_pointer
+     * @param RequestParameters $parameters
+     *
+     * @throws \Minz\Errors\RoutingError if method is invalid
      * @throws \Minz\Errors\RoutingError if required parameters are missing
      * @throws \Minz\Errors\RouteNotFoundError if action pointer matches with no route
-     *
-     * @return string The URI corresponding to the action
      */
-    public function uriByPointer($via, $action_pointer, $parameters = [])
+    public function uriByPointer(string $method, string $action_pointer, array $parameters = []): string
     {
-        if (!in_array($via, self::VALID_VIAS)) {
-            $vias_as_string = implode(', ', self::VALID_VIAS);
+        if (!in_array($method, Request::VALID_METHODS)) {
+            $methods_as_string = implode(', ', Request::VALID_METHODS);
             throw new Errors\RoutingError(
-                "{$via} via is invalid ({$vias_as_string})."
+                "{$method} method is invalid ({$methods_as_string})."
             );
         }
 
-        $via_routes = $this->routes[$via];
-        foreach ($via_routes as $pattern => $route_action_pointer) {
+        $method_routes = $this->routes[$method];
+        foreach ($method_routes as $pattern => $route_action_pointer) {
             if ($action_pointer === $route_action_pointer) {
                 return $this->patternToUri($pattern, $parameters);
             }
         }
 
         throw new Errors\RouteNotFoundError(
-            "Action pointer \"{$via} {$action_pointer}\" doesn’t match any route."
+            "Action pointer \"{$method} {$action_pointer}\" doesn’t match any route."
         );
     }
 
     /**
-     * Check if a path matches with a pattern.
+     * Return true if the path matches with the pattern, or false otherwise.
      *
-     * @param string $path
-     * @param string $pattern
-     *
-     * @return boolean Return true if the path matches with the pattern, or
-     *                 false otherwise.
+     * @param RoutePattern $pattern
      */
-    private function pathMatchesPattern($path, $pattern)
+    private function pathMatchesPattern(string $path, string $pattern): bool
     {
         $pattern_exploded = explode('/', $pattern);
         $path_exploded = explode('/', $path);
@@ -246,15 +250,13 @@ class Router
     }
 
     /**
-     * Extract from a path a list of parameters matching a pattern.
+     * Extract a list of parameters from a path that matches a pattern.
      *
-     * @param string $path
-     * @param string $pattern
+     * @param RoutePattern $pattern
      *
-     * @return array The list of matching parameters where keys are extracted
-     *               from the pattern, and values from the path.
+     * @return RequestParameters
      */
-    private function extractParameters($path, $pattern)
+    private function extractParameters(string $path, string $pattern): array
     {
         $parameters = [];
 
@@ -292,14 +294,12 @@ class Router
      * If given parameters don't correspond to a pattern variable, they are
      * added as a query string (e.g. `?id=value`).
      *
-     * @param string $pattern
-     * @param array $parameters
+     * @param RoutePattern $pattern
+     * @param RequestParameters $parameters
      *
      * @throws \Minz\Errors\RoutingError if required parameters are missing
-     *
-     * @return string
      */
-    private function patternToUri($pattern, $parameters = [])
+    private function patternToUri(string $pattern, array $parameters = []): string
     {
         $uri_elements = [];
 

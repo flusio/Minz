@@ -76,19 +76,26 @@ namespace Minz;
  *         'computed' => true,
  *     ]
  *
+ * @phpstan-type PropertyDeclaration array{
+ *     'type': value-of<Model::VALID_PROPERTY_TYPES>,
+ *     'required': bool,
+ *     'validator': ?callable,
+ *     'computed': bool,
+ *     'format'?: string,
+ * }
+ *
+ * @phpstan-type PropertiesDeclarations array<string, PropertyDeclaration>
+ *
+ * @phpstan-type ModelValues array<string, mixed>
+ *
+ * @phpstan-type ModelId integer|string
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Model
 {
     public const VALID_PROPERTY_TYPES = ['string', 'integer', 'datetime', 'boolean'];
-
-    public const DEFAULT_PROPERTY_DECLARATION = [
-        'type' => null,
-        'required' => false,
-        'validator' => null,
-        'computed' => false,
-    ];
 
     // This is almost ISO 8601 format, only the middle T is replaced by a space
     // to match with the output format of pgsql.
@@ -102,17 +109,19 @@ class Model
     public const ERROR_PROPERTY_TYPE_INVALID = 'property_type_invalid';
     public const ERROR_PROPERTY_VALIDATOR_INVALID = 'property_validator_invalid';
 
-    /** @var array Cache the property declarations of models */
-    protected static $property_declarations = [];
+    /**
+     * Cache the property declarations of models
+     *
+     * @var array<string, PropertiesDeclarations>
+     */
+    protected static array $property_declarations = [];
 
     /**
      * Return the complete property declarations for a model.
      *
-     * @param string $model_class_name
-     *
-     * @return array
+     * @return PropertiesDeclarations
      */
-    public static function propertyDeclarations($model_class_name)
+    public static function propertyDeclarations(string $model_class_name): array
     {
         if (isset(self::$property_declarations[$model_class_name])) {
             return self::$property_declarations[$model_class_name];
@@ -128,25 +137,20 @@ class Model
      * required or validator options). This method checks the properties are
      * valid and cache the complete declarations.
      *
-     * @param string $model_class_name
-     * @param array $properties
+     * @param array<string, mixed> $properties
      *
-     * @throws \Minz\Errors\ModelPropertyError if a type is invalid
-     * @throws \Minz\Errors\ModelPropertyError if validator is declared but cannot
-     *                                         be called
+     * @throws \Minz\Errors\ModelPropertyError
+     *     If a type is invalid
+     * @throws \Minz\Errors\ModelPropertyError
+     *     If validator is declared but cannot be called
      **/
-    public static function declareProperties($model_class_name, $properties)
+    public static function declareProperties(string $model_class_name, array $properties): void
     {
         self::$property_declarations[$model_class_name] = [];
         foreach ($properties as $property => $declaration) {
             if (!is_array($declaration)) {
                 $declaration = ['type' => $declaration];
             }
-
-            $declaration = array_merge(
-                self::DEFAULT_PROPERTY_DECLARATION,
-                $declaration
-            );
 
             if (!in_array($declaration['type'], self::VALID_PROPERTY_TYPES)) {
                 throw new Errors\ModelPropertyError(
@@ -157,7 +161,7 @@ class Model
             }
 
             if (
-                $declaration['validator'] !== null &&
+                isset($declaration['validator']) &&
                 !is_callable($declaration['validator'])
             ) {
                 throw new Errors\ModelPropertyError(
@@ -174,14 +178,25 @@ class Model
                 $declaration['format'] = self::DATETIME_FORMAT;
             }
 
-            self::$property_declarations[$model_class_name][$property] = $declaration;
+            $clean_declaration = [
+                'type' => $declaration['type'],
+                'required' => $declaration['required'] ?? false,
+                'validator' => $declaration['validator'] ?? null,
+                'computed' => $declaration['computed'] ?? false,
+            ];
+
+            if (isset($declaration['format'])) {
+                $clean_declaration['format'] = $declaration['format'];
+            }
+
+            self::$property_declarations[$model_class_name][$property] = $clean_declaration;
         }
     }
 
     /**
      * Initialize a Model and set the values.
      *
-     * @param array $values
+     * @param ModelValues $values
      */
     public function __construct($values = [])
     {
@@ -206,9 +221,9 @@ class Model
      * Note that datetime are converted to (almost) iso 8601 by default, see
      * DATETIME_FORMAT. It can be changed by providing a `format` option.
      *
-     * @return array
+     * @return ModelValues
      */
-    public function toValues()
+    public function toValues(): array
     {
         $values = [];
         foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
@@ -216,7 +231,7 @@ class Model
                 continue;
             }
 
-            if ($declaration['type'] === 'datetime' && $this->$property) {
+            if ($declaration['type'] === 'datetime' && $this->$property && isset($declaration['format'])) {
                 $values[$property] = $this->$property->format($declaration['format']);
             } elseif ($declaration['type'] === 'boolean' && $this->$property !== null) {
                 $values[$property] = (int)$this->$property;
@@ -233,11 +248,11 @@ class Model
      * The array can contain strings, the values are automatically casted to
      * the correct type, based on the properties declarations.
      *
-     * @param array $values
+     * @param ModelValues $values
      *
      * @throws \Minz\Errors\ModelPropertyError if property is not declared
      */
-    public function fromValues($values)
+    public function fromValues(array $values): void
     {
         $property_declarations = self::propertyDeclarations(get_called_class());
         foreach ($values as $property => $value) {
@@ -255,7 +270,7 @@ class Model
 
                 if ($type === 'integer' && filter_var($value, FILTER_VALIDATE_INT) !== false) {
                     $value = filter_var($value, FILTER_VALIDATE_INT);
-                } elseif ($type === 'datetime' && is_string($value)) {
+                } elseif ($type === 'datetime' && is_string($value) && isset($declaration['format'])) {
                     $date = date_create_from_format($declaration['format'], $value);
                     if ($date !== false) {
                         $value = $date;
@@ -281,9 +296,12 @@ class Model
      * are arrays with a `code` (the \Minz\Model::ERROR_* constants) and a
      * `description`.
      *
-     * @return array
+     * @return array<string, array{
+     *     'code': self::ERROR_*,
+     *     'description': string,
+     * }>
      */
-    public function validate()
+    public function validate(): array
     {
         $errors = [];
         foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {

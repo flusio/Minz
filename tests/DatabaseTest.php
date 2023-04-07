@@ -4,9 +4,15 @@ namespace Minz;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @phpstan-import-type ConfigurationDatabase from \Minz\Configuration
+ */
 class DatabaseTest extends TestCase
 {
-    private $initial_configuration;
+    /**
+     * @var ?ConfigurationDatabase
+     */
+    private ?array $initial_configuration;
 
     public function setUp(): void
     {
@@ -21,15 +27,20 @@ class DatabaseTest extends TestCase
         Configuration::$database = $this->initial_configuration;
     }
 
-    public function testGetWithSqlite()
+    public function testGetWithSqlite(): void
     {
         Database::resetInstance();
-        Configuration::$database['type'] = 'sqlite';
-        Configuration::$database['path'] = ':memory:';
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        $configuration['type'] = 'sqlite';
+        $configuration['path'] = ':memory:';
+        Configuration::$database = $configuration;
 
         $database = Database::get();
 
-        $foreign_keys_pragma = $database->query('PRAGMA foreign_keys')->fetchColumn();
+        /** @var \PDOStatement */
+        $statement = $database->query('PRAGMA foreign_keys');
+        $foreign_keys_pragma = $statement->fetchColumn();
         $this->assertSame('sqlite', $database->getAttribute(\PDO::ATTR_DRIVER_NAME));
         $this->assertSame(
             \PDO::FETCH_ASSOC,
@@ -38,7 +49,7 @@ class DatabaseTest extends TestCase
         $this->assertSame(1, intval($foreign_keys_pragma));
     }
 
-    public function testGetAlwaysReturnSameInstance()
+    public function testGetAlwaysReturnSameInstance(): void
     {
         Database::resetInstance();
         $initial_database = Database::get();
@@ -48,7 +59,7 @@ class DatabaseTest extends TestCase
         $this->assertSame($initial_database, $database);
     }
 
-    public function testGetFailsIfDatabaseIsntConfigured()
+    public function testGetFailsIfDatabaseIsntConfigured(): void
     {
         Database::resetInstance();
         $this->expectException(Errors\DatabaseError::class);
@@ -56,12 +67,12 @@ class DatabaseTest extends TestCase
             'The database is not set in the configuration file.'
         );
 
-        Configuration::$database = [];
+        Configuration::$database = null;
 
         Database::get();
     }
 
-    public function testConstructorFailsIfDatabaseIsBadlyConfigured()
+    public function testConstructorFailsIfDatabaseIsBadlyConfigured(): void
     {
         Database::resetInstance();
         $this->expectException(Errors\DatabaseError::class);
@@ -76,17 +87,54 @@ class DatabaseTest extends TestCase
             );
         }
 
+        // @phpstan-ignore-next-line
         Configuration::$database['type'] = 'not a correct type';
 
         Database::get();
     }
 
-    public function testDropIfSqlite()
+    public function testDropIfSqlite(): void
     {
         $sqlite_file = tmpfile();
+        assert($sqlite_file !== false);
         $sqlite_filename = stream_get_meta_data($sqlite_file)['uri'];
-        Configuration::$database['type'] = 'sqlite';
-        Configuration::$database['path'] = $sqlite_filename;
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        $configuration['type'] = 'sqlite';
+        $configuration['path'] = $sqlite_filename;
+        Configuration::$database = $configuration;
+
+        $database = Database::get();
+        $schema = <<<'SQL'
+            CREATE TABLE rabbits (
+                id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                name varchar(255) NOT NULL
+            )
+        SQL;
+        $result = $database->exec($schema);
+        $error_if_any = $database->errorInfo()[2];
+        $this->assertTrue(
+            $result !== false,
+            "An error occured when initializing a database: {$error_if_any}."
+        );
+
+        $result = Database::drop();
+
+        $new_database = Database::get();
+        /** @var \PDOStatement */
+        $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
+        $table = $statement->fetchColumn();
+        $this->assertTrue($result);
+        $this->assertFalse($table);
+    }
+
+    public function testDropIfSqliteIsInMemory(): void
+    {
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        $configuration['type'] = 'sqlite';
+        $configuration['path'] = ':memory:';
+        Configuration::$database = $configuration;
 
         $database = Database::get();
         $schema = <<<'SQL'
@@ -111,69 +159,40 @@ class DatabaseTest extends TestCase
         $this->assertFalse($table);
     }
 
-    public function testDropIfSqliteIsInMemory()
+    public function testDropReturnsFalseIfSqliteFileDoesNotExist(): void
     {
-        Configuration::$database['type'] = 'sqlite';
-        Configuration::$database['path'] = ':memory:';
-
-        $database = Database::get();
-        $schema = <<<'SQL'
-            CREATE TABLE rabbits (
-                id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-                name varchar(255) NOT NULL
-            )
-        SQL;
-        $result = $database->exec($schema);
-        $error_if_any = $database->errorInfo()[2];
-        $this->assertTrue(
-            $result !== false,
-            "An error occured when initializing a database: {$error_if_any}."
-        );
-
-        $result = Database::drop();
-
-        $new_database = Database::get();
-        $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
-        $table = $statement->fetchColumn();
-        $this->assertTrue($result);
-        $this->assertFalse($table);
-    }
-
-    public function testDropReturnsFalseIfSqliteFileDoesNotExist()
-    {
-        Configuration::$database = [
-            'type' => 'sqlite',
-            'path' => '/missing/file.sqlite',
-        ];
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        $configuration['type'] = 'sqlite';
+        $configuration['path'] = '/missing/file.sqlite';
+        Configuration::$database = $configuration;
 
         $result = Database::drop();
 
         $this->assertFalse($result);
     }
 
-    public function testDropFailsReturnsFalseIfDatabaseTypeIsntSupported()
+    public function testDropFailsReturnsFalseIfDatabaseTypeIsntSupported(): void
     {
-        Configuration::$database = [
-            'type' => 'mysql',
-            'host' => 'localhost',
-            'port' => 3306,
-            'dbname' => 'testdb',
-            'username' => '',
-        ];
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        $configuration['type'] = 'mysql';
+        // @phpstan-ignore-next-line
+        Configuration::$database = $configuration;
 
         $result = Database::drop();
 
         $this->assertFalse($result);
     }
 
-    public function testDropFailsIfDatabaseIsntConfigured()
+    public function testDropFailsIfDatabaseIsntConfigured(): void
     {
         $this->expectException(Errors\DatabaseError::class);
         $this->expectExceptionMessage(
             'The database is not set in the configuration file.'
         );
 
-        Configuration::$database = [];
+        Configuration::$database = null;
 
         Database::drop();
     }

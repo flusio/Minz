@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class ViewHelpersTest extends TestCase
 {
-    public function testProtect()
+    public function testProtect(): void
     {
         $string = '<strong>foo</strong>';
 
@@ -15,7 +15,7 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('&lt;strong&gt;foo&lt;/strong&gt;', $protected_string);
     }
 
-    public function testProtectReturnsEmptyStringIfNull()
+    public function testProtectReturnsEmptyStringIfNull(): void
     {
         $string = null;
 
@@ -24,7 +24,7 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('', $protected_string);
     }
 
-    public function testUrl()
+    public function testUrl(): void
     {
         $router = new \Minz\Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -35,7 +35,7 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('/rabbits?foo=bar&amp;spam=egg', $url);
     }
 
-    public function testUrlFull()
+    public function testUrlFull(): void
     {
         $router = new \Minz\Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -46,35 +46,35 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('http://localhost/rabbits?foo=bar&amp;spam=egg', $url);
     }
 
-    public function testUrlStatic()
+    public function testUrlStatic(): void
     {
         $url = ViewHelpers::urlStatic('file.txt');
 
         $this->assertStringStartsWith('/static/file.txt?', $url);
     }
 
-    public function testUrlFullStatic()
+    public function testUrlFullStatic(): void
     {
         $url = ViewHelpers::urlFullStatic('file.txt');
 
         $this->assertStringStartsWith('http://localhost/static/file.txt?', $url);
     }
 
-    public function testUrlPublic()
+    public function testUrlPublic(): void
     {
         $url = ViewHelpers::urlPublic('file.txt');
 
         $this->assertSame('/file.txt', $url);
     }
 
-    public function testUrlFullPublic()
+    public function testUrlFullPublic(): void
     {
         $url = ViewHelpers::urlFullPublic('file.txt');
 
         $this->assertSame('http://localhost/file.txt', $url);
     }
 
-    public function testFormatDate()
+    public function testFormatDate(): void
     {
         ini_set('intl.default_locale', 'en-GB');
         $date = new \DateTime('2022-09-06');
@@ -86,7 +86,7 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('Tuesday 6 September', $formatted_date);
     }
 
-    public function testFormatDateWithFormat()
+    public function testFormatDateWithFormat(): void
     {
         ini_set('intl.default_locale', 'en-GB');
         $date = new \DateTime('2022-09-06');
@@ -98,7 +98,7 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('06/09/2022', $formatted_date);
     }
 
-    public function testFormatDateWithSpecifiedLocale()
+    public function testFormatDateWithSpecifiedLocale(): void
     {
         ini_set('intl.default_locale', 'en-GB');
         $date = new \DateTime('2022-09-06');
@@ -110,7 +110,7 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('mardi 6 septembre', $formatted_date);
     }
 
-    public function testFormatGettext()
+    public function testFormatGettext(): void
     {
         $string = 'Hello %s!';
 
@@ -119,14 +119,14 @@ class ViewHelpersTest extends TestCase
         $this->assertSame('Hello World!', $formatted_string);
     }
 
-    public function testFormatNgettextSingular()
+    public function testFormatNgettextSingular(): void
     {
         $formatted_string = ViewHelpers::formatNgettext('%d rabbit', '%d rabbits', 1, 1);
 
         $this->assertSame('1 rabbit', $formatted_string);
     }
 
-    public function testFormatNgettextPlural()
+    public function testFormatNgettextPlural(): void
     {
         $formatted_string = ViewHelpers::formatNgettext('%d rabbit', '%d rabbits', 2, 2);
 

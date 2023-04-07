@@ -5,32 +5,31 @@ namespace Minz;
 /**
  * Handle the database requests.
  *
+ * @phpstan-import-type ConfigurationDatabase from Configuration
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Database
 {
-    /** @var \Minz\Database|null */
-    private static $instance;
+    private static ?Database $instance = null;
 
-    /** @var \PDO|null */
-    private $pdo_connection;
+    private ?\PDO $pdo_connection = null;
 
-    private $connect_to_db;
+    private bool $connect_to_db;
 
     /**
      * Initialize a database. Note it is private, you must use `\Minz\Database::get`
      * to get an instance.
      *
-     * @param boolean $connect_to_db
-     *     Indicates if the connection must be done on the database. Else, the
-     *     dbname will not be included in the DSN. It is useful if you need to
-     *     drop or create a database. It has no effects with SQLite.
+     * You can specify if the connection must be done on the database. Else,
+     * the dbname will not be included in the DSN. It is useful if you need to
+     * drop or create a database. It has no effects with SQLite.
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occured during initialization
      */
-    private function __construct($connect_to_db = true)
+    private function __construct(bool $connect_to_db = true)
     {
         $this->connect_to_db = $connect_to_db;
         $this->start();
@@ -42,7 +41,7 @@ class Database
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occured during initialization
      */
-    public function start()
+    public function start(): void
     {
         $database_configuration = Configuration::$database;
         if (!$database_configuration) {
@@ -77,7 +76,7 @@ class Database
     /**
      * Close the PDO connection.
      */
-    public function close()
+    public function close(): void
     {
         // When unassigning a PDO object, it closes the connection to the
         // database.
@@ -87,47 +86,70 @@ class Database
     /**
      * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
      */
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
-        return $this->pdoCall('beginTransaction');
+        /** @var bool $result */
+        $result = $this->pdoCall('beginTransaction');
+        return $result;
     }
 
     /**
      * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
      */
-    public function commit()
+    public function commit(): bool
     {
-        return $this->pdoCall('commit');
+        /** @var bool $result */
+        $result = $this->pdoCall('commit');
+        return $result;
     }
 
     /**
      * @see \PDO::errorCode https://www.php.net/manual/pdo.errorcode.php
      */
-    public function errorCode()
+    public function errorCode(): ?string
     {
-        return $this->pdoCall('errorCode');
+        /** @var ?string $result */
+        $result = $this->pdoCall('errorCode');
+        return $result;
     }
 
     /**
      * @see \PDO::errorInfo https://www.php.net/manual/pdo.errorinfo.php
+     *
+     * @return array{
+     *     0: string,
+     *     1: ?string,
+     *     2: string,
+     * }
      */
-    public function errorInfo()
+    public function errorInfo(): array
     {
-        return $this->pdoCall('errorInfo');
+        /** @var array{
+         *     0: string,
+         *     1: ?string,
+         *     2: string,
+         * } $result
+        */
+        $result = $this->pdoCall('errorInfo');
+        return $result;
     }
 
     /**
      * @see \PDO::exec() https://www.php.net/manual/pdo.exec.php
      */
-    public function exec($sql_statement)
+    public function exec(string $sql_statement): int
     {
-        return $this->pdoCall('exec', $sql_statement);
+        /** @var int $result */
+        $result = $this->pdoCall('exec', $sql_statement);
+        return $result;
     }
 
     /**
      * @see \PDO::getAttribute() https://www.php.net/manual/pdo.getattribute.php
+     *
+     * @param \PDO::ATTR_* $attribute
      */
-    public function getAttribute($attribute)
+    public function getAttribute(int $attribute): mixed
     {
         return $this->pdoCall('getAttribute', $attribute);
     }
@@ -135,69 +157,80 @@ class Database
     /**
      * @see \PDO::inTransaction() https://www.php.net/manual/pdo.intransaction.php
      */
-    public function inTransaction()
+    public function inTransaction(): bool
     {
-        return $this->pdoCall('inTransaction');
+        /** @var bool $result */
+        $result = $this->pdoCall('inTransaction');
+        return $result;
     }
 
     /**
      * @see \PDO::lastInsertId() https://www.php.net/manual/pdo.lastinsertid.php
      */
-    public function lastInsertId()
+    public function lastInsertId(?string $name = null): string
     {
-        return $this->pdoCall('lastInsertId');
+        /** @var string $result */
+        $result = $this->pdoCall('lastInsertId', $name);
+        return $result;
     }
 
     /**
      * @see \PDO::prepare() https://www.php.net/manual/pdo.prepare.php
+     *
+     * @param mixed[] $options
      */
-    public function prepare($sql_statement)
+    public function prepare(string $sql_statement, array $options = []): \PDOStatement
     {
-        return $this->pdoCall('prepare', $sql_statement);
+        /** @var \PDOStatement $result */
+        $result = $this->pdoCall('prepare', $sql_statement, $options);
+        return $result;
     }
 
     /**
      * @see \PDO::query() https://www.php.net/manual/pdo.query.php
      */
-    public function query($sql_statement)
+    public function query(string $sql_statement, ?int $fetch_mode = null): \PDOStatement
     {
-        return $this->pdoCall('query', $sql_statement);
+        /** @var \PDOStatement $result */
+        $result = $this->pdoCall('query', $sql_statement, $fetch_mode);
+        return $result;
     }
 
     /**
      * @see \PDO::quote https://www.php.net/manual/pdo.quote.php
      */
-    public function quote($string, $parameter_type = \PDO::PARAM_STR)
+    public function quote(string $string, int $parameter_type = \PDO::PARAM_STR): string
     {
-        return $this->pdoCall('quote', $string, $parameter_type);
+        /** @var string $result */
+        $result = $this->pdoCall('quote', $string, $parameter_type);
+        return $result;
     }
 
     /**
      * @see \PDO::rollBack https://www.php.net/manual/pdo.rollback.php
      */
-    public function rollBack()
+    public function rollBack(): bool
     {
-        return $this->pdoCall('rollBack');
+        /** @var bool $result */
+        $result = $this->pdoCall('rollBack');
+        return $result;
     }
 
     /**
      * @see \PDO::setAttribute() https://www.php.net/manual/pdo.setattribute.php
      */
-    public function setAttribute($attribute, $value)
+    public function setAttribute(int $attribute, mixed $value): bool
     {
-        return $this->pdoCall('setAttribute', $attribute, $value);
+        /** @var bool $result */
+        $result = $this->pdoCall('setAttribute', $attribute, $value);
+        return $result;
     }
 
     /**
      * Transfer method calls to the PDO connection. It starts the connection if
      * it has been stopped.
-     *
-     * @param string $name Method name to transfer
-     * @param mixed $arguments,... Arguments to pass to the method
-     *
-     * @return mixed
      */
-    public function pdoCall($name, ...$arguments)
+    public function pdoCall(string $name, mixed ...$arguments): mixed
     {
         if (!$this->pdo_connection) {
             $this->start();
@@ -215,10 +248,8 @@ class Database
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occured during initialization
-     *
-     * @return \Minz\Database
      */
-    public static function get()
+    public static function get(): Database
     {
         if (!self::$instance) {
             self::$instance = new self();
@@ -232,10 +263,8 @@ class Database
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on drop
-     *
-     * @return boolean Return true if the database was dropped, false otherwise
      */
-    public static function drop()
+    public static function drop(): bool
     {
         $database_configuration = Configuration::$database;
         if (!$database_configuration) {
@@ -251,7 +280,7 @@ class Database
         }
 
         $database_type = $database_configuration['type'];
-        if ($database_type === 'sqlite') {
+        if ($database_type === 'sqlite' && isset($database_configuration['path'])) {
             $database_path = $database_configuration['path'];
             if ($database_path === ':memory:') {
                 return true;
@@ -273,10 +302,8 @@ class Database
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on create
-     *
-     * @return boolean Return true if the database was created, false otherwise
      */
-    public static function create()
+    public static function create(): bool
     {
         $database_configuration = Configuration::$database;
         if (!$database_configuration) {
@@ -286,7 +313,7 @@ class Database
         }
 
         $database_type = $database_configuration['type'];
-        if ($database_type === 'sqlite') {
+        if ($database_type === 'sqlite' && isset($database_configuration['path'])) {
             $database_path = $database_configuration['path'];
             if ($database_path === ':memory:') {
                 return true;
@@ -312,22 +339,19 @@ class Database
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on create
      */
-    public static function reset()
+    public static function reset(): void
     {
         self::drop();
         self::create();
     }
 
     /**
-     * Return a DSN string to initialize PDO
+     * Return a DSN string to initialize PDO (can include the database name or
+     * not).
      *
-     * @param array $database_configuration The array from the Configuration
-     * @param boolean $with_dbname Indicates if dbname must be included in the DSN
-     *                             (it has no effects with SQLite)
-     *
-     * @return string
+     * @param ConfigurationDatabase $database_configuration
      */
-    private static function buildDsn($database_configuration, $with_dbname)
+    private static function buildDsn(array $database_configuration, bool $with_dbname): string
     {
         if ($database_configuration['type'] === 'sqlite') {
             return 'sqlite:' . $database_configuration['path'];
@@ -353,7 +377,7 @@ class Database
      * It tries to stop the PDO connection as well, but it seems it doesn't
      * work because I unassign the instance just after. Damn you PDO!
      */
-    public static function resetInstance()
+    public static function resetInstance(): void
     {
         if (self::$instance) {
             self::$instance->close();

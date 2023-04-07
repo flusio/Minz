@@ -67,8 +67,8 @@ namespace Minz;
  */
 class Dotenv
 {
-    /** @var array The list of the variables loaded from the env file */
-    private $variables = [];
+    /** @var array<string, string> The list of the variables loaded from the env file */
+    private array $variables = [];
 
     /**
      * Load an env file.
@@ -76,10 +76,8 @@ class Dotenv
      * If the file cannot be read, Dotenv will return immediately and log a
      * warning. Note: an exception handled by the Configuration class might be
      * better here. It’s not a critical issue though.
-     *
-     * @param string $dotenv_path
      */
-    public function __construct($dotenv_path)
+    public function __construct(string $dotenv_path)
     {
         $dotenv_content = @file_get_contents($dotenv_path);
         if ($dotenv_content === false) {
@@ -89,6 +87,11 @@ class Dotenv
 
         // Each line is parsed one by one
         $dotenv_lines = preg_split("/\r\n|\n|\r/", $dotenv_content);
+        if ($dotenv_lines === false) {
+            Log::warning("{$dotenv_path} dotenv file cannot be read.");
+            return;
+        }
+
         foreach ($dotenv_lines as $line) {
             $line = trim($line);
             if (!$line) {
@@ -130,15 +133,8 @@ class Dotenv
      *
      * Note that variables defined in the global environment have the priority
      * over the values defined in the env file.
-     *
-     * @param string $name
-     * @param string|null $default
-     *     The default value to return if variable doesn’t exist (default is
-     *     null).
-     *
-     * @return string|null
      */
-    public function pop($name, $default = null)
+    public function pop(string $name, ?string $default = null): ?string
     {
         $value_from_env = getenv($name);
         if (isset($this->variables[$name])) {

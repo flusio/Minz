@@ -13,13 +13,16 @@ use PHPMailer\PHPMailer;
  *
  * This class can be inherited in order to specialize it into smaller Mailers.
  *
+ * @phpstan-import-type ViewVariables from Output\View
+ *
+ * @phpstan-import-type ViewPointer from Output\View
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Mailer
 {
-    /** @var \PHPMailer\PHPMailer\PHPMailer */
-    public $mailer;
+    public PHPMailer\PHPMailer $mailer;
 
     /**
      * Setup the PHPMailer mailer with the application configuration.
@@ -36,7 +39,10 @@ class Mailer
 
         $mailer->setFrom($mailer_configuration['from']);
 
-        if ($mailer_configuration['type'] === 'smtp') {
+        if (
+            $mailer_configuration['type'] === 'smtp' &&
+            isset($mailer_configuration['smtp'])
+        ) {
             $smtp_config = $mailer_configuration['smtp'];
             $mailer->isSMTP();
             $mailer->Hostname = $smtp_config['domain'];
@@ -57,13 +63,13 @@ class Mailer
     /**
      * Set the body with both HTML and text content.
      *
-     * @param string $html_view_pointer
-     * @param string $text_view_pointer
-     * @param array $variables The variables to pass to the Output\View
+     * @param ViewPointer $html_view_pointer
+     * @param ViewPointer $text_view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError if one of the pointers is invalid
      */
-    public function setBody($html_view_pointer, $text_view_pointer, $variables = [])
+    public function setBody(string $html_view_pointer, string $text_view_pointer, array $variables = []): void
     {
         $html_output = new Output\View($html_view_pointer, $variables);
         $text_output = new Output\View($text_view_pointer, $variables);
@@ -76,13 +82,8 @@ class Mailer
 
     /**
      * Send an email.
-     *
-     * @param string $to The recipient of the email
-     * @param string $subject The subject of the email
-     *
-     * @return bool true on success, false if a SMTP error happens
      */
-    public function send($to, $subject)
+    public function send(string $to, string $subject): bool
     {
         try {
             $this->mailer->clearAddresses();

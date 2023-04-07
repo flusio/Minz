@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class DotenvTest extends TestCase
 {
-    public function testPop()
+    public function testPop(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -16,7 +16,7 @@ class DotenvTest extends TestCase
         $this->assertSame('bar', $variable);
     }
 
-    public function testPopWithDefaultValue()
+    public function testPopWithDefaultValue(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -26,7 +26,7 @@ class DotenvTest extends TestCase
         $this->assertSame('egg', $variable);
     }
 
-    public function testPopErasesTheValue()
+    public function testPopErasesTheValue(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -37,7 +37,7 @@ class DotenvTest extends TestCase
         $this->assertNull($variable);
     }
 
-    public function testPopWithEnvAlreadySet()
+    public function testPopWithEnvAlreadySet(): void
     {
         putenv('FOO=spam');
         $dotenv_path = Configuration::$app_path . '/dotenv';
@@ -49,7 +49,7 @@ class DotenvTest extends TestCase
         putenv('FOO');
     }
 
-    public function testPopErasesTheValueWithEnvAlreadySet()
+    public function testPopErasesTheValueWithEnvAlreadySet(): void
     {
         putenv('FOO=spam');
         $dotenv_path = Configuration::$app_path . '/dotenv';
@@ -62,7 +62,7 @@ class DotenvTest extends TestCase
         $this->assertNull($variable);
     }
 
-    public function testPopWithEnvSetButNotInDotenv()
+    public function testPopWithEnvSetButNotInDotenv(): void
     {
         putenv('NOT_DEFINED=spam');
         $dotenv_path = Configuration::$app_path . '/dotenv';
@@ -73,7 +73,7 @@ class DotenvTest extends TestCase
         $this->assertSame('spam', $variable);
     }
 
-    public function testPopTrimsNamesAndValues()
+    public function testPopTrimsNamesAndValues(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -83,7 +83,7 @@ class DotenvTest extends TestCase
         $this->assertSame('SPACES', $variable);
     }
 
-    public function testPopWithVariableWithoutValue()
+    public function testPopWithVariableWithoutValue(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -93,7 +93,7 @@ class DotenvTest extends TestCase
         $this->assertSame('', $variable);
     }
 
-    public function testPopWithValueBetweenSingleQuotes()
+    public function testPopWithValueBetweenSingleQuotes(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -103,7 +103,7 @@ class DotenvTest extends TestCase
         $this->assertSame('foo', $variable);
     }
 
-    public function testPopWithValueBetweenDoubleQuotes()
+    public function testPopWithValueBetweenDoubleQuotes(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);
@@ -113,7 +113,7 @@ class DotenvTest extends TestCase
         $this->assertSame('foo', $variable);
     }
 
-    public function testPopIgnoresComments()
+    public function testPopIgnoresComments(): void
     {
         $dotenv_path = Configuration::$app_path . '/dotenv';
         $dotenv = new Dotenv($dotenv_path);

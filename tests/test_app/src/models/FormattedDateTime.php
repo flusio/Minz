@@ -11,5 +11,5 @@ class FormattedDateTime extends \Minz\Model
         ],
     ];
 
-    public $created_at;
+    public ?\DateTime $created_at;
 }

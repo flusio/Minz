@@ -15,19 +15,15 @@ trait FilesHelper
      *
      * @beforeClass
      */
-    public static function createTmpFolder()
+    public static function createTmpFolder(): void
     {
         @mkdir(\Minz\Configuration::$tmp_path, 0777, true);
     }
 
     /**
-     * Copy a file in a temporary folder.
-     *
-     * @param string $filepath
-     *
-     * @return string Return the temporary filepath
+     * Copy a file in a temporary folder and return its path.
      */
-    public function tmpCopyFile($filepath)
+    public function tmpCopyFile(string $filepath): string
     {
         $tmp_path = \Minz\Configuration::$tmp_path;
         $tmp_filepath = $tmp_path . '/' . bin2hex(random_bytes(10));

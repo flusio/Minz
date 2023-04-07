@@ -11,17 +11,17 @@ namespace Minz;
  */
 class Log
 {
-    public static function notice($message)
+    public static function notice(string $message): void
     {
         syslog(LOG_NOTICE, $message);
     }
 
-    public static function warning($message)
+    public static function warning(string $message): void
     {
         syslog(LOG_WARNING, $message);
     }
 
-    public static function error($message)
+    public static function error(string $message): void
     {
         syslog(LOG_ERR, $message);
     }

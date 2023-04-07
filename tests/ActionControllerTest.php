@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class ActionControllerTest extends TestCase
 {
-    public function testConstruct()
+    public function testConstruct(): void
     {
         $action_controller = new ActionController('Rabbits#items');
 
@@ -14,11 +14,12 @@ class ActionControllerTest extends TestCase
         $this->assertSame('items', $action_controller->actionName());
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('Rabbits#items');
 
+        /** @var Response */
         $response = $action_controller->execute($request);
 
         $this->assertSame(200, $response->code());
@@ -33,11 +34,12 @@ class ActionControllerTest extends TestCase
         $this->assertSame('rabbits/items.phtml', $output->pointer());
     }
 
-    public function testExecuteWithSubDirectory()
+    public function testExecuteWithSubDirectory(): void
     {
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('admin/Rabbits#items');
 
+        /** @var Response */
         $response = $action_controller->execute($request);
 
         $this->assertSame(200, $response->code());
@@ -46,11 +48,12 @@ class ActionControllerTest extends TestCase
         $this->assertSame('admin/rabbits/items.phtml', $output->pointer());
     }
 
-    public function testExecuteWithNamespace()
+    public function testExecuteWithNamespace(): void
     {
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('Rabbits#items', '\\AppTest\\admin');
 
+        /** @var Response */
         $response = $action_controller->execute($request);
 
         $this->assertSame(200, $response->code());
@@ -59,51 +62,51 @@ class ActionControllerTest extends TestCase
         $this->assertSame('admin/rabbits/items.phtml', $output->pointer());
     }
 
-    public function testExecuteFailsIfControllerDoesntExist()
+    public function testExecuteFailsIfControllerDoesntExist(): void
     {
         $this->expectException(Errors\ControllerError::class);
         $this->expectExceptionMessage('Missing controller class cannot be found.');
 
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('Missing#items');
 
         $action_controller->execute($request);
     }
 
-    public function testExecuteFailsIfControllerPathIsDirectory()
+    public function testExecuteFailsIfControllerPathIsDirectory(): void
     {
         $this->expectException(Errors\ControllerError::class);
         $this->expectExceptionMessage(
             'Controller_as_directory controller class cannot be found.'
         );
 
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('Controller_as_directory#items');
 
         $action_controller->execute($request);
     }
 
-    public function testExecuteFailsIfActionIsNotCallable()
+    public function testExecuteFailsIfActionIsNotCallable(): void
     {
         $this->expectException(Errors\ActionError::class);
         $this->expectExceptionMessage(
             'uncallable action cannot be called on Rabbits controller.'
         );
 
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('Rabbits#uncallable');
 
         $action_controller->execute($request);
     }
 
-    public function testExecuteFailsIfActionDoesNotReturnResponse()
+    public function testExecuteFailsIfActionDoesNotReturnResponse(): void
     {
         $this->expectException(Errors\ActionError::class);
         $this->expectExceptionMessage(
             'noResponse action in Rabbits controller does not return a Response.'
         );
 
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
         $action_controller = new ActionController('Rabbits#noResponse');
 
         $action_controller->execute($request);

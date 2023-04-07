@@ -11,65 +11,45 @@ class RequestTest extends TestCase
     /**
      * @dataProvider invalidMethodProvider
      */
-    public function testConstructorFailsIfInvalidMethod($invalidMethod)
+    public function testConstructorFailsIfInvalidMethod(?string $invalidMethod): void
     {
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage(
             "`{$invalidMethod}` method is invalid (accepted methods: get, post, patch, put, delete, cli)."
         );
 
+        // @phpstan-ignore-next-line
         new Request($invalidMethod, '/');
     }
 
-    /**
-     * @dataProvider emptyUriProvider
-     */
-    public function testConstructorFailsIfUriIsEmpty($empty_uri)
+    public function testConstructorFailsIfUriIsEmpty(): void
     {
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('URI cannot be empty.');
 
-        new Request('GET', $empty_uri);
+        new Request('get', '');
     }
 
-    public function testConstructorFailsIfUriIsInvalid()
+    public function testConstructorFailsIfUriIsInvalid(): void
     {
         $invalid_uri = 'http:///';
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage("{$invalid_uri} URI path cannot be parsed.");
 
-        new Request('GET', $invalid_uri);
+        new Request('get', $invalid_uri);
     }
 
-    public function testConstructorFailsIfUriPathDoesntStartWithSlash()
+    public function testConstructorFailsIfUriPathDoesntStartWithSlash(): void
     {
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('no_slash URI path must start with a slash.');
 
-        new Request('GET', 'no_slash');
+        new Request('get', 'no_slash');
     }
 
-    public function testConstructorFailsIfParametersAreNotArray()
+    public function testMethod(): void
     {
-        $this->expectException(Errors\RequestError::class);
-        $this->expectExceptionMessage('Parameters are not in an array.');
-
-        // @phpstan-ignore-next-line
-        new Request('GET', '/', 'a parameter ?');
-    }
-
-    public function testConstructorFailsIfHeadersAreNotArray()
-    {
-        $this->expectException(Errors\RequestError::class);
-        $this->expectExceptionMessage('Headers are not in an array.');
-
-        // @phpstan-ignore-next-line
-        new Request('GET', '/', [], 'a header ?');
-    }
-
-    public function testMethod()
-    {
-        $request = new Request('GET', '/');
+        $request = new Request('get', '/');
 
         $method = $request->method();
 
@@ -79,20 +59,20 @@ class RequestTest extends TestCase
     /**
      * @dataProvider requestToPathProvider
      */
-    public function testPath($requestUri, $expectedPath)
+    public function testPath(string $requestUri, string $expectedPath): void
     {
-        $request = new Request('GET', $requestUri);
+        $request = new Request('get', $requestUri);
 
         $path = $request->path();
 
         $this->assertSame($expectedPath, $path);
     }
 
-    public function testPathWithUrlOptionsPath()
+    public function testPathWithUrlOptionsPath(): void
     {
         $old_url_path = \Minz\Configuration::$url_options['path'];
         \Minz\Configuration::$url_options['path'] = '/minz';
-        $request = new Request('GET', '/minz/rabbits');
+        $request = new Request('get', '/minz/rabbits');
 
         $path = $request->path();
 
@@ -101,9 +81,9 @@ class RequestTest extends TestCase
         $this->assertSame('/rabbits', $path);
     }
 
-    public function testParam()
+    public function testParam(): void
     {
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => 'bar'
         ]);
 
@@ -112,18 +92,18 @@ class RequestTest extends TestCase
         $this->assertSame('bar', $foo);
     }
 
-    public function testParamWithDefaultValue()
+    public function testParamWithDefaultValue(): void
     {
-        $request = new Request('GET', '/', []);
+        $request = new Request('get', '/', []);
 
         $foo = $request->param('foo', 'bar');
 
         $this->assertSame('bar', $foo);
     }
 
-    public function testParamBoolean()
+    public function testParamBoolean(): void
     {
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => 'true'
         ]);
 
@@ -132,18 +112,18 @@ class RequestTest extends TestCase
         $this->assertTrue($foo);
     }
 
-    public function testParamBooleanWithDefaultValue()
+    public function testParamBooleanWithDefaultValue(): void
     {
-        $request = new Request('GET', '/', []);
+        $request = new Request('get', '/', []);
 
         $foo = $request->paramBoolean('foo', true);
 
         $this->assertTrue($foo);
     }
 
-    public function testParamInteger()
+    public function testParamInteger(): void
     {
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => '42'
         ]);
 
@@ -152,18 +132,18 @@ class RequestTest extends TestCase
         $this->assertSame(42, $foo);
     }
 
-    public function testParamIntegerWithDefaultValue()
+    public function testParamIntegerWithDefaultValue(): void
     {
-        $request = new Request('GET', '/', []);
+        $request = new Request('get', '/', []);
 
         $foo = $request->paramInteger('foo', 42);
 
         $this->assertSame(42, $foo);
     }
 
-    public function testParamArray()
+    public function testParamArray(): void
     {
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => ['bar' => 'baz'],
         ]);
 
@@ -174,18 +154,18 @@ class RequestTest extends TestCase
         ], $foo);
     }
 
-    public function testParamArrayWithDefaultValue()
+    public function testParamArrayWithDefaultValue(): void
     {
-        $request = new Request('GET', '/', []);
+        $request = new Request('get', '/', []);
 
         $foo = $request->paramArray('foo', ['spam' => 'egg']);
 
         $this->assertSame(['spam' => 'egg'], $foo);
     }
 
-    public function testParamArrayWithDefaultValueMergesValues()
+    public function testParamArrayWithDefaultValueMergesValues(): void
     {
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => ['bar' => 'baz'],
         ]);
 
@@ -197,10 +177,10 @@ class RequestTest extends TestCase
         ], $foo);
     }
 
-    public function testParamWithNonArrayValue()
+    public function testParamWithNonArrayValue(): void
     {
         // here, we set foo as a simple string (i.e. bar)
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => 'bar',
         ]);
 
@@ -210,29 +190,28 @@ class RequestTest extends TestCase
         $this->assertSame(['bar'], $foo);
     }
 
-    public function testParamFile()
+    public function testParamFile(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => [
                 'tmp_name' => $tmp_filepath,
                 'error' => UPLOAD_ERR_OK,
             ],
         ]);
 
+        /** @var File $foo */
         $foo = $request->paramFile('foo');
 
         $this->assertSame($tmp_filepath, $foo->filepath);
         $this->assertNull($foo->error);
     }
 
-    public function testParamFileReturnsNullIfFileInvalid()
+    public function testParamFileReturnsNullIfFileInvalid(): void
     {
-        $request = new Request('GET', '/', [
-            'foo' => [
-                'error' => UPLOAD_ERR_OK,
-            ],
+        $request = new Request('get', '/', [
+            'foo' => 'bar',
         ]);
 
         $foo = $request->paramFile('foo');
@@ -240,18 +219,18 @@ class RequestTest extends TestCase
         $this->assertNull($foo);
     }
 
-    public function testParamFileReturnsNullIfParamIsMissing()
+    public function testParamFileReturnsNullIfParamIsMissing(): void
     {
-        $request = new Request('GET', '/', []);
+        $request = new Request('get', '/', []);
 
         $foo = $request->paramFile('foo');
 
         $this->assertNull($foo);
     }
 
-    public function testSetParam()
+    public function testSetParam(): void
     {
-        $request = new Request('GET', '/', [
+        $request = new Request('get', '/', [
             'foo' => 'bar'
         ]);
 
@@ -264,9 +243,9 @@ class RequestTest extends TestCase
     /**
      * @dataProvider isAcceptingProvider
      */
-    public function testIsAccepting($header, $media, $expected)
+    public function testIsAccepting(string $header, string $media, bool $expected): void
     {
-        $request = new Request('GET', '/', [], [
+        $request = new Request('get', '/', [], [
             'HTTP_ACCEPT' => $header,
         ]);
 
@@ -275,19 +254,19 @@ class RequestTest extends TestCase
         $this->assertSame($expected, $is_accepting);
     }
 
-    public function testIsAcceptingWithNoAcceptHeader()
+    public function testIsAcceptingWithNoAcceptHeader(): void
     {
         // Equivalent to */*
-        $request = new Request('GET', '/', [], []);
+        $request = new Request('get', '/', [], []);
 
         $is_accepting = $request->isAccepting('text/html');
 
         $this->assertTrue($is_accepting);
     }
 
-    public function testHeader()
+    public function testHeader(): void
     {
-        $request = new Request('GET', '/', [], [
+        $request = new Request('get', '/', [], [
             'SERVER_PROTOCOL' => 'HTTP/1.1',
         ]);
 
@@ -296,18 +275,18 @@ class RequestTest extends TestCase
         $this->assertSame('HTTP/1.1', $protocol);
     }
 
-    public function testHeaderWithDefaultValue()
+    public function testHeaderWithDefaultValue(): void
     {
-        $request = new Request('GET', '/', [], []);
+        $request = new Request('get', '/', [], []);
 
         $protocol = $request->header('SERVER_PROTOCOL', 'foo');
 
         $this->assertSame('foo', $protocol);
     }
 
-    public function testCookie()
+    public function testCookie(): void
     {
-        $request = new Request('GET', '/', [], [
+        $request = new Request('get', '/', [], [
             'COOKIE' => [
                 'foo' => 'bar',
             ],
@@ -318,16 +297,19 @@ class RequestTest extends TestCase
         $this->assertSame('bar', $foo);
     }
 
-    public function testCookieWithDefaultValue()
+    public function testCookieWithDefaultValue(): void
     {
-        $request = new Request('GET', '/', [], []);
+        $request = new Request('get', '/', [], []);
 
         $foo = $request->cookie('foo', 'baz');
 
         $this->assertSame('baz', $foo);
     }
 
-    public function requestToPathProvider()
+    /**
+     * @return array<array{string, string}>
+     */
+    public function requestToPathProvider(): array
     {
         return [
             ['/', '/'],
@@ -347,26 +329,23 @@ class RequestTest extends TestCase
         ];
     }
 
-    public function invalidMethodProvider()
+    /**
+     * @return array<array{?string}>
+     */
+    public function invalidMethodProvider(): array
     {
         return [
             [''],
-            [null],
             ['invalid'],
             ['postpost'],
             [' get'],
         ];
     }
 
-    public function emptyUriProvider()
-    {
-        return [
-            [''],
-            [null],
-        ];
-    }
-
-    public function isAcceptingProvider()
+    /**
+     * @return array<array{string, string, bool}>
+     */
+    public function isAcceptingProvider(): array
     {
         return [
             ['text/html', 'text/html', true],

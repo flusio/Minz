@@ -5,21 +5,26 @@ namespace Minz;
 /**
  * The Url class provides helper functions to build internal URLs.
  *
+ * @phpstan-import-type RoutePointer from Router
+ *
+ * @phpstan-import-type RouteName from Router
+ *
+ * @phpstan-type UrlPointer RoutePointer|RouteName
+ *
+ * @phpstan-type UrlParameters array<string, mixed>
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Url
 {
-    /** @var \Minz\Router|null */
-    private static $router;
+    private static ?Router $router;
 
     /**
      * Set the router so Url class can lookup for action pointers. It needs to
      * be called first.
-     *
-     * @param \Minz\Router|null $router
      */
-    public static function setRouter($router)
+    public static function setRouter(?Router $router): void
     {
         self::$router = $router;
     }
@@ -27,17 +32,17 @@ class Url
     /**
      * Return the relative URL corresponding to an action.
      *
-     * @param string $action_pointer_or_name
-     * @param array $parameters
+     * @param UrlPointer $pointer
+     * @param UrlParameters $parameters
      *
-     * @throws \Minz\Errors\UrlError if router has not been registered
-     * @throws \Minz\Errors\UrlError if the action pointer has not be added to
-     *                               the router
-     * @throws \Minz\Errors\UrlError if required parameter is missing
-     *
-     * @return string The URL corresponding to the action
+     * @throws \Minz\Errors\UrlError
+     *     If router has not been registered
+     * @throws \Minz\Errors\UrlError
+     *     If the action pointer has not be added to the router
+     * @throws \Minz\Errors\UrlError
+     *     If required parameter is missing
      */
-    public static function for($action_pointer_or_name, $parameters = [])
+    public static function for(string $pointer, array $parameters = []): string
     {
         if (!self::$router) {
             throw new Errors\UrlError(
@@ -46,7 +51,7 @@ class Url
         }
 
         try {
-            $uri = self::$router->uriByName($action_pointer_or_name, $parameters);
+            $uri = self::$router->uriByName($pointer, $parameters);
             return self::path() . $uri;
         } catch (Errors\RouteNotFoundError $e) {
             // Do nothing on purpose
@@ -54,10 +59,10 @@ class Url
             throw new Errors\UrlError($e->getMessage());
         }
 
-        $vias = Router::VALID_VIAS;
-        foreach ($vias as $via) {
+        $methods = Request::VALID_METHODS;
+        foreach ($methods as $method) {
             try {
-                $uri = self::$router->uriByPointer($via, $action_pointer_or_name, $parameters);
+                $uri = self::$router->uriByPointer($method, $pointer, $parameters);
                 return self::path() . $uri;
             } catch (Errors\RouteNotFoundError $e) {
                 // Do nothing on purpose
@@ -67,35 +72,33 @@ class Url
         }
 
         throw new Errors\UrlError(
-            "{$action_pointer_or_name} action pointer or route name does not exist in the router."
+            "{$pointer} action pointer or route name does not exist in the router."
         );
     }
 
     /**
      * Return the absolute URL corresponding to an action.
      *
-     * @param string $action_pointer
-     * @param array $parameters
+     * @param UrlPointer $pointer
+     * @param UrlParameters $parameters
      *
-     * @throws \Minz\Errors\UrlError if router has not been registered
-     * @throws \Minz\Errors\UrlError if the action pointer has not be added to
-     *                               the router
-     * @throws \Minz\Errors\UrlError if required parameter is missing
-     *
-     * @return string The URL corresponding to the action
+     * @throws \Minz\Errors\UrlError
+     *     If router has not been registered
+     * @throws \Minz\Errors\UrlError
+     *     If the action pointer has not be added to the router
+     * @throws \Minz\Errors\UrlError
+     *     If required parameter is missing
      */
-    public static function absoluteFor($action_pointer, $parameters = [])
+    public static function absoluteFor(string $pointer, array $parameters = []): string
     {
-        $relative_url = self::for($action_pointer, $parameters);
+        $relative_url = self::for($pointer, $parameters);
         return self::baseUrl() . $relative_url;
     }
 
     /**
      * Return the URL of the server, based on Configuration url_options.
-     *
-     * @return string
      */
-    public static function baseUrl()
+    public static function baseUrl(): string
     {
         $url_options = Configuration::$url_options;
         $absolute_url = $url_options['protocol'] . '://';
@@ -114,10 +117,8 @@ class Url
      * Return the path as specified in the Configuration url_options.
      *
      * It always removes the final character if the path ends with a slash (/).
-     *
-     * @return string
      */
-    public static function path()
+    public static function path(): string
     {
         $path = Configuration::$url_options['path'];
         if (substr($path, -1) === '/') {

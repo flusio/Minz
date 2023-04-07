@@ -6,14 +6,14 @@ use PHPUnit\Framework\TestCase;
 
 class TextTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $output = new Text('Hello World!');
 
         $this->assertSame('text/plain', $output->contentType());
     }
 
-    public function testRender()
+    public function testRender(): void
     {
         $output = new Text('Hello World!');
 

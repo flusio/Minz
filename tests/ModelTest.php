@@ -7,7 +7,7 @@ use AppTest\models;
 
 class ModelTest extends TestCase
 {
-    public function testPropertyDeclarations()
+    public function testPropertyDeclarations(): void
     {
         Model::declareProperties(
             models\SimpleId::class,
@@ -26,7 +26,7 @@ class ModelTest extends TestCase
         ], $property_declarations);
     }
 
-    public function testPropertyDeclarationsWithValidTypes()
+    public function testPropertyDeclarationsWithValidTypes(): void
     {
         Model::declareProperties(
             models\ValidPropertyTypes::class,
@@ -66,7 +66,7 @@ class ModelTest extends TestCase
         ], $property_declarations);
     }
 
-    public function testPropertyDeclarationsFailsIfPropertyTypeIsNotSupported()
+    public function testPropertyDeclarationsFailsIfPropertyTypeIsNotSupported(): void
     {
         $this->expectException(Errors\ModelPropertyError::class);
         $this->expectExceptionCode(Model::ERROR_PROPERTY_TYPE_INVALID);
@@ -78,7 +78,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testPropertyDeclarationsFailsIfValidatorIsUncallable()
+    public function testPropertyDeclarationsFailsIfValidatorIsUncallable(): void
     {
         $this->expectException(Errors\ModelPropertyError::class);
         $this->expectExceptionCode(Model::ERROR_PROPERTY_VALIDATOR_INVALID);
@@ -90,7 +90,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testToValues()
+    public function testToValues(): void
     {
         $model = new models\SimpleId();
         $model->id = 42;
@@ -100,7 +100,7 @@ class ModelTest extends TestCase
         $this->assertSame(42, $values['id']);
     }
 
-    public function testToValuesWithUnsetValue()
+    public function testToValuesWithUnsetValue(): void
     {
         $model = new models\SimpleId();
 
@@ -109,7 +109,7 @@ class ModelTest extends TestCase
         $this->assertNull($values['id']);
     }
 
-    public function testToValuesWithUndeclaredProperty()
+    public function testToValuesWithUndeclaredProperty(): void
     {
         $model = new models\SimpleId();
         $model->foo = 'bar';
@@ -119,7 +119,7 @@ class ModelTest extends TestCase
         $this->assertArrayNotHasKey('foo', $values);
     }
 
-    public function testToValuesWithDatetimeProperty()
+    public function testToValuesWithDatetimeProperty(): void
     {
         $model = new models\SimpleDateTime();
         $created_at = new \DateTime();
@@ -130,7 +130,7 @@ class ModelTest extends TestCase
         $this->assertSame($created_at->format(Model::DATETIME_FORMAT), $values['created_at']);
     }
 
-    public function testToValuesWithDatetimePropertyAndCustomFormat()
+    public function testToValuesWithDatetimePropertyAndCustomFormat(): void
     {
         $model = new models\FormattedDateTime();
         $created_at = new \DateTime();
@@ -141,7 +141,7 @@ class ModelTest extends TestCase
         $this->assertSame($created_at->format('Y-m-d'), $values['created_at']);
     }
 
-    public function testToValuesWithUnsetDatetimeProperty()
+    public function testToValuesWithUnsetDatetimeProperty(): void
     {
         $model = new models\SimpleDateTime();
 
@@ -150,7 +150,7 @@ class ModelTest extends TestCase
         $this->assertNull($values['created_at']);
     }
 
-    public function testToValuesWithComputedProperty()
+    public function testToValuesWithComputedProperty(): void
     {
         $model = new models\Computed();
         $model->count = 42;
@@ -160,7 +160,7 @@ class ModelTest extends TestCase
         $this->assertSame([], $values);
     }
 
-    public function testToValuesWithTrueBooleanProperty()
+    public function testToValuesWithTrueBooleanProperty(): void
     {
         $model = new models\ValidPropertyTypes();
         $model->boolean = true;
@@ -170,7 +170,7 @@ class ModelTest extends TestCase
         $this->assertSame(1, $values['boolean']);
     }
 
-    public function testToValuesWithFalseBooleanProperty()
+    public function testToValuesWithFalseBooleanProperty(): void
     {
         $model = new models\ValidPropertyTypes();
         $model->boolean = false;
@@ -180,7 +180,7 @@ class ModelTest extends TestCase
         $this->assertSame(0, $values['boolean']);
     }
 
-    public function testFromValuesWithString()
+    public function testFromValuesWithString(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -189,7 +189,7 @@ class ModelTest extends TestCase
         $this->assertSame('foo', $model->string);
     }
 
-    public function testFromValuesWithInteger()
+    public function testFromValuesWithInteger(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -198,7 +198,7 @@ class ModelTest extends TestCase
         $this->assertSame(42, $model->integer);
     }
 
-    public function testFromValuesWithIntegerZero()
+    public function testFromValuesWithIntegerZero(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -207,7 +207,7 @@ class ModelTest extends TestCase
         $this->assertSame(0, $model->integer);
     }
 
-    public function testFromValuesWithBoolean()
+    public function testFromValuesWithBoolean(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -216,7 +216,7 @@ class ModelTest extends TestCase
         $this->assertTrue($model->boolean);
     }
 
-    public function testFromValuesWithBooleanFalse()
+    public function testFromValuesWithBooleanFalse(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -225,7 +225,7 @@ class ModelTest extends TestCase
         $this->assertFalse($model->boolean);
     }
 
-    public function testFromValuesWithDatetime()
+    public function testFromValuesWithDatetime(): void
     {
         $model = new models\ValidPropertyTypes();
         $datetime = new \DateTime();
@@ -235,7 +235,7 @@ class ModelTest extends TestCase
         $this->assertEquals($datetime, $model->datetime);
     }
 
-    public function testFromValuesWithIso8601()
+    public function testFromValuesWithIso8601(): void
     {
         $model = new models\ValidPropertyTypes();
         $datetime = new \DateTime();
@@ -245,10 +245,12 @@ class ModelTest extends TestCase
 
         // we must compare timestamps because ISO-8601 lose the microseconds
         // and so the two DateTime are, in fact, different.
-        $this->assertEquals($datetime->getTimestamp(), $model->datetime->getTimestamp());
+        /** @var \DateTime $model_datetime */
+        $model_datetime = $model->datetime;
+        $this->assertEquals($datetime->getTimestamp(), $model_datetime->getTimestamp());
     }
 
-    public function testFromValuesWithCustomFormat()
+    public function testFromValuesWithCustomFormat(): void
     {
         $model = new models\FormattedDateTime();
         $datetime = new \DateTime('2020-01-20');
@@ -256,10 +258,12 @@ class ModelTest extends TestCase
 
         $model->fromValues(['created_at' => $formatted_datetime]);
 
-        $this->assertEquals($formatted_datetime, $model->created_at->format('Y-m-d'));
+        /** @var \DateTime $created_at */
+        $created_at = $model->created_at;
+        $this->assertEquals($formatted_datetime, $created_at->format('Y-m-d'));
     }
 
-    public function testFromValuesWhenIntegerTypeDoesNotMatch()
+    public function testFromValuesWhenIntegerTypeDoesNotMatch(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -268,7 +272,7 @@ class ModelTest extends TestCase
         $this->assertSame('not an integer', $model->integer);
     }
 
-    public function testFromValuesWhenDatetimeTypeDoesNotMatch()
+    public function testFromValuesWhenDatetimeTypeDoesNotMatch(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -277,7 +281,7 @@ class ModelTest extends TestCase
         $this->assertSame('not a datetime', $model->datetime);
     }
 
-    public function testFromValuesWhenBooleanTypeDoesNotMatch()
+    public function testFromValuesWhenBooleanTypeDoesNotMatch(): void
     {
         $model = new models\ValidPropertyTypes();
 
@@ -286,7 +290,7 @@ class ModelTest extends TestCase
         $this->assertSame('not a boolean', $model->boolean);
     }
 
-    public function testFromValuesWithComputedProperty()
+    public function testFromValuesWithComputedProperty(): void
     {
         $model = new models\Computed();
 
@@ -295,7 +299,7 @@ class ModelTest extends TestCase
         $this->assertSame(42, $model->count);
     }
 
-    public function testFromValuesFailsIfUndeclaredProperty()
+    public function testFromValuesFailsIfUndeclaredProperty(): void
     {
         $this->expectException(Errors\ModelPropertyError::class);
         $this->expectExceptionCode(Model::ERROR_PROPERTY_UNDECLARED);
@@ -308,7 +312,7 @@ class ModelTest extends TestCase
         $model->fromValues(['not_a_property' => 'foo']);
     }
 
-    public function testValidateReturnsNoErrorsIfValid()
+    public function testValidateReturnsNoErrorsIfValid(): void
     {
         $model = new models\Validator();
         $model->status = 'new';
@@ -318,7 +322,7 @@ class ModelTest extends TestCase
         $this->assertEmpty($errors);
     }
 
-    public function testValidateReturnsErrorIfRequiredPropertyIsNull()
+    public function testValidateReturnsErrorIfRequiredPropertyIsNull(): void
     {
         $model = new models\Required();
         $model->id = null;
@@ -336,7 +340,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateReturnsErrorIfRequiredStringPropertyIsEmpty()
+    public function testValidateReturnsErrorIfRequiredStringPropertyIsEmpty(): void
     {
         $model = new models\Required();
         $model->id = '';
@@ -354,7 +358,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateReturnsErrorIfIntegerTypeDoesNotMatch()
+    public function testValidateReturnsErrorIfIntegerTypeDoesNotMatch(): void
     {
         $model = new models\ValidPropertyTypes();
         $model->integer = 'not an integer';
@@ -372,7 +376,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateReturnsErrorIfDatetimeTypeDoesNotMatch()
+    public function testValidateReturnsErrorIfDatetimeTypeDoesNotMatch(): void
     {
         $model = new models\ValidPropertyTypes();
         $model->datetime = 'not a datetime';
@@ -390,7 +394,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateReturnsErrorIfBooleanTypeDoesNotMatch()
+    public function testValidateReturnsErrorIfBooleanTypeDoesNotMatch(): void
     {
         $model = new models\ValidPropertyTypes();
         $model->boolean = 'not a boolean';
@@ -408,7 +412,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateReturnsErrorIfValidatorReturnsFalse()
+    public function testValidateReturnsErrorIfValidatorReturnsFalse(): void
     {
         $model = new models\Validator();
         $model->status = 'not valid';
@@ -426,7 +430,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateReturnsErrorIfValidatorReturnsCustomMessage()
+    public function testValidateReturnsErrorIfValidatorReturnsCustomMessage(): void
     {
         $model = new models\ValidatorMessage();
         $model->status = 'not valid';
@@ -444,7 +448,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateCanReturnSeveralErrors()
+    public function testValidateCanReturnSeveralErrors(): void
     {
         $model = new models\Friend();
         $model->id = 'an id';
@@ -468,7 +472,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function testValidateDoesNotCallValidatorIfStringValueIsEmpty()
+    public function testValidateDoesNotCallValidatorIfStringValueIsEmpty(): void
     {
         $model = new models\Validator();
         $model->status = '';

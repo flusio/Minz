@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
 {
-    public function testListRoutes()
+    public function testListRoutes(): void
     {
         $router = new Router();
 
@@ -15,7 +15,7 @@ class RouterTest extends TestCase
         $this->assertSame(0, count($routes));
     }
 
-    public function testAddRoute()
+    public function testAddRoute(): void
     {
         $router = new Router();
 
@@ -29,7 +29,7 @@ class RouterTest extends TestCase
         ], $routes);
     }
 
-    public function testAddRouteAcceptsCliVia()
+    public function testAddRouteAcceptsCliMethod(): void
     {
         $router = new Router();
 
@@ -43,20 +43,7 @@ class RouterTest extends TestCase
         ], $routes);
     }
 
-    /**
-     * @dataProvider emptyValuesProvider
-     */
-    public function testAddRouteFailsIfPathIsEmpty($emptyPath)
-    {
-        $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage('Route "pattern" cannot be empty.');
-
-        $router = new Router();
-
-        $router->addRoute('get', $emptyPath, 'rabbits#list');
-    }
-
-    public function testAddRouteFailsIfPathDoesntStartWithSlash()
+    public function testAddRouteFailsIfPathDoesntStartWithSlash(): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage('Route "pattern" must start by a slash (/).');
@@ -66,20 +53,7 @@ class RouterTest extends TestCase
         $router->addRoute('get', 'rabbits', 'rabbits#list');
     }
 
-    /**
-     * @dataProvider emptyValuesProvider
-     */
-    public function testAddRouteFailsIfToIsEmpty($emptyTo)
-    {
-        $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage('Route "action_pointer" cannot be empty.');
-
-        $router = new Router();
-
-        $router->addRoute('get', '/rabbits', $emptyTo);
-    }
-
-    public function testAddRouteFailsIfToDoesntContainHash()
+    public function testAddRouteFailsIfToDoesntContainHash(): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage('Route "action_pointer" must contain a hash (#).');
@@ -89,7 +63,7 @@ class RouterTest extends TestCase
         $router->addRoute('get', '/rabbits', 'rabbits_list');
     }
 
-    public function testAddRouteFailsIfToContainsMoreThanOneHash()
+    public function testAddRouteFailsIfToContainsMoreThanOneHash(): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
@@ -102,21 +76,22 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @dataProvider invalidViaProvider
+     * @dataProvider invalidMethodProvider
      */
-    public function testAddRouteFailsIfViaIsInvalid($invalidVia)
+    public function testAddRouteFailsIfMethodIsInvalid(string $invalidMethod): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalidVia} via is invalid (get, post, patch, put, delete, cli)."
+            "{$invalidMethod} method is invalid (get, post, patch, put, delete, cli)."
         );
 
         $router = new Router();
 
-        $router->addRoute($invalidVia, '/rabbits', 'rabbits#list');
+        // @phpstan-ignore-next-line
+        $router->addRoute($invalidMethod, '/rabbits', 'rabbits#list');
     }
 
-    public function testMatch()
+    public function testMatch(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -132,7 +107,7 @@ class RouterTest extends TestCase
         ], $parameters);
     }
 
-    public function testMatchWithTrailingSlashes()
+    public function testMatchWithTrailingSlashes(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -148,7 +123,7 @@ class RouterTest extends TestCase
         ], $parameters);
     }
 
-    public function testMatchWithParam()
+    public function testMatchWithParam(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#get');
@@ -165,7 +140,7 @@ class RouterTest extends TestCase
         ], $parameters);
     }
 
-    public function testMatchWithWildcard()
+    public function testMatchWithWildcard(): void
     {
         $router = new Router();
         $router->addRoute('get', '/assets/*', 'assets#serve');
@@ -182,7 +157,7 @@ class RouterTest extends TestCase
         ], $parameters);
     }
 
-    public function testMatchFailsIfPatternIsLongerThanPath()
+    public function testMatchFailsIfPatternIsLongerThanPath(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage('Path "get /rabbits" doesn’t match any route.');
@@ -193,7 +168,7 @@ class RouterTest extends TestCase
         $router->match('get', '/rabbits');
     }
 
-    public function testMatchFailsIfNotMatchingVia()
+    public function testMatchFailsIfNotMatchingMethod(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage('Path "post /rabbits" doesn’t match any route.');
@@ -204,7 +179,7 @@ class RouterTest extends TestCase
         $router->match('post', '/rabbits');
     }
 
-    public function testMatchFailsIfIncorrectPath()
+    public function testMatchFailsIfIncorrectPath(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage('Path "get /no-rabbits" doesn’t match any route.');
@@ -215,7 +190,7 @@ class RouterTest extends TestCase
         $router->match('get', '/no-rabbits');
     }
 
-    public function testMatchWithParamFailsIfIncorrectPath()
+    public function testMatchWithParamFailsIfIncorrectPath(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage('Path "get /rabbits/42/details" doesn’t match any route.');
@@ -227,22 +202,23 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @dataProvider invalidViaProvider
+     * @dataProvider invalidMethodProvider
      */
-    public function testMatchFailsIfViaIsInvalid($invalidVia)
+    public function testMatchFailsIfMethodIsInvalid(string $invalidMethod): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalidVia} via is invalid (get, post, patch, put, delete, cli)."
+            "{$invalidMethod} method is invalid (get, post, patch, put, delete, cli)."
         );
 
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $router->match($invalidVia, '/rabbits');
+        // @phpstan-ignore-next-line
+        $router->match($invalidMethod, '/rabbits');
     }
 
-    public function testUriByPointer()
+    public function testUriByPointer(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -252,7 +228,7 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits', $uri);
     }
 
-    public function testUriByPointerWithParams()
+    public function testUriByPointerWithParams(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#details');
@@ -262,7 +238,7 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits/42', $uri);
     }
 
-    public function testUriWithAdditionalParameters()
+    public function testUriWithAdditionalParameters(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#details');
@@ -272,7 +248,7 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits?id=42', $uri);
     }
 
-    public function testUriByPointerFailsIfParameterIsMissing()
+    public function testUriByPointerFailsIfParameterIsMissing(): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage('Required `id` parameter is missing.');
@@ -283,7 +259,7 @@ class RouterTest extends TestCase
         $uri = $router->uriByPointer('get', 'rabbits#details');
     }
 
-    public function testUriByPointerFailsIfActionPointerNotRegistered()
+    public function testUriByPointerFailsIfActionPointerNotRegistered(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage(
@@ -296,22 +272,23 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @dataProvider invalidViaProvider
+     * @dataProvider invalidMethodProvider
      */
-    public function testUriByPointerFailsIfViaIsInvalid($invalid_via)
+    public function testUriByPointerFailsIfMethodIsInvalid(string $invalid_method): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalid_via} via is invalid (get, post, patch, put, delete, cli)."
+            "{$invalid_method} method is invalid (get, post, patch, put, delete, cli)."
         );
 
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
 
-        $router->uriByPointer($invalid_via, 'rabbits#list');
+        // @phpstan-ignore-next-line
+        $router->uriByPointer($invalid_method, 'rabbits#list');
     }
 
-    public function testUriByName()
+    public function testUriByName(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
@@ -321,7 +298,7 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits', $uri);
     }
 
-    public function testUriByNameWithParams()
+    public function testUriByNameWithParams(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#details', 'rabbit');
@@ -331,7 +308,7 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits/42', $uri);
     }
 
-    public function testUriByNameWithAdditionalParameters()
+    public function testUriByNameWithAdditionalParameters(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#details', 'rabbit');
@@ -341,7 +318,7 @@ class RouterTest extends TestCase
         $this->assertSame('/rabbits?id=42', $uri);
     }
 
-    public function testUriByNameFailsIfParameterIsMissing()
+    public function testUriByNameFailsIfParameterIsMissing(): void
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage('Required `id` parameter is missing.');
@@ -352,7 +329,7 @@ class RouterTest extends TestCase
         $uri = $router->uriByName('rabbit');
     }
 
-    public function testUriByNameFailsIfNameNotRegistered()
+    public function testUriByNameFailsIfNameNotRegistered(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage(
@@ -364,17 +341,10 @@ class RouterTest extends TestCase
         $router->uriByName('rabbits');
     }
 
-    public function emptyValuesProvider()
-    {
-        return [
-            [''],
-            [null],
-            [false],
-            [[]],
-        ];
-    }
-
-    public function invalidViaProvider()
+    /**
+     * @return array<array{string}>
+     */
+    public function invalidMethodProvider(): array
     {
         return [
             ['invalid'],

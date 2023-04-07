@@ -8,19 +8,7 @@ class FileTest extends TestCase
 {
     use Tests\FilesHelper;
 
-    public function testConstructFailsIfNoErrorKey()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Invalid parameter: missing "error" key.');
-
-        $file_filepath = Configuration::$app_path . '/dotenv';
-        $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        new File([
-            'tmp_name' => $tmp_filepath,
-        ]);
-    }
-
-    public function testConstructFailsIfInvalidErrorKey()
+    public function testConstructFailsIfInvalidErrorKey(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Invalid parameter: unknown error.');
@@ -28,55 +16,23 @@ class FileTest extends TestCase
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => 42,
         ]);
     }
 
-    public function testConstructFailsIfNoTmpNameKey()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Invalid parameter: missing "tmp_name" key.');
-
-        new File([
-            'error' => UPLOAD_ERR_OK,
-        ]);
-    }
-
-    public function testSourceNameIsSet()
+    public function testContent(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
-            'name' => 'name.jpg',
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
 
-        $this->assertSame('name.jpg', $file->source_name);
-    }
-
-    public function testSourceNameDefaultsToEmptyString()
-    {
-        $file_filepath = Configuration::$app_path . '/dotenv';
-        $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $file = new File([
-            'tmp_name' => $tmp_filepath,
-            'error' => UPLOAD_ERR_OK,
-        ]);
-
-        $this->assertSame('', $file->source_name);
-    }
-
-    public function testContent()
-    {
-        $file_filepath = Configuration::$app_path . '/dotenv';
-        $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $file = new File([
-            'tmp_name' => $tmp_filepath,
-            'error' => UPLOAD_ERR_OK,
-        ]);
-
+        /** @var string */
         $content = $file->content();
 
         $this->assertStringContainsString('FOO=bar', $content);
@@ -85,11 +41,12 @@ class FileTest extends TestCase
     /**
      * @dataProvider errorsProvider
      */
-    public function testContentReturnsNothingIfInError($error)
+    public function testContentReturnsNothingIfInError(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => $error,
         ]);
@@ -99,11 +56,12 @@ class FileTest extends TestCase
         $this->assertFalse($content);
     }
 
-    public function testContentReturnsNothingIfIsUploadedFileReturnsFalse()
+    public function testContentReturnsNothingIfIsUploadedFileReturnsFalse(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
             // This is used during tests to change the behaviour of the method.
@@ -116,11 +74,12 @@ class FileTest extends TestCase
         $this->assertFalse($content);
     }
 
-    public function testMove()
+    public function testMove(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
@@ -137,11 +96,12 @@ class FileTest extends TestCase
     /**
      * @dataProvider errorsProvider
      */
-    public function testMoveFailsIfInError($error)
+    public function testMoveFailsIfInError(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => $error,
         ]);
@@ -155,11 +115,12 @@ class FileTest extends TestCase
         $this->assertSame($tmp_filepath, $file->filepath);
     }
 
-    public function testMoveFailsIfIsUploadedFileReturnsFalse()
+    public function testMoveFailsIfIsUploadedFileReturnsFalse(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
             // This is used during tests to change the behaviour of the method.
@@ -176,11 +137,12 @@ class FileTest extends TestCase
         $this->assertSame($tmp_filepath, $file->filepath);
     }
 
-    public function testIsTooLargeWithNoErrors()
+    public function testIsTooLargeWithNoErrors(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
@@ -193,11 +155,12 @@ class FileTest extends TestCase
     /**
      * @dataProvider tooLargeErrorsProvider
      */
-    public function testIsTooLargeWithTooLargeErrors($error)
+    public function testIsTooLargeWithTooLargeErrors(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => $error,
         ]);
@@ -210,11 +173,12 @@ class FileTest extends TestCase
     /**
      * @dataProvider notTooLargeErrorsProvider
      */
-    public function testIsTooLargeWithNotTooLargeErrors($error)
+    public function testIsTooLargeWithNotTooLargeErrors(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => $error,
         ]);
@@ -224,11 +188,12 @@ class FileTest extends TestCase
         $this->assertFalse($result);
     }
 
-    public function testIsType()
+    public function testIsType(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
@@ -241,11 +206,12 @@ class FileTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testIsTypeReturnsFalseIfWrongType()
+    public function testIsTypeReturnsFalseIfWrongType(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
@@ -258,11 +224,12 @@ class FileTest extends TestCase
         $this->assertFalse($result);
     }
 
-    public function testErrorIsNotSetIfOk()
+    public function testErrorIsNotSetIfOk(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
@@ -273,11 +240,12 @@ class FileTest extends TestCase
     /**
      * @dataProvider errorsProvider
      */
-    public function testErrorIsSetIfNotOk($error)
+    public function testErrorIsSetIfNotOk(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => $error,
         ]);
@@ -285,11 +253,12 @@ class FileTest extends TestCase
         $this->assertSame($error, $file->error);
     }
 
-    public function testErrorIsSetIfIsUploadedFileReturnsFalse()
+    public function testErrorIsSetIfIsUploadedFileReturnsFalse(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
         $file = new File([
+            'name' => '',
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
             // This is used during tests to change the behaviour of the method.
@@ -300,7 +269,10 @@ class FileTest extends TestCase
         $this->assertSame(-1, $file->error);
     }
 
-    public function errorsProvider()
+    /**
+     * @return array<array{int}>
+     */
+    public function errorsProvider(): array
     {
         return [
             [UPLOAD_ERR_INI_SIZE],
@@ -313,7 +285,10 @@ class FileTest extends TestCase
         ];
     }
 
-    public function tooLargeErrorsProvider()
+    /**
+     * @return array<array{int}>
+     */
+    public function tooLargeErrorsProvider(): array
     {
         return [
             [UPLOAD_ERR_INI_SIZE],
@@ -321,7 +296,10 @@ class FileTest extends TestCase
         ];
     }
 
-    public function notTooLargeErrorsProvider()
+    /**
+     * @return array<array{int}>
+     */
+    public function notTooLargeErrorsProvider(): array
     {
         return [
             [UPLOAD_ERR_PARTIAL],

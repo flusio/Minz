@@ -2,6 +2,8 @@
 
 namespace Minz;
 
+use Minz\Output;
+
 /**
  * The Response represents the answer given to a Request. It is returned to a client.
  *
@@ -92,6 +94,44 @@ namespace Minz;
  * }
  * ```
  *
+ * @phpstan-import-type UrlPointer from Url
+ *
+ * @phpstan-import-type UrlParameters from Url
+ *
+ * @phpstan-import-type ViewPointer from Output\View
+ *
+ * @phpstan-import-type ViewVariables from Output\View
+ *
+ * @phpstan-type ResponseHttpCode value-of<Response::VALID_HTTP_CODES>
+ *
+ * @phpstan-type ResponseHeaders array<string, ResponseHeader>
+ *
+ * @phpstan-type ResponseHeader string|string[]
+ *
+ * @phpstan-type ResponseCookies array<string, ResponseCookie>
+ *
+ * @phpstan-type ResponseCookie array{
+ *     'name': string,
+ *     'value': string,
+ *     'options': array{
+ *         'expires': int,
+ *         'path': string,
+ *         'secure': bool,
+ *         'httponly': bool,
+ *         'samesite': 'Strict'|'Lax'|'None',
+ *         'domain'?: string,
+ *     },
+ * }
+ *
+ * @phpstan-type CookieOptions array{
+ *     'expires'?: int,
+ *     'path'?: string,
+ *     'secure'?: bool,
+ *     'httponly'?: bool,
+ *     'samesite'?: 'Strict'|'Lax'|'None',
+ *     'domain'?: string,
+ * }
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -110,35 +150,29 @@ class Response
         'default-src' => "'self'",
     ];
 
-    /** @var integer */
-    private $code;
+    /** @var ResponseHttpCode */
+    private int $code;
 
-    /** @var array<string, mixed> */
-    private $headers = [];
+    /** @var ResponseHeaders */
+    private array $headers = [];
 
-    /** @var array */
-    private $cookies = [];
+    /** @var ResponseCookies */
+    private array $cookies = [];
 
-    /** @var \Minz\Output\Output|null */
-    private $output;
+    private ?Output\Output $output;
 
     /**
      * Create a OK response (HTTP 200) with an optional Output\View.
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function ok($view_pointer = '', $variables = [])
+    public static function ok(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -153,18 +187,13 @@ class Response
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function created($view_pointer = '', $variables = [])
+    public static function created(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -179,18 +208,13 @@ class Response
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function accepted($view_pointer = '', $variables = [])
+    public static function accepted(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -202,23 +226,16 @@ class Response
 
     /**
      * Create a no content response (HTTP 204).
-     *
-     * @return \Minz\Response
      */
-    public static function noContent()
+    public static function noContent(): Response
     {
         return new Response(204);
     }
 
     /**
      * Create a moved permanently response (HTTP 301).
-     *
-     * @param string $url
-     *     The url to redirect to.
-     *
-     * @return \Minz\Response
      */
-    public static function movedPermanently($url)
+    public static function movedPermanently(string $url): Response
     {
         $response = new Response(301);
         $response->setHeader('Location', $url);
@@ -227,13 +244,8 @@ class Response
 
     /**
      * Create a found response (HTTP 302).
-     *
-     * @param string $url
-     *     The url to redirect to.
-     *
-     * @return \Minz\Response
      */
-    public static function found($url)
+    public static function found(string $url): Response
     {
         $response = new Response(302);
         $response->setHeader('Location', $url);
@@ -255,16 +267,12 @@ class Response
      * $response = \Minz\Response::redirect('home');
      * ```
      *
-     * @param string $action_pointer_or_name
-     *     An action pointer or action name declared in the router.
-     * @param array $parameters
-     *     The parameters to build the action URL (empty array by default).
-     *
-     * @return \Minz\Response
+     * @param UrlPointer $pointer
+     * @param UrlParameters $parameters
      */
-    public static function redirect($action_pointer_or_name, $parameters = [])
+    public static function redirect(string $pointer, array $parameters = []): Response
     {
-        $url = Url::for($action_pointer_or_name, $parameters);
+        $url = Url::for($pointer, $parameters);
         return self::found($url);
     }
 
@@ -273,18 +281,13 @@ class Response
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function badRequest($view_pointer = '', $variables = [])
+    public static function badRequest(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -299,18 +302,13 @@ class Response
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function unauthorized($view_pointer = '', $variables = [])
+    public static function unauthorized(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -325,18 +323,13 @@ class Response
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function notFound($view_pointer = '', $variables = [])
+    public static function notFound(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -351,18 +344,13 @@ class Response
      *
      * @see \Minz\Output\View
      *
-     * @param string $view_pointer
-     *     A pointer to an existing view file under src/views (default is an
-     *     empty string).
-     * @param mixed[] $variables
-     *     The variables to pass to the View (default is an empty array)
+     * @param ?ViewPointer $view_pointer
+     * @param ViewVariables $variables
      *
      * @throws \Minz\Errors\OutputError
      *     Raised if the view file doesn't exist.
-     *
-     * @return \Minz\Response
      */
-    public static function internalServerError($view_pointer = '', $variables = [])
+    public static function internalServerError(?string $view_pointer = null, array $variables = []): Response
     {
         if ($view_pointer) {
             $view = new Output\View($view_pointer, $variables);
@@ -377,14 +365,9 @@ class Response
      *
      * @see \Minz\Output\Text
      *
-     * @param integer $code
-     *     The HTTP status code.
-     * @param string $text
-     *     The text to render.
-     *
-     * @return \Minz\Response
+     * @param ResponseHttpCode $code
      */
-    public static function text($code, $text)
+    public static function text(int $code, string $text): Response
     {
         $output = new \Minz\Output\Text($text);
         return new Response($code, $output);
@@ -395,16 +378,15 @@ class Response
      *
      * @see https://www.php.net/manual/function.json-encode.php
      *
-     * @param integer $code
-     *     The HTTP status code.
-     * @param mixed $value
-     *     The value to encode with json_encode.
-     *
-     * @return \Minz\Response
+     * @param ResponseHttpCode $code
+     * @param mixed[] $values
      */
-    public static function json($code, $value)
+    public static function json(int $code, array $values): Response
     {
-        $json = json_encode($value);
+        $json = json_encode($values);
+        if (!$json) {
+            $json = '';
+        }
         $output = new \Minz\Output\Text($json);
         $response = new Response($code, $output);
         $response->setHeader('Content-Type', 'application/json');
@@ -414,15 +396,12 @@ class Response
     /**
      * Create a Response from a HTTP status code and an optional output.
      *
-     * @param integer $code
-     *     The HTTP status code.
-     * @param \Minz\Output\Output|null $output
-     *     The Output to set to the response (optional).
+     * @param ResponseHttpCode $code
      *
      * @throws \Minz\Errors\ResponseError
      *     Raised if the code is not a valid HTTP status code.
      */
-    public function __construct($code, $output = null)
+    public function __construct(int $code, ?Output\Output $output = null)
     {
         $this->setCode($code);
         $this->setOutput($output);
@@ -435,41 +414,31 @@ class Response
         $this->setHeader('Content-Security-Policy', self::DEFAULT_CSP);
     }
 
-    /**
-     * @return \Minz\Output\Output
-     */
-    public function output()
+    public function output(): ?Output\Output
     {
         return $this->output;
     }
 
-    /**
-     * @param \Minz\Output\Output|null $output
-     *
-     * @return void
-     */
-    public function setOutput($output)
+    public function setOutput(?Output\Output $output): void
     {
         $this->output = $output;
     }
 
     /**
-     * @return integer
+     * @return ResponseHttpCode
      */
-    public function code()
+    public function code(): int
     {
         return $this->code;
     }
 
     /**
-     * @param integer $code
+     * @param ResponseHttpCode $code
      *
      * @throws \Minz\Errors\ResponseError
      *     Raised if the code is not a valid HTTP status code.
-     *
-     * @return void
      */
-    public function setCode($code)
+    public function setCode(int $code): void
     {
         if (!in_array($code, self::VALID_HTTP_CODES)) {
             throw new Errors\ResponseError("{$code} is not a valid HTTP code.");
@@ -481,14 +450,9 @@ class Response
     /**
      * Add or replace a HTTP header.
      *
-     * @param string $name
-     *     The header name to set.
-     * @param mixed $value
-     *     The value of the header.
-     *
-     * @return void
+     * @param ResponseHeader $value
      */
-    public function setHeader($name, $value)
+    public function setHeader(string $name, mixed $value): void
     {
         $this->headers[$name] = $value;
     }
@@ -500,16 +464,13 @@ class Response
      * allowed to load.
      *
      * @see https://developer.mozilla.org/docs/Web/HTTP/Headers/Content-Security-Policy
-     *
-     * @param string $directive
-     *     The CSP directive name.
-     * @param string $sources
-     *     The sources for which the directive is allowed.
-     *
-     * @return void
      */
-    public function setContentSecurityPolicy($directive, $sources)
+    public function setContentSecurityPolicy(string $directive, string $sources): void
     {
+        if (!is_array($this->headers['Content-Security-Policy'])) {
+            $this->headers['Content-Security-Policy'] = [];
+        }
+
         $this->headers['Content-Security-Policy'][$directive] = $sources;
     }
 
@@ -542,14 +503,9 @@ class Response
      * ]
      * ```
      *
-     * @param boolean $raw
-     *     True indicates that headers should be returned as is, false (default)
-     *     that they should be processed in order to be passed to the PHP
-     *     `header()` function.
-     *
-     * @return array
+     * @return ResponseHeaders|array<string>
      */
-    public function headers($raw = false)
+    public function headers(bool $raw = false): array
     {
         if ($raw) {
             return $this->headers;
@@ -592,16 +548,9 @@ class Response
      *
      * @see https://www.php.net/manual/function.setcookie.php
      *
-     * @param string $name
-     *     The name of the cookie.
-     * @param string $value
-     *     The value of the cookie.
-     * @param array $options
-     *     Additional options
-     *
-     * @return void
+     * @param CookieOptions $options
      */
-    public function setCookie($name, $value, $options = [])
+    public function setCookie(string $name, string $value, array $options = []): void
     {
         $url_options = Configuration::$url_options;
         $default_options = [
@@ -630,14 +579,9 @@ class Response
      *
      * To remove the cookie, the expiration date is set to 1 year in the past.
      *
-     * @param string $name
-     *     The name of the cookie to remove.
-     * @param array $options
-     *     Additional options to pass to the cookie.
-     *
-     * @return void
+     * @param CookieOptions $options
      */
-    public function removeCookie($name, $options = [])
+    public function removeCookie(string $name, array $options = []): void
     {
         $options['expires'] = Time::ago(1, 'year')->getTimestamp();
         $this->setCookie($name, '', $options);
@@ -652,21 +596,18 @@ class Response
      *
      * @see https://www.php.net/manual/function.setcookie.php
      *
-     * @return array
+     * @return ResponseCookies
      */
-    public function cookies()
+    public function cookies(): array
     {
         return $this->cookies;
     }
 
     /**
-     * Generate and return the content of the output.
-     *
-     * @return string
-     *     Return the output, or an empty string if the response doesn't have
-     *     any output.
+     * Generate and return the content of the output, or an empty string if
+     * no Output is set.
      */
-    public function render()
+    public function render(): string
     {
         if ($this->output) {
             return $this->output->render();

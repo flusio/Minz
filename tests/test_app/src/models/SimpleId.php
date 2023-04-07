@@ -8,7 +8,7 @@ class SimpleId extends \Minz\Model
         'id' => 'integer',
     ];
 
-    public $id;
+    public ?int $id;
 
-    public $foo;
+    public ?string $foo;
 }

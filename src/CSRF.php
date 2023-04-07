@@ -16,10 +16,8 @@ class CSRF
      * Static alias of generateToken
      *
      * @see \Minz\CSRF::generateToken
-     *
-     * @return string
      */
-    public static function generate()
+    public static function generate(): string
     {
         $csrf = new \Minz\CSRF();
         return $csrf->generateToken();
@@ -29,12 +27,8 @@ class CSRF
      * Static alias of validateToken
      *
      * @see \Minz\CSRF::validateToken
-     *
-     * @param string $token
-     *
-     * @return boolean
      */
-    public static function validate($token)
+    public static function validate(string $token): bool
     {
         $csrf = new \Minz\CSRF();
         return $csrf->validateToken($token);
@@ -44,10 +38,8 @@ class CSRF
      * Static alias of setToken
      *
      * @see \Minz\CSRF::setToken
-     *
-     * @param string $token
      */
-    public static function set($token)
+    public static function set(string $token): void
     {
         $csrf = new \Minz\CSRF();
         $csrf->setToken($token);
@@ -57,10 +49,8 @@ class CSRF
      * Store a CSRF hexadecimal token in session and return it.
      *
      * No tokens are generated if $_SESSION['CSRF'] already contains a token.
-     *
-     * @return string
      */
-    public function generateToken()
+    public function generateToken(): string
     {
         if (!isset($_SESSION['CSRF']) || !$_SESSION['CSRF']) {
             $_SESSION['CSRF'] = \bin2hex(\random_bytes(32));
@@ -72,12 +62,8 @@ class CSRF
      * Validate a token against the session-stored one.
      *
      * The token cannot be empty or the method will always return false.
-     *
-     * @param string $token The token to check
-     *
-     * @return boolean True if the token matches with $_SESSION['CSRF'], false otherwise
      */
-    public function validateToken($token)
+    public function validateToken(string $token): bool
     {
         if (isset($_SESSION['CSRF'])) {
             $expected_token = $_SESSION['CSRF'];
@@ -101,20 +87,16 @@ class CSRF
 
     /**
      * Force the value of the CSRF token
-     *
-     * @param string $token
      */
-    public function setToken($token)
+    public function setToken(string $token): void
     {
         $_SESSION['CSRF'] = $token;
     }
 
     /**
      * Generate a new CSRF token
-     *
-     * @return string
      */
-    public function resetToken()
+    public function resetToken(): string
     {
         unset($_SESSION['CSRF']);
         return $this->generateToken();

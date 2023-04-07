@@ -8,5 +8,5 @@ class SimpleDateTime extends \Minz\Model
         'created_at' => 'datetime',
     ];
 
-    public $created_at;
+    public ?\DateTime $created_at;
 }

@@ -107,6 +107,12 @@ namespace Minz;
  * $my_cookie = $request->cookie('my_cookie');
  * ```
  *
+ * @phpstan-type RequestMethod value-of<Request::VALID_METHODS>
+ *
+ * @phpstan-type RequestParameters array<string, mixed>
+ *
+ * @phpstan-type RequestHeaders array<string, mixed>
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -114,22 +120,21 @@ class Request
 {
     public const VALID_METHODS = ['get', 'post', 'patch', 'put', 'delete', 'cli'];
 
-    /** @var string */
-    private $method;
+    /** @var RequestMethod */
+    private string $method;
 
-    /** @var string */
-    private $path;
+    private string $path;
 
-    /** @var mixed[] */
-    private $parameters;
+    /** @var RequestParameters */
+    private array $parameters;
 
-    /** @var mixed[] */
-    private $headers;
+    /** @var RequestHeaders */
+    private array $headers;
 
     /**
      * Create a Request
      *
-     * @param string $method
+     * @param RequestMethod $method
      *     The method that is executing the request. Its value must be one of
      *     the Request::VALID_METHODS. Valid methods are equivalent to a subset
      *     of HTTP verbs + the `cli` value (to handle requests from the CLI).
@@ -146,13 +151,13 @@ class Request
      *     For HTTP requests, its value usually comes from `$_SERVER['REQUEST_URI']`.
      *     CLI must respect this format as well and build the path by itself (cf.
      *     example above)
-     * @param mixed[] $parameters
+     * @param RequestParameters $parameters
      *     The parameters of the request where keys are the names of the parameters.
      *     The parameters can be retrieved with the `param*()` methods.
      *     For HTTP requests, its value usually is a merge of `$_GET`, `$_POST`
      *     and `$_FILE` global variables.
      *     CLI must build the array by itself (cf. example above)
-     * @param mixed[] $headers
+     * @param RequestHeaders $headers
      *     The headers of the request where keys are the names of the headers.
      *     Cookies must be associated to the `COOKIE` key. Headers can be
      *     retrieved with the `header()` method, while cookies are retrieved
@@ -170,8 +175,12 @@ class Request
      * @see https://developer.mozilla.org/docs/Web/HTTP/Headers
      * @see https://developer.mozilla.org/docs/Web/HTTP/Overview#requests
      */
-    public function __construct($method, $uri, $parameters = [], $headers = [])
+    public function __construct(string $method, string $uri, array $parameters = [], array $headers = [])
     {
+        // Note: $method is not always one of the valid methods, even if the
+        // declaration says so. Later, we'll ask for a valid method, then we’ll
+        // be able to delete the next few lines.
+        // @phpstan-ignore-next-line
         if ($method) {
             $method = strtolower($method);
         }
@@ -251,45 +260,24 @@ class Request
     }
 
     /**
-     * @return string
+     * @return RequestMethod
      */
-    public function method()
+    public function method(): string
     {
         return $this->method;
     }
 
-    /**
-     * @return string
-     */
-    public function path()
+    public function path(): string
     {
         return $this->path;
     }
 
-    /**
-     * Set a parameter.
-     *
-     * @param string $name
-     *     The name of the parameter to set.
-     * @param mixed $value
-     *     The new value of the parameter.
-     */
-    public function setParam($name, $value)
+    public function setParam(string $name, mixed $value): void
     {
         $this->parameters[$name] = $value;
     }
 
-    /**
-     * Return a parameter value.
-     *
-     * @param string $name
-     *     The name of the parameter to get.
-     * @param mixed $default
-     *     A default value to return if the parameter name doesn't exist.
-     *
-     * @return mixed
-     */
-    public function param($name, $default = null)
+    public function param(string $name, mixed $default = null): mixed
     {
         if (isset($this->parameters[$name])) {
             return $this->parameters[$name];
@@ -300,16 +288,8 @@ class Request
 
     /**
      * Return a parameter value as a boolean.
-     *
-     * @param string $name
-     *     The name of the parameter to get.
-     * @param boolean $default
-     *     A default value to return if the parameter name doesn't exist
-     *     (default is false).
-     *
-     * @return boolean
      */
-    public function paramBoolean($name, $default = false)
+    public function paramBoolean(string $name, bool $default = false): bool
     {
         if (isset($this->parameters[$name])) {
             return filter_var($this->parameters[$name], FILTER_VALIDATE_BOOLEAN);
@@ -320,16 +300,8 @@ class Request
 
     /**
      * Return a parameter value as an integer.
-     *
-     * @param string $name
-     *     The name of the parameter to get.
-     * @param integer $default
-     *     A default value to return if the parameter name doesn't exist
-     *     (default is null).
-     *
-     * @return integer|null
      */
-    public function paramInteger($name, $default = null)
+    public function paramInteger(string $name, ?int $default = null): ?int
     {
         if (isset($this->parameters[$name])) {
             return intval($this->parameters[$name]);
@@ -343,15 +315,13 @@ class Request
      *
      * If the parameter isn’t an array, it’s placed into one.
      *
-     * @param string $name
-     *     The name of the parameter to get.
-     * @param array $default
-     *     A default value to return if the parameter name doesn't exist
-     *     (default is empty array). Array is merged with the parameter value.
+     * The default value is merged with the parameter value.
      *
-     * @return array
+     * @param mixed[] $default
+     *
+     * @return mixed[]
      */
-    public function paramArray($name, $default = [])
+    public function paramArray(string $name, array $default = []): array
     {
         if (isset($this->parameters[$name])) {
             $value = $this->parameters[$name];
@@ -372,36 +342,37 @@ class Request
      * `error` keys, or a null value will be returned.
      *
      * @see https://www.php.net/manual/features.file-upload.post-method.php
-     *
-     * @param string $name
-     *     The name of the parameter to get.
-     *
-     * @return \Minz\File|null
      */
-    public function paramFile($name)
+    public function paramFile(string $name): ?\Minz\File
     {
         if (!isset($this->parameters[$name])) {
             return null;
         }
 
+        $parameter = $this->parameters[$name];
+
+        if (!is_array($parameter)) {
+            return null;
+        }
+
+        $file_info = [
+            'tmp_name' => $parameter['tmp_name'] ?? '',
+            'error' => $parameter['error'] ?? -1,
+            'name' => $parameter['name'] ?? '',
+        ];
+
+        if (isset($parameter['is_uploaded_file'])) {
+            $file_info['is_uploaded_file'] = $parameter['is_uploaded_file'];
+        };
+
         try {
-            return new File($this->parameters[$name]);
+            return new File($file_info);
         } catch (\RuntimeException $e) {
             return null;
         }
     }
 
-    /**
-     * Return the value of a header.
-     *
-     * @param string $name
-     *     The name of the header to get.
-     * @param mixed $default
-     *     A default value to return if the header name doesn't exist.
-     *
-     * @return mixed
-     */
-    public function header($name, $default = null)
+    public function header(string $name, mixed $default = null): mixed
     {
         if (isset($this->headers[$name])) {
             return $this->headers[$name];
@@ -414,18 +385,12 @@ class Request
      * Return the value of a cookie.
      *
      * Cookies must be passed during Request initialization as $headers['COOKIE'].
-     *
-     * @param string $name
-     *     The name of the cookie to get.
-     * @param mixed $default
-     *     A default value to return if the cookie name doesn't exist.
-     *
-     * @return mixed
      */
-    public function cookie($name, $default = null)
+    public function cookie(string $name, mixed $default = null): mixed
     {
         if (
             isset($this->headers['COOKIE']) &&
+            is_array($this->headers['COOKIE']) &&
             isset($this->headers['COOKIE'][$name])
         ) {
             return $this->headers['COOKIE'][$name];
@@ -438,18 +403,12 @@ class Request
      * Return whether the given media is accepted by the client or not.
      *
      * @see https://datatracker.ietf.org/doc/html/rfc7231#section-5.3.2
-     *
-     * @param string $media
-     *     The media type/subtype to look for in the Accept headers.
-     *
-     * @return boolean
-     *     Return true if the client accepts the given media, false otherwise.
      */
-    public function isAccepting($media)
+    public function isAccepting(string $media): bool
     {
         // No Accept header implies the user agent accepts any media type (cf.
         // the RFC 7231)
-        $accept_header = $this->header('HTTP_ACCEPT', '*/*');
+        $accept_header = strval($this->header('HTTP_ACCEPT', '*/*'));
         $accept_medias = explode(',', $accept_header);
 
         list($media_type, $media_subtype) = explode('/', $media);

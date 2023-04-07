@@ -2,24 +2,35 @@
 
 namespace Minz;
 
+/**
+ * Allow to manipulate models in database.
+ *
+ * @phpstan-import-type ModelValues from Model
+ *
+ * @phpstan-import-type ModelId from Model
+ *
+ * @phpstan-type Criteria array<string, mixed>
+ *
+ * @author Marien Fressinaud <dev@marienfressinaud.fr>
+ * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
+ */
 class DatabaseModel
 {
     private const VALID_TABLE_NAME_REGEX = '/^\w[\w\d]*$/';
     private const VALID_COLUMN_NAME_REGEX = '/^\w[\w\d]*$/';
 
-    /** @var \Minz\Database */
-    protected $database;
+    protected Database $database;
 
-    /** @var string */
-    protected $table_name;
+    protected string $table_name;
 
-    /** @var string */
-    protected $primary_key_name;
+    protected string $primary_key_name;
 
     /** @var string[] */
-    protected $properties;
+    protected array $properties;
 
     /**
+     * @param string[] $properties
+     *
      * @throws \Minz\Errors\DatabaseModelError
      *     If the table name, or one of the declared properties is invalid
      * @throws \Minz\Errors\DatabaseModelError
@@ -29,7 +40,7 @@ class DatabaseModel
      *
      * @see \Minz\Database::_construct()
      */
-    public function __construct($table_name, $primary_key_name, $properties)
+    public function __construct(string $table_name, string $primary_key_name, array $properties)
     {
         $this->database = Database::get();
 
@@ -41,19 +52,21 @@ class DatabaseModel
     /**
      * Create an instance of the model in database
      *
-     * @param mixed[] $values The list of properties with associated values
+     * @param ModelValues $values
      *
-     * @throws \Minz\Errors\DatabaseModelError if values is empty
-     * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
-     *                                         declared by the model
-     * @throws \PDOException if an error occured in the SQL syntax
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If values is empty
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If at least one property isn't declared by the model
+     * @throws \PDOException
+     *     If an error occured in the SQL syntax
      *
-     * @return integer|string|boolean Return the id as an integer if cast is
-     *                                possible, as a string otherwise. Return
-     *                                true if lastInsertId is not supported by
-     *                                the PDO driver.
+     * @return ModelId|boolean
+     *     Return the id as an integer if cast is possible, as a string
+     *     otherwise. Return true if lastInsertId is not supported by the PDO
+     *     driver.
      */
-    public function create($values)
+    public function create($values): mixed
     {
         if (!$values) {
             $class = get_called_class();
@@ -81,7 +94,9 @@ class DatabaseModel
         $result = $statement->execute(array_values($values));
 
         if (isset($values[$this->primary_key_name])) {
-            return $values[$this->primary_key_name];
+            /** @var ModelId $value */
+            $value = $values[$this->primary_key_name];
+            return $value;
         } else {
             return $this->lastInsertId();
         }
@@ -90,16 +105,16 @@ class DatabaseModel
     /**
      * Return a list of all items in database for the current model/table.
      *
-     * @param string[] $selected_properties Allow to limit what properties to
-     *                                      get (optional)
+     * @param string[] $selected_properties
      *
-     * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
-     *                                         declared by the model
-     * @throws \PDOException if an error occured in the SQL syntax
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If at least one property isn't declared by the model
+     * @throws \PDOException
+     *     If an error occured in the SQL syntax
      *
-     * @return array
+     * @return ModelValues[]
      */
-    public function listAll($selected_properties = [])
+    public function listAll(array $selected_properties = []): array
     {
         $undeclared_property = $this->findUndeclaredProperty($selected_properties);
         if ($undeclared_property) {
@@ -124,18 +139,20 @@ class DatabaseModel
     /**
      * Return a row of the current model/table.
      *
-     * @param integer|string $primary_key The value of the row's primary key to find
+     * @param ModelId $primary_key
      *
-     * @throws \PDOException if an error occured in the SQL syntax
+     * @throws \PDOException
+     *     If an error occured in the SQL syntax
      *
-     * @return array|null Return the corresponding row data, null otherwise
+     * @return ?ModelValues
      */
-    public function find($primary_key)
+    public function find(mixed $primary_key): ?array
     {
         $sql = "SELECT * FROM {$this->table_name} WHERE {$this->primary_key_name} = ?";
 
         $statement = $this->prepare($sql);
         $statement->execute([$primary_key]);
+        /** @var ?ModelValues $result */
         $result = $statement->fetch();
         if ($result) {
             return $result;
@@ -145,20 +162,22 @@ class DatabaseModel
     }
 
     /**
-     * Return a row matching the given values.
+     * Return a row matching the given criteria.
      *
-     * @param mixed[] $values The values which must match
+     * @param Criteria $criteria
      *
-     * @throws \Minz\Errors\DatabaseModelError if values is empty
-     * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
-     *                                         declared by the model
-     * @throws \Minz\Errors\DatabaseModelError if an error occured in the SQL syntax
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If criteria is empty
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If at least one property isn't declared by the model
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If an error occured in the SQL syntax
      *
-     * @return array|null Return the corresponding row data, null otherwise
+     * @return ?ModelValues
      */
-    public function findBy($values)
+    public function findBy(array $criteria): ?array
     {
-        $result = $this->listBy($values);
+        $result = $this->listBy($criteria);
         if ($result) {
             return $result[0];
         } else {
@@ -167,33 +186,35 @@ class DatabaseModel
     }
 
     /**
-     * Return a list of rows matching the given values.
+     * Return a list of rows matching the given criteria.
      *
-     * The $values array keys must match with valid properties. The $values
+     * The $criteria array keys must match with valid properties. The $criteria
      * array values can either be a single value or an array (in which case the
      * where condition will be IN instead of =).
      *
-     * @param array $values The values which must match
+     * @param Criteria $criteria
      *
-     * @throws \Minz\Errors\DatabaseModelError if values is empty
-     * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
-     *                                         declared by the model
-     * @throws \PDOException if an error occured in the SQL syntax
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If criteria is empty
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If at least one property isn't declared by the model
+     * @throws \PDOException
+     *     If an error occured in the SQL syntax
      *
-     * @return array Return the corresponding row data, null otherwise
+     * @return ModelValues[]
      */
-    public function listBy($values)
+    public function listBy(array $criteria): array
     {
-        if (!$values) {
+        if (!$criteria) {
             throw new Errors\DatabaseModelError(
-                'It is expected values not to be empty.'
+                'It is expected criteria not to be empty.'
             );
         }
 
         $properties = [];
         $parameters = [];
         $where_statement_as_array = [];
-        foreach ($values as $property => $parameter) {
+        foreach ($criteria as $property => $parameter) {
             $properties[] = $property;
 
             if (is_array($parameter)) {
@@ -227,11 +248,9 @@ class DatabaseModel
     /**
      * Return whether all the given values exist in database.
      *
-     * @param mixed|array $primary_keys
-     *
-     * @return boolean
+     * @param ModelId|ModelId[] $primary_keys
      */
-    public function exists($primary_keys)
+    public function exists(mixed $primary_keys): bool
     {
         if (!is_array($primary_keys)) {
             $primary_keys = [$primary_keys];
@@ -244,17 +263,19 @@ class DatabaseModel
     }
 
     /**
-     * Update a row
+     * Update a row.
      *
-     * @param mixed[] $values The list of properties with associated values
-     * @param integer|string $primary_key The value of the row's primary key to change
+     * @param ModelId $primary_key
+     * @param ModelValues $values
      *
-     * @throws \Minz\Errors\DatabaseModelError if values is empty
-     * @throws \Minz\Errors\DatabaseModelError if at least one property isn't
-     *                                         declared by the model
-     * @throws \PDOException if an error occured in the SQL syntax
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If values are empty
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If at least one property isn't declared by the model
+     * @throws \PDOException
+     *     If an error occured in the SQL syntax
      */
-    public function update($primary_key, $values)
+    public function update(mixed $primary_key, array $values): bool
     {
         if (!$values) {
             $class = get_called_class();
@@ -290,25 +311,23 @@ class DatabaseModel
     /**
      * Delete all rows.
      *
-     * @throws \PDOException if an error occured in the SQL syntax
+     * It returns the number of deleted rows.
      *
-     * @return integer The number of deleted rows.
+     * @throws \PDOException if an error occured in the SQL syntax
      */
-    public function deleteAll()
+    public function deleteAll(): int
     {
         return $this->exec("DELETE FROM {$this->table_name}");
     }
 
     /**
-     * Delete a row.
+     * Delete one or several row by primary key value.
      *
-     * @param integer|string|array $pk_values
-     *     The value of the row's primary key to delete, or an array of primary
-     *     keys.
+     * @param ModelId|ModelId[] $pk_values
      *
      * @throws \PDOException if an error occured in the SQL syntax
      */
-    public function delete($pk_values)
+    public function delete(mixed $pk_values): bool
     {
         if (is_array($pk_values)) {
             $question_marks = array_fill(0, count($pk_values), '?');
@@ -328,10 +347,8 @@ class DatabaseModel
      * Return the number of model instances saved in database
      *
      * @throws \Minz\Errors\DatabaseModelError if the query fails
-     *
-     * @return integer
      */
-    public function count()
+    public function count(): int
     {
         $sql = "SELECT COUNT(*) FROM {$this->table_name};";
 
@@ -340,37 +357,35 @@ class DatabaseModel
     }
 
     /**
-     * Return the number of rows matching the given values.
+     * Return the number of rows matching the given criteria.
      *
-     * The $values array keys must be existing properties. The $values array
+     * The $criteria array keys must be existing properties. The $criteria array
      * values can either be a single value or an array (in which case the where
      * condition will be IN instead of =).
      *
-     * @param array $values The values which must match
+     * @param Criteria $criteria
      *
      * @throws \Minz\Errors\DatabaseModelError
-     *     if values is empty
+     *     if criteria is empty
      * @throws \Minz\Errors\DatabaseModelError
      *     if at least one property isn't declared by the model
      * @throws \Minz\Errors\DatabaseModelError
      *     if the query fails
      * @throws \PDOException
      *     if an error occured in the SQL syntax
-     *
-     * @return integer
      */
-    public function countBy($values)
+    public function countBy(array $criteria): int
     {
-        if (!$values) {
+        if (!$criteria) {
             throw new Errors\DatabaseModelError(
-                'It is expected values not to be empty.'
+                'It is expected criteria not to be empty.'
             );
         }
 
         $properties = [];
         $parameters = [];
         $where_statement_as_array = [];
-        foreach ($values as $property => $parameter) {
+        foreach ($criteria as $property => $parameter) {
             $properties[] = $property;
 
             if (is_array($parameter)) {
@@ -408,13 +423,9 @@ class DatabaseModel
     /**
      * Call query method on a database object.
      *
-     * @param string $sql_statement
-     *
      * @throws \PDOException if an error occured in the SQL syntax
-     *
-     * @return \PDOStatement
      */
-    protected function query($sql_statement)
+    protected function query(string $sql_statement): \PDOStatement
     {
         return $this->database->query($sql_statement);
     }
@@ -422,13 +433,9 @@ class DatabaseModel
     /**
      * Call exec method on a database object.
      *
-     * @param string $sql_statement
-     *
      * @throws \PDOException if an error occured in the SQL syntax
-     *
-     * @return int|false
      */
-    protected function exec($sql_statement)
+    protected function exec(string $sql_statement): int
     {
         return $this->database->exec($sql_statement);
     }
@@ -436,13 +443,9 @@ class DatabaseModel
     /**
      * Call prepare method on a database object.
      *
-     * @param string $sql_statement
-     *
      * @throws \PDOException if an error occured in the SQL syntax
-     *
-     * @return \PDOStatement
      */
-    protected function prepare($sql_statement)
+    protected function prepare(string $sql_statement): \PDOStatement
     {
         return $this->database->prepare($sql_statement);
     }
@@ -452,12 +455,12 @@ class DatabaseModel
      *
      * @see \PDO::lastInsertId()
      *
-     * @return integer|string|boolean Return the id as an integer if cast is
-     *                                possible, as a string otherwise. Return
-     *                                true if lastInsertId is not supported by
-     *                                the PDO driver.
+     * @return ModelId|true
+     *     Return the id as an integer if cast is possible, as a string
+     *     otherwise. Return true if lastInsertId is not supported by the PDO
+     *     driver.
      */
-    protected function lastInsertId()
+    protected function lastInsertId(): mixed
     {
         try {
             $id = $this->database->lastInsertId();
@@ -475,10 +478,8 @@ class DatabaseModel
      * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
      *
      * @throws \PDOException if there is already an active transaction.
-     *
-     * @return boolean
      */
-    protected function beginTransaction()
+    protected function beginTransaction(): bool
     {
         return $this->database->beginTransaction();
     }
@@ -487,10 +488,8 @@ class DatabaseModel
      * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
      *
      * @throws \PDOException if there is no active transaction.
-     *
-     * @return boolean
      */
-    protected function commit()
+    protected function commit(): bool
     {
         return $this->database->commit();
     }
@@ -499,10 +498,8 @@ class DatabaseModel
      * @see \PDO::rollBack https://www.php.net/manual/pdo.rollback.php
      *
      * @throws \PDOException if there is no active transaction.
-     *
-     * @return boolean
      */
-    protected function rollBack()
+    protected function rollBack(): bool
     {
         return $this->database->rollBack();
     }
@@ -514,11 +511,9 @@ class DatabaseModel
      * someone tries to set or use an undeclared property, an error must be
      * throwed.
      *
-     * @param string[] $properties The properties to check
-     *
-     * @return string|null Return an undeclared property if any, null otherwise
+     * @param string[] $properties
      */
-    protected function findUndeclaredProperty($properties)
+    protected function findUndeclaredProperty(array $properties): ?string
     {
         $valid_properties = $this->properties;
         $undeclared_properties = array_diff($properties, $valid_properties);
@@ -529,18 +524,12 @@ class DatabaseModel
         }
     }
 
-    /**
-     * @return string
-     */
-    public function tableName()
+    public function tableName(): string
     {
         return $this->table_name;
     }
 
-    /**
-     * @return string
-     */
-    public function primaryKeyName()
+    public function primaryKeyName(): string
     {
         return $this->primary_key_name;
     }
@@ -548,15 +537,16 @@ class DatabaseModel
     /**
      * @return string[]
      */
-    public function properties()
+    public function properties(): array
     {
         return $this->properties;
     }
 
     /**
-     * @throws \Minz\Errors\DatabaseModelError if the table name is invalid
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If the table name is invalid
      */
-    private function setTableName($table_name)
+    private function setTableName(string $table_name): void
     {
         if (!preg_match(self::VALID_TABLE_NAME_REGEX, $table_name)) {
             $class = get_called_class();
@@ -568,9 +558,12 @@ class DatabaseModel
     }
 
     /**
-     * @throws \Minz\Errors\DatabaseModelError if at least one of the properties is invalid
+     * @param string[] $properties
+     *
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If at least one of the properties is invalid
      */
-    private function setProperties($properties)
+    private function setProperties(array $properties): void
     {
         foreach ($properties as $property) {
             if (!preg_match(self::VALID_COLUMN_NAME_REGEX, $property)) {
@@ -584,10 +577,10 @@ class DatabaseModel
     }
 
     /**
-     * @throws \Minz\Errors\DatabaseModelError if the primary key name isn't declared
-     *                                  in properties
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If the primary key name isn't declared in properties
      */
-    private function setPrimaryKeyName($primary_key_name)
+    private function setPrimaryKeyName(string $primary_key_name): void
     {
         if (!in_array($primary_key_name, $this->properties)) {
             $class = get_called_class();

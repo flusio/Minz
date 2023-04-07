@@ -4,7 +4,7 @@ namespace Minz;
 
 class TimeTest extends \PHPUnit\Framework\TestCase
 {
-    public function testNow()
+    public function testNow(): void
     {
         $now = new \DateTime('now');
 
@@ -13,7 +13,7 @@ class TimeTest extends \PHPUnit\Framework\TestCase
         $this->assertGreaterThanOrEqual($now, $result);
     }
 
-    public function testNowReturnsFreezedTime()
+    public function testNowReturnsFreezedTime(): void
     {
         $freezed_datetime = new \DateTime('2021-01-20');
         Time::freeze($freezed_datetime);
@@ -23,7 +23,7 @@ class TimeTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($freezed_datetime, $result);
     }
 
-    public function testRelative()
+    public function testRelative(): void
     {
         $freezed_datetime = new \DateTime('2021-01-20');
         Time::freeze($freezed_datetime);
@@ -33,7 +33,7 @@ class TimeTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('2021-01-21', $result->format('Y-m-d'));
     }
 
-    public function testFromNow()
+    public function testFromNow(): void
     {
         $freezed_datetime = new \DateTime('2021-01-20');
         Time::freeze($freezed_datetime);
@@ -43,7 +43,7 @@ class TimeTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('2021-01-21', $result->format('Y-m-d'));
     }
 
-    public function testAgo()
+    public function testAgo(): void
     {
         $freezed_datetime = new \DateTime('2021-01-20');
         Time::freeze($freezed_datetime);
@@ -53,7 +53,7 @@ class TimeTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('2021-01-19', $result->format('Y-m-d'));
     }
 
-    public function testSleepWithFreezedTime()
+    public function testSleepWithFreezedTime(): void
     {
         $freezed_datetime = new \DateTime('2021-01-20');
         Time::freeze($freezed_datetime);

@@ -2,6 +2,8 @@
 
 namespace Minz\Tests;
 
+use PHPMailer\PHPMailer;
+
 /**
  * Provide some assert methods to help to test the mailer.
  *
@@ -18,32 +20,24 @@ trait MailerAsserts
 {
     /**
      * Assert that $count emails have been sent.
-     *
-     * @param integer $count
      */
-    public function assertEmailsCount($count)
+    public function assertEmailsCount(int $count): void
     {
         $this->assertSame($count, \Minz\Tests\Mailer::count());
     }
 
     /**
      * Assert a mailer to declare the given subject.
-     *
-     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-     * @param string $subject
      */
-    public function assertEmailSubject($mailer, $subject)
+    public function assertEmailSubject(PHPMailer\PHPMailer $mailer, string $subject): void
     {
         $this->assertSame($subject, $mailer->Subject);
     }
 
     /**
      * Assert a mailer to declare the given "from" email.
-     *
-     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-     * @param string $from
      */
-    public function assertEmailFrom($mailer, $from)
+    public function assertEmailFrom(PHPMailer\PHPMailer $mailer, string $from): void
     {
         $this->assertSame($from, $mailer->From);
     }
@@ -51,10 +45,9 @@ trait MailerAsserts
     /**
      * Assert a mailer to declare the given "to" email.
      *
-     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
      * @param string[] $to
      */
-    public function assertEmailEqualsTo($mailer, $to)
+    public function assertEmailEqualsTo(PHPMailer\PHPMailer $mailer, array $to): void
     {
         $to_addresses = array_map(function ($address_array) {
             return $address_array[0];
@@ -64,11 +57,8 @@ trait MailerAsserts
 
     /**
      * Assert a mailer to contain the given "to" email.
-     *
-     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-     * @param string $to
      */
-    public function assertEmailContainsTo($mailer, $to)
+    public function assertEmailContainsTo(PHPMailer\PHPMailer $mailer, string $to): void
     {
         $to_addresses = array_map(function ($address_array) {
             return $address_array[0];
@@ -78,22 +68,16 @@ trait MailerAsserts
 
     /**
      * Assert a mailer to declare the given "reply_to" email.
-     *
-     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-     * @param string $reply_to
      */
-    public function assertEmailContainsReplyTo($mailer, $reply_to)
+    public function assertEmailContainsReplyTo(PHPMailer\PHPMailer $mailer, string $reply_to): void
     {
         $this->assertArrayHasKey($reply_to, $mailer->getReplyToAddresses());
     }
 
     /**
      * Assert a mailer to contain the given content in body.
-     *
-     * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-     * @param string $content
      */
-    public function assertEmailContainsBody($mailer, $content)
+    public function assertEmailContainsBody(PHPMailer\PHPMailer $mailer, string $content): void
     {
         $this->assertStringContainsString($content, $mailer->Body);
     }

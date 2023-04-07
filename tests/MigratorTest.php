@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class MigratorTest extends TestCase
 {
-    public function testAddMigration()
+    public function testAddMigration(): void
     {
         $migrator = new Migrator();
 
@@ -20,7 +20,7 @@ class MigratorTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testAddMigrationAcceptsAnOptionalRollbackFunction()
+    public function testAddMigrationAcceptsAnOptionalRollbackFunction(): void
     {
         $migrator = new Migrator();
 
@@ -34,21 +34,13 @@ class MigratorTest extends TestCase
         $this->assertArrayHasKey('foo', $migrations);
         $result = $migrations['foo']['migration']();
         $this->assertSame('returned by migration', $result);
-        $result = $migrations['foo']['rollback']();
+        /** @var callable $rollback */
+        $rollback = $migrations['foo']['rollback'];
+        $result = $rollback();
         $this->assertSame('returned by rollback', $result);
     }
 
-    public function testAddMigrationFailsIfUncallableMigration()
-    {
-        $this->expectException(Errors\MigrationError::class);
-        $this->expectExceptionMessage('foo migration cannot be called.');
-
-        $migrator = new Migrator();
-        // @phpstan-ignore-next-line
-        $migrator->addMigration('foo', null);
-    }
-
-    public function testMigrationsIsSorted()
+    public function testMigrationsIsSorted(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('2_foo', function () {
@@ -67,7 +59,7 @@ class MigratorTest extends TestCase
         $this->assertSame($expected_names, array_keys($migrations));
     }
 
-    public function testSetVersion()
+    public function testSetVersion(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -79,7 +71,7 @@ class MigratorTest extends TestCase
         $this->assertSame('foo', $migrator->version());
     }
 
-    public function testSetVersionTrimArgument()
+    public function testSetVersionTrimArgument(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -91,7 +83,7 @@ class MigratorTest extends TestCase
         $this->assertSame('foo', $migrator->version());
     }
 
-    public function testSetVersionFailsIfMigrationDoesNotExist()
+    public function testSetVersionFailsIfMigrationDoesNotExist(): void
     {
         $this->expectException(Errors\MigrationError::class);
         $this->expectExceptionMessage('foo migration does not exist.');
@@ -101,7 +93,7 @@ class MigratorTest extends TestCase
         $migrator->setVersion('foo');
     }
 
-    public function testMigrate()
+    public function testMigrate(): void
     {
         $migrator = new Migrator();
         $spy = false;
@@ -120,7 +112,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testMigrateCallsMigrationsInSortedOrder()
+    public function testMigrateCallsMigrationsInSortedOrder(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('2_foo', function () {
@@ -139,7 +131,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testMigrateDoesNotCallAppliedMigrations()
+    public function testMigrateDoesNotCallAppliedMigrations(): void
     {
         $migrator = new Migrator();
         $spy = false;
@@ -155,7 +147,7 @@ class MigratorTest extends TestCase
         $this->assertSame([], $result);
     }
 
-    public function testMigrateWithMigrationReturningFalseDoesNotChangeVersion()
+    public function testMigrateWithMigrationReturningFalseDoesNotChangeVersion(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('1_foo', function () {
@@ -174,7 +166,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testMigrateWithMigrationReturningFalseDoesNotExecuteNextMigrations()
+    public function testMigrateWithMigrationReturningFalseDoesNotExecuteNextMigrations(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('1_foo', function () {
@@ -195,7 +187,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testMigrateWithFailingMigration()
+    public function testMigrateWithFailingMigration(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -210,7 +202,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testRollback()
+    public function testRollback(): void
     {
         $migrator = new Migrator();
         $spy = false;
@@ -233,7 +225,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testRollbackStopsAfterMaxSteps()
+    public function testRollbackStopsAfterMaxSteps(): void
     {
         $migrator = new Migrator();
         $spy = '';
@@ -267,7 +259,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testRollbackStartsFromCurrentVersion()
+    public function testRollbackStartsFromCurrentVersion(): void
     {
         $migrator = new Migrator();
         $spy = false;
@@ -294,7 +286,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testRollbackDoesNothingIfVersionIsNull()
+    public function testRollbackDoesNothingIfVersionIsNull(): void
     {
         $migrator = new Migrator();
         $spy = false;
@@ -314,7 +306,7 @@ class MigratorTest extends TestCase
         $this->assertSame([], $result);
     }
 
-    public function testRollbackWithCallbackReturningFalseDoesNotExecuteNextRollback()
+    public function testRollbackWithCallbackReturningFalseDoesNotExecuteNextRollback(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo1', function () {
@@ -340,7 +332,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testRollbackWithFailingCallback()
+    public function testRollbackWithFailingCallback(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -358,7 +350,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testRollbackWithNoCallback()
+    public function testRollbackWithNoCallback(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -374,7 +366,7 @@ class MigratorTest extends TestCase
         ], $result);
     }
 
-    public function testUpToDate()
+    public function testUpToDate(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -387,7 +379,7 @@ class MigratorTest extends TestCase
         $this->assertTrue($upToDate);
     }
 
-    public function testUpToDateRespectsOrder()
+    public function testUpToDateRespectsOrder(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('2_foo', function () {
@@ -403,7 +395,7 @@ class MigratorTest extends TestCase
         $this->assertTrue($upToDate);
     }
 
-    public function testUpToDateIfRemainingMigration()
+    public function testUpToDateIfRemainingMigration(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('1_foo', function () {
@@ -419,7 +411,7 @@ class MigratorTest extends TestCase
         $this->assertFalse($upToDate);
     }
 
-    public function testUpToDateIfNoMigrations()
+    public function testUpToDateIfNoMigrations(): void
     {
         $migrator = new Migrator();
 
@@ -428,7 +420,7 @@ class MigratorTest extends TestCase
         $this->assertTrue($upToDate);
     }
 
-    public function testLastVersion()
+    public function testLastVersion(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
@@ -440,7 +432,7 @@ class MigratorTest extends TestCase
         $this->assertSame('foo', $version);
     }
 
-    public function testLastVersionRespectsOrder()
+    public function testLastVersionRespectsOrder(): void
     {
         $migrator = new Migrator();
         $migrator->addMigration('2_foo', function () {
@@ -455,7 +447,7 @@ class MigratorTest extends TestCase
         $this->assertSame('2_foo', $version);
     }
 
-    public function testLastVersionIfNoMigrations()
+    public function testLastVersionIfNoMigrations(): void
     {
         $migrator = new Migrator();
 
@@ -464,7 +456,7 @@ class MigratorTest extends TestCase
         $this->assertNull($version);
     }
 
-    public function testConstructorLoadsDirectory()
+    public function testConstructorLoadsDirectory(): void
     {
         $migrations_path = Configuration::$app_path . '/src/migrations';
         $migrator = new Migrator($migrations_path);

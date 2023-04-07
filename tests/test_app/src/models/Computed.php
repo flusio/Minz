@@ -11,5 +11,5 @@ class Computed extends \Minz\Model
         ],
     ];
 
-    public $count;
+    public ?int $count;
 }

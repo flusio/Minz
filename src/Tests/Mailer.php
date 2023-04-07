@@ -2,6 +2,8 @@
 
 namespace Minz\Tests;
 
+use PHPMailer\PHPMailer;
+
 /**
  * Allow to access sent emails during tests. If configuration mailer type is
  * `test`, the PHPMailer object is stored in the \Minz\Tests\Mailer::$emails
@@ -12,15 +14,13 @@ namespace Minz\Tests;
  */
 class Mailer
 {
-    /** @var \PHPMailer\PHPMailer\PHPMailer[] */
-    public static $emails = [];
+    /** @var PHPMailer\PHPMailer[] */
+    public static array $emails = [];
 
     /**
      * Store a PHPMailer object in $emails.
-     *
-     * @param \PHPMailer\PHPMailer\PHPMailer $phpmailer
      */
-    public static function store($phpmailer)
+    public static function store(PHPMailer\PHPMailer $phpmailer): void
     {
         self::$emails[] = clone($phpmailer);
     }
@@ -28,29 +28,23 @@ class Mailer
     /**
      * Clear the list of emails.
      */
-    public static function clear()
+    public static function clear(): void
     {
         self::$emails = [];
     }
 
     /**
      * Return the number of sent emails.
-     *
-     * @return integer
      */
-    public static function count()
+    public static function count(): int
     {
         return count(self::$emails);
     }
 
     /**
      * Return the $n email.
-     *
-     * @param integer $n (default is 0)
-     *
-     * @return \PHPMailer\PHPMailer\PHPMailer|null
      */
-    public static function take($n = 0)
+    public static function take(int $n = 0): ?PHPMailer\PHPMailer
     {
         if (isset(self::$emails[$n])) {
             return self::$emails[$n];

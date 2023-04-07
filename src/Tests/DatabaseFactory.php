@@ -63,27 +63,32 @@ namespace Minz\Tests;
  * Registered factories are automatically available in integration tests via
  * `self::$factories[$factory_name]`.
  *
+ * @phpstan-import-type ModelValues from \Minz\Model
+ *
+ * @phpstan-import-type ModelId from \Minz\Model
+ *
+ * @phpstan-type FactoryType array{
+ *     'dao_name': string,
+ *     'default_values': ModelValues,
+ * }
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class DatabaseFactory
 {
-    /** @var array */
-    protected static $factories = [];
+    /** @var array<string, FactoryType> */
+    protected static array $factories = [];
+
+    protected string $factory_name;
 
     /** @var string */
-    protected $factory_name;
+    protected string $dao_name;
 
-    /** @var string */
-    protected $dao_name;
+    /** @var ModelValues */
+    protected array $default_values;
 
-    /** @var array */
-    protected $default_values;
-
-    /**
-     * @param string $factory_name
-     */
-    public function __construct($factory_name)
+    public function __construct(string $factory_name)
     {
         $factory = self::$factories[$factory_name];
         $this->factory_name = $factory_name;
@@ -92,13 +97,13 @@ class DatabaseFactory
     }
 
     /**
-     * @param array $values
+     * @see \Minz\DatabaseModel::create
      *
-     * @return integer|string|boolean Return the result of DatabaseModel::create
+     * @param ModelValues $values
      *
-     * @see \Minz\DatabaseModel
+     * @return ModelId|boolean
      */
-    public function create($values = [])
+    public function create(array $values = []): mixed
     {
         $default_values = [];
         foreach ($this->default_values as $property => $value) {
@@ -108,17 +113,16 @@ class DatabaseFactory
             $default_values[$property] = $value;
         }
 
+        /** @var \Minz\DatabaseModel */
         $dao = new $this->dao_name();
         $values = array_merge($default_values, $values);
         return $dao->create($values);
     }
 
     /**
-     * @param string $factory_name
-     * @param string $dao_name
-     * @param array $default_values
+     * @param ModelValues $default_values
      */
-    public static function addFactory($factory_name, $dao_name, $default_values)
+    public static function addFactory(string $factory_name, string $dao_name, array $default_values): void
     {
         self::$factories[$factory_name] = [
             'dao_name' => $dao_name,
@@ -127,9 +131,9 @@ class DatabaseFactory
     }
 
     /**
-     * @return array
+     * @return array<string, FactoryType>
      */
-    public static function factories()
+    public static function factories(): array
     {
         return self::$factories;
     }
@@ -137,14 +141,17 @@ class DatabaseFactory
     /**
      * Return a callable function that generates a sequence of values.
      *
-     * @param integer|string $start_n Default is 1
-     * @param callable $callback This optional function can be called to
-     *                           transform the "n" value.
-     *
-     * @return \Closure
+     * @param integer|string $start_n
+     *     The initial value of the sequence (default is 1).
+     * @param ?callable $callback
+     *     A function to transform the value (default is incrementing)
      */
-    public static function sequence($start_n = 1, $callback = null)
+    public static function sequence(mixed $start_n = null, ?callable $callback = null): \Closure
     {
+        if ($start_n === null) {
+            $start_n = 1;
+        }
+
         $current_n = $start_n;
         return function () use (&$current_n, $callback) {
             $n = $current_n;

@@ -10,16 +10,16 @@ namespace Minz\Errors;
  */
 class ModelPropertyError extends \LogicException
 {
-    private $property;
+    private string $property;
 
-    public function __construct($property, $code, $message)
+    public function __construct(string $property, string $code, string $message)
     {
         parent::__construct($message);
         $this->property = $property;
         $this->code = $code;
     }
 
-    public function property()
+    public function property(): string
     {
         return $this->property;
     }

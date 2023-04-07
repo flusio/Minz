@@ -19,18 +19,15 @@ class File implements Output
         'zip' => 'application/zip',
     ];
 
-    /** @var string */
-    private $filepath;
+    private string $filepath;
 
-    /** @var string */
-    private $content_type;
+    private string $content_type;
 
     /**
-     * @param string $filepath
-     *
-     * @throws \Minz\Errors\OutputError if the file doesn't exist
+     * @throws \Minz\Errors\OutputError
+     *     If the file doesn't exist
      */
-    public function __construct($filepath)
+    public function __construct(string $filepath)
     {
         if (!file_exists($filepath)) {
             throw new Errors\OutputError("{$filepath} file cannot be found.");
@@ -39,29 +36,27 @@ class File implements Output
         $this->filepath = $filepath;
     }
 
-    /**
-     * @return string
-     */
-    public function contentType()
+    public function contentType(): string
     {
         return $this->content_type;
     }
 
-    /**
-     * @return string
-     */
-    public function render()
+    public function render(): string
     {
-        return file_get_contents($this->filepath);
+        $output = file_get_contents($this->filepath);
+
+        if ($output === false) {
+            throw new Errors\OutputError("{$this->filepath} file cannot be read.");
+        };
+
+        return $output;
     }
 
     /**
-     * @param string $filepath
-     *
-     * @throws \Minz\Errors\OutputError if the file extension is not associated
-     *                                  to a supported one
+     * @throws \Minz\Errors\OutputError
+     *     If the file extension is not associated to a supported one
      */
-    public function setContentType($filepath)
+    public function setContentType(string $filepath): void
     {
         $file_extension = pathinfo($filepath, PATHINFO_EXTENSION);
         if (!isset(self::EXTENSION_TO_CONTENT_TYPE[$file_extension])) {

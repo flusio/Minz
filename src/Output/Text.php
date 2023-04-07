@@ -10,19 +10,19 @@ namespace Minz\Output;
  */
 class Text implements Output
 {
-    private $text;
+    private string $text;
 
-    public function __construct($text)
+    public function __construct(string $text)
     {
         $this->text = $text;
     }
 
-    public function contentType()
+    public function contentType(): string
     {
         return 'text/plain';
     }
 
-    public function render()
+    public function render(): string
     {
         return $this->text;
     }

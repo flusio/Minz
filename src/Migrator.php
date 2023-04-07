@@ -6,16 +6,27 @@ namespace Minz;
  * The Migrator helps to migrate data (in a database or not) or the
  * architecture of a Minz application.
  *
+ * @phpstan-type Migration array{
+ *     'migration': MigrationCallable,
+ *     'rollback': ?MigrationCallable,
+ * }
+ *
+ * @phpstan-type MigrationCallable callable(): (string|bool)
+ *
+ * @phpstan-type MigrationResult string|bool
+ *
+ * @phpstan-type MigrationVersion string
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Migrator
 {
-    /** @var string|null */
-    private $version;
+    /** @var ?MigrationVersion */
+    private ?string $version = null;
 
-    /** @var array */
-    private $migrations = [];
+    /** @var array<MigrationVersion, Migration> */
+    private array $migrations = [];
 
     /**
      * Create a Migrator instance. If directory is given, it'll load the
@@ -33,17 +44,24 @@ class Migrator
      * @throws \Minz\Errors\MigrationError if a file doesn't contain a valid class
      * @throws \Minz\Errors\MigrationError if a migrate method is not callable
      *                                     on a migration
-     *
-     * @param string|null $directory
      */
-    public function __construct($directory = null)
+    public function __construct(?string $directory = null)
     {
-        if (!$directory || !is_dir($directory)) {
+        if (!$directory) {
             return;
         }
 
+        if (!is_dir($directory)) {
+            throw new Errors\MigrationError("The directory {$directory} cannot be read.");
+        }
+
         $app_name = Configuration::$app_name;
-        foreach (scandir($directory) as $filename) {
+        $filenames = scandir($directory);
+        if (!$filenames) {
+            throw new Errors\MigrationError("The directory {$directory} cannot be read.");
+        }
+
+        foreach ($filenames as $filename) {
             if ($filename[0] === '.') {
                 continue;
             }
@@ -58,6 +76,10 @@ class Migrator
             }
 
             $migration_callback = [$migration, 'migrate'];
+            if (!is_callable($migration_callback)) {
+                throw new Errors\MigrationError("Migration {$migration_classname}::migrate cannot be called.");
+            }
+
             $rollback_callback = [$migration, 'rollback'];
             if (is_callable($rollback_callback)) {
                 $this->addMigration($migration_version, $migration_callback, $rollback_callback);
@@ -70,24 +92,18 @@ class Migrator
     /**
      * Register a migration into the migration system.
      *
-     * @param string $version
+     * @param MigrationVersion $version
      *     The name version of the migration (be careful, migrations are sorted
      *     with the `strnatcmp` function)
-     * @param callable $migration
+     * @param MigrationCallable $migration
      *     The migration function to execute, it should return true on success
      *     and must return false on error.
-     * @param callable|null $rollback
+     * @param ?MigrationCallable $rollback
      *     An optional rollback function to execute, it should behave as
      *     migration (but by reversing its effect).
-     *
-     * @throws \Minz\Errors\MigrationError if the callback isn't callable.
      */
-    public function addMigration($version, $migration, $rollback = null)
+    public function addMigration(string $version, callable $migration, ?callable $rollback = null): void
     {
-        if (!is_callable($migration)) {
-            throw new Errors\MigrationError("{$version} migration cannot be called.");
-        }
-
         $this->migrations[$version] = [
             'migration' => $migration,
             'rollback' => $rollback,
@@ -99,11 +115,9 @@ class Migrator
      *
      * @see https://www.php.net/manual/en/function.strnatcmp.php
      *
-     * @param boolean $reverse True to reverse sorting (false by default)
-     *
-     * @return array
+     * @return array<MigrationVersion, Migration>
      */
-    public function migrations($reverse = false)
+    public function migrations(bool $reverse = false): array
     {
         $migrations = $this->migrations;
         if ($reverse) {
@@ -121,12 +135,12 @@ class Migrator
     /**
      * Set the actual version of the application.
      *
-     * @param string $version
+     * @param MigrationVersion $version
      *
-     * @throws \Minz\Errors\MigrationError if there is no migrations corresponding
-     *                                     to the given version.
+     * @throws \Minz\Errors\MigrationError
+     *     If there is no migrations corresponding to the given version.
      */
-    public function setVersion($version)
+    public function setVersion(string $version): void
     {
         $version = trim($version);
         if (!isset($this->migrations[$version])) {
@@ -137,17 +151,17 @@ class Migrator
     }
 
     /**
-     * @return string|null
+     * @return ?MigrationVersion
      */
-    public function version()
+    public function version(): ?string
     {
         return $this->version;
     }
 
     /**
-     * @return string|null
+     * @return ?MigrationVersion
      */
-    public function lastVersion()
+    public function lastVersion(): ?string
     {
         $migrations = array_keys($this->migrations());
         if (!$migrations) {
@@ -158,11 +172,10 @@ class Migrator
     }
 
     /**
-     * @return boolean Return true if the application is up-to-date, false
-     *                 otherwise. If no migrations are registered, it always
-     *                 returns true.
+     * Return true if the application is up-to-date, false otherwise. If no
+     * migrations are registered, it always returns true.
      */
-    public function upToDate()
+    public function upToDate(): bool
     {
         return $this->version === $this->lastVersion();
     }
@@ -177,11 +190,12 @@ class Migrator
      * considered as successful. It is considered as good practice to return
      * true on success though.
      *
-     * @return array Return the results of each executed migration. If an
-     *               exception was raised in a migration, its result is set to
-     *               the exception message.
+     * Return the results of each executed migration. If an exception was
+     * raised in a migration, its result is set to the exception message.
+     *
+     * @return array<MigrationVersion, MigrationResult>
      */
-    public function migrate()
+    public function migrate(): array
     {
         $result = [];
         $apply_migration = $this->version === null;
@@ -192,6 +206,7 @@ class Migrator
             }
 
             try {
+                /** @var MigrationResult $migration_result */
                 $migration_result = call_user_func($callbacks['migration']);
                 $result[$version] = $migration_result;
             } catch (\Exception $e) {
@@ -223,13 +238,12 @@ class Migrator
      * If a migration was added without rollback function, it’s considered as a
      * failing rollback.
      *
-     * @param integer $max_steps
+     * Return the results of each executed rollback. If an exception was raised
+     * in a rollback, its result is set to the exception message.
      *
-     * @return array
-     *     Return the results of each executed rollback. If an exception was
-     *     raised in a rollback, its result is set to the exception message.
+     * @return array<MigrationVersion, MigrationResult>
      */
-    public function rollback($max_steps)
+    public function rollback(int $max_steps): array
     {
         $result = [];
         $count_steps = 0;
@@ -263,6 +277,7 @@ class Migrator
             // Execute the rollback and get the result
             if (isset($callbacks['rollback'])) {
                 try {
+                    /** @var MigrationResult $migration_result */
                     $migration_result = call_user_func($callbacks['rollback']);
                     $result[$version] = $migration_result;
                 } catch (\Exception $e) {

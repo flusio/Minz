@@ -11,7 +11,7 @@ class CSRFTest extends TestCase
         session_unset();
     }
 
-    public function testGenerateToken()
+    public function testGenerateToken(): void
     {
         $csrf = new CSRF();
 
@@ -20,7 +20,7 @@ class CSRFTest extends TestCase
         $this->assertSame($_SESSION['CSRF'], $token);
     }
 
-    public function testGenerateTokenTwiceDoesntChange()
+    public function testGenerateTokenTwiceDoesntChange(): void
     {
         $csrf = new CSRF();
 
@@ -30,7 +30,7 @@ class CSRFTest extends TestCase
         $this->assertSame($first_token, $second_token);
     }
 
-    public function testGenerateTokenWhenTokenIsSetToEmpty()
+    public function testGenerateTokenWhenTokenIsSetToEmpty(): void
     {
         $_SESSION['CSRF'] = '';
         $csrf = new CSRF();
@@ -41,14 +41,14 @@ class CSRFTest extends TestCase
         $this->assertSame($_SESSION['CSRF'], $token);
     }
 
-    public function testGenerateIsAliasOfGenerateToken()
+    public function testGenerateIsAliasOfGenerateToken(): void
     {
         $token = CSRF::generate();
 
         $this->assertSame($_SESSION['CSRF'], $token);
     }
 
-    public function testValidateToken()
+    public function testValidateToken(): void
     {
         $csrf = new CSRF();
         $token = $csrf->generateToken();
@@ -58,7 +58,7 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
-    public function testValidateTokenWithEmptyToken()
+    public function testValidateTokenWithEmptyToken(): void
     {
         $csrf = new CSRF();
         $_SESSION['CSRF'] = '';
@@ -68,7 +68,7 @@ class CSRFTest extends TestCase
         $this->assertFalse($valid);
     }
 
-    public function testValidateTokenWhenValidatingTwice()
+    public function testValidateTokenWhenValidatingTwice(): void
     {
         $csrf = new CSRF();
         $token = $csrf->generateToken();
@@ -79,7 +79,7 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
-    public function testValidateTokenWhenTokenIsWrong()
+    public function testValidateTokenWhenTokenIsWrong(): void
     {
         $csrf = new CSRF();
         $token = $csrf->generateToken();
@@ -89,7 +89,7 @@ class CSRFTest extends TestCase
         $this->assertFalse($valid);
     }
 
-    public function testValidateTokenWhenValidatingAfterFirstWrongTry()
+    public function testValidateTokenWhenValidatingAfterFirstWrongTry(): void
     {
         $csrf = new CSRF();
         $token = $csrf->generateToken();
@@ -100,7 +100,7 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
-    public function testValidateIsAliasOfValidateToken()
+    public function testValidateIsAliasOfValidateToken(): void
     {
         $token = CSRF::generate();
 
@@ -109,7 +109,7 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
-    public function testSetToken()
+    public function testSetToken(): void
     {
         $csrf = new CSRF();
         $token = 'foo';
@@ -120,7 +120,7 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
-    public function testSetIsAliasOfSetToken()
+    public function testSetIsAliasOfSetToken(): void
     {
         $token = 'foo';
 
@@ -130,7 +130,7 @@ class CSRFTest extends TestCase
         $this->assertTrue($valid);
     }
 
-    public function testResetToken()
+    public function testResetToken(): void
     {
         $csrf = new CSRF();
         $initial_token = $csrf->generateToken();

@@ -8,12 +8,9 @@ namespace Minz;
 class Time
 {
     /** @var \DateTime|integer|null */
-    public static $freezed_timestamp;
+    public static mixed $freezed_timestamp = null;
 
-    /**
-     * @return \DateTime
-     */
-    public static function now()
+    public static function now(): \DateTime
     {
         if (self::$freezed_timestamp && is_int(self::$freezed_timestamp)) {
             $date = new \DateTime();
@@ -22,7 +19,7 @@ class Time
         } elseif (self::$freezed_timestamp && self::$freezed_timestamp instanceof \DateTime) {
             return clone self::$freezed_timestamp;
         } else {
-            return \date_create();
+            return new \DateTime('now');
         }
     }
 
@@ -31,12 +28,8 @@ class Time
      *
      * @see https://www.php.net/manual/datetime.modify.php
      * @see https://www.php.net/manual/datetime.formats.relative.php
-     *
-     * @param string $modifier
-     *
-     * @return \DateTime
      */
-    public static function relative($modifier)
+    public static function relative(string $modifier): \DateTime
     {
         $datetime = self::now();
         $datetime->modify($modifier);
@@ -47,13 +40,8 @@ class Time
      * Return a datetime from the future.
      *
      * @see https://www.php.net/manual/en/datetime.formats.relative.php
-     *
-     * @param integer $number
-     * @param string $unit
-     *
-     * @return \DateTime
      */
-    public static function fromNow($number, $unit)
+    public static function fromNow(int $number, string $unit): \DateTime
     {
         return self::relative("+{$number} {$unit}");
     }
@@ -62,13 +50,8 @@ class Time
      * Return a datetime from the past.
      *
      * @see https://www.php.net/manual/en/datetime.formats.relative.php
-     *
-     * @param integer $number
-     * @param string $unit
-     *
-     * @return \DateTime
      */
-    public static function ago($number, $unit)
+    public static function ago(int $number, string $unit): \DateTime
     {
         return self::relative("-{$number} {$unit}");
     }
@@ -80,12 +63,8 @@ class Time
      * case, it adds the number of seconds to the freezed time.
      *
      * @see https://www.php.net/manual/function.sleep.php
-     *
-     * @param integer $seconds
-     *
-     * @return boolean
      */
-    public static function sleep($seconds)
+    public static function sleep(int $seconds): bool
     {
         if (self::$freezed_timestamp && is_int(self::$freezed_timestamp)) {
             self::$freezed_timestamp += $seconds;
@@ -105,7 +84,7 @@ class Time
      *
      * @param \DateTime|integer $datetime
      */
-    public static function freeze($datetime)
+    public static function freeze(mixed $datetime): void
     {
         self::$freezed_timestamp = $datetime;
     }
@@ -113,7 +92,7 @@ class Time
     /**
      * Unfreeze the time.
      */
-    public static function unfreeze()
+    public static function unfreeze(): void
     {
         self::$freezed_timestamp = null;
     }

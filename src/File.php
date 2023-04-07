@@ -10,37 +10,30 @@ namespace Minz;
  */
 class File
 {
-    /** @var string */
-    public $filepath;
+    public string $filepath;
 
-    /** @var string */
-    public $source_name;
+    public string $source_name;
 
-    /** @var integer */
-    public $error;
+    public ?int $error = null;
 
     /**
      * Initialize a File object.
      *
-     * @param array $file_info
-     *     The array containing information about the file, from $_FILES.
+     * @param array{
+     *     'name': string,
+     *     'tmp_name': string,
+     *     'error': int,
+     *     'is_uploaded_file'?: bool,
+     * } $file_info
      */
-    public function __construct($file_info)
+    public function __construct(array $file_info)
     {
-        if (!isset($file_info['tmp_name'])) {
-            throw new \RuntimeException('Invalid parameter: missing "tmp_name" key.');
-        }
-
-        if (!isset($file_info['error'])) {
-            throw new \RuntimeException('Invalid parameter: missing "error" key.');
-        }
-
         if ($file_info['error'] < UPLOAD_ERR_OK || $file_info['error'] > UPLOAD_ERR_EXTENSION) {
             throw new \RuntimeException('Invalid parameter: unknown error.');
         }
 
         $this->filepath = $file_info['tmp_name'];
-        $this->source_name = $file_info['name'] ?? '';
+        $this->source_name = $file_info['name'];
         if ($file_info['error'] !== UPLOAD_ERR_OK) {
             $this->error = $file_info['error'];
         }
@@ -61,12 +54,11 @@ class File
     }
 
     /**
-     * Return the content of the file.
+     * Return the content of the file, or false if there is an error.
      *
      * @return string|boolean
-     *     Returns the content of the file, or false if there is an error.
      */
-    public function content()
+    public function content(): mixed
     {
         if ($this->error) {
             return false;
@@ -76,13 +68,9 @@ class File
     }
 
     /**
-     * Move the file to $file_destination.
-     *
-     * @param string $file_destination
-     *
-     * @return boolean True on success, false otherwise.
+     * Move the file to a destination.
      */
-    public function move($file_destination)
+    public function move(string $file_destination): bool
     {
         if ($this->error) {
             return false;
@@ -106,10 +94,8 @@ class File
 
     /**
      * Return whether the file is too large or not.
-     *
-     * @return boolean Return true if the file is too large.
      */
-    public function isTooLarge()
+    public function isTooLarge(): bool
     {
         return (
             $this->error === UPLOAD_ERR_INI_SIZE ||
@@ -121,10 +107,8 @@ class File
      * Return whether the file is one of the given types.
      *
      * @param string[] $mime_types
-     *
-     * @return boolean Return true if the file type matches one of the given types.
      */
-    public function isType($mime_types)
+    public function isType(array $mime_types): bool
     {
         $current_mime_type = mime_content_type($this->filepath);
         return in_array($current_mime_type, $mime_types);

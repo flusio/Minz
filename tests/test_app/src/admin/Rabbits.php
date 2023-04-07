@@ -2,11 +2,12 @@
 
 namespace AppTest\admin;
 
+use Minz\Request;
 use Minz\Response;
 
 class Rabbits
 {
-    public function items($request)
+    public function items(Request $request): Response
     {
         $rabbits = [
             'Bugs',

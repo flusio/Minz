@@ -14,18 +14,9 @@ namespace Minz;
  */
 class Engine
 {
-    private const DEFAULT_OPTIONS = [
-        'not_found_view_pointer' => null,
-        'internal_server_error_view_pointer' => null,
-    ];
+    private Router $router;
 
-    /** @var \Minz\Router */
-    private $router;
-
-    /**
-     * @param \Minz\Router $router The router to use in the application
-     */
-    public function __construct($router)
+    public function __construct(Router $router)
     {
         $this->router = $router;
     }
@@ -39,14 +30,21 @@ class Engine
      * options. You should make sure the view pointers you pass exist. By
      * default, the errors are returned as text.
      *
-     * @param \Minz\Request $request The actual request from the user.
-     * @param array $options An optional array of options (see self::DEFAULT_OPTIONS)
+     * @param array{
+     *     'controller_namespace'?: ?string,
+     *     'not_found_view_pointer'?: ?string,
+     *     'internal_server_error_view_pointer'?: ?string,
+     * } $options
      *
-     * @return \Minz\Response A response to return to the user.
+     * @return \Generator|Response
      */
-    public function run($request, $options = [])
+    public function run(Request $request, array $options = []): mixed
     {
-        $options = array_merge(self::DEFAULT_OPTIONS, $options);
+        $options = array_merge([
+            'controller_namespace' => null,
+            'not_found_view_pointer' => null,
+            'internal_server_error_view_pointer' => null,
+        ], $options);
 
         try {
             list(
@@ -70,8 +68,7 @@ class Engine
         }
 
         try {
-            $namespace = $options['controller_namespace'] ?? null;
-            $action_controller = new ActionController($to, $namespace);
+            $action_controller = new ActionController($to, $options['controller_namespace']);
             return $action_controller->execute($request);
         } catch (\Exception $e) {
             Log::error((string)$e);

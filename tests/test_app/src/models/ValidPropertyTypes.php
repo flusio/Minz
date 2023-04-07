@@ -11,8 +11,8 @@ class ValidPropertyTypes extends \Minz\Model
         'boolean' => 'boolean',
     ];
 
-    public $integer;
-    public $string;
-    public $datetime;
-    public $boolean;
+    public mixed $integer;
+    public mixed $string;
+    public mixed $datetime;
+    public mixed $boolean;
 }

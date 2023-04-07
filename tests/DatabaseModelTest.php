@@ -9,9 +9,11 @@ class DatabaseModelTest extends TestCase
 {
     public function setUp(): void
     {
+        assert(Configuration::$database !== null);
         $database_type = Configuration::$database['type'];
         $sql_schema_path = Configuration::$app_path . "/schema.{$database_type}.sql";
         $sql_schema = file_get_contents($sql_schema_path);
+        assert($sql_schema !== false);
         $database = Database::get();
         $database->exec($sql_schema);
     }
@@ -21,7 +23,7 @@ class DatabaseModelTest extends TestCase
         Database::reset();
     }
 
-    public function testConstructorFailsIfTableNameIsInvalid()
+    public function testConstructorFailsIfTableNameIsInvalid(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -31,7 +33,7 @@ class DatabaseModelTest extends TestCase
         new DatabaseModel("invalid'name", 'id', ['id', 'name']);
     }
 
-    public function testConstructorFailsIfColumnIsInvalid()
+    public function testConstructorFailsIfColumnIsInvalid(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -41,7 +43,7 @@ class DatabaseModelTest extends TestCase
         new DatabaseModel('rabbits', 'id', ['id', "invalid'name"]);
     }
 
-    public function testConstructorFailsIfPrimaryKeyIsntIncludedInProperties()
+    public function testConstructorFailsIfPrimaryKeyIsntIncludedInProperties(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -51,7 +53,7 @@ class DatabaseModelTest extends TestCase
         new DatabaseModel('rabbits', 'id', ['name']);
     }
 
-    public function testCount()
+    public function testCount(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Alix']);
@@ -61,7 +63,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(1, $number_of_friends);
     }
 
-    public function testCountWithNoData()
+    public function testCountWithNoData(): void
     {
         $dao = new models\dao\Friend();
 
@@ -70,7 +72,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $number_of_friends);
     }
 
-    public function testCountBy()
+    public function testCountBy(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Alix']);
@@ -83,7 +85,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(1, $number_of_friends);
     }
 
-    public function testCountByWithNullValue()
+    public function testCountByWithNullValue(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Alix', 'address' => 'rue du Gratin']);
@@ -96,7 +98,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(1, $number_of_friends);
     }
 
-    public function testCountByWithArrayOfValues()
+    public function testCountByWithArrayOfValues(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Alix']);
@@ -110,7 +112,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(2, $number_of_friends);
     }
 
-    public function testCountByWithNoMatchingData()
+    public function testCountByWithNoMatchingData(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Alix']);
@@ -123,10 +125,10 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $number_of_friends);
     }
 
-    public function testCountByFailsWithEmptyValues()
+    public function testCountByFailsWithEmptyValues(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage('It is expected values not to be empty.');
+        $this->expectExceptionMessage('It is expected criteria not to be empty.');
 
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Alix']);
@@ -134,7 +136,7 @@ class DatabaseModelTest extends TestCase
         $dao->countBy([]);
     }
 
-    public function testCountByFailsIfUnsupportedProperty()
+    public function testCountByFailsIfUnsupportedProperty(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -147,7 +149,7 @@ class DatabaseModelTest extends TestCase
         $dao->countBy(['not_property' => 'foo']);
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $dao = new models\dao\Friend();
         $this->assertSame(0, $dao->count());
@@ -160,7 +162,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(1, $id);
     }
 
-    public function testCreateWithDependency()
+    public function testCreateWithDependency(): void
     {
         $friend_dao = new models\dao\Friend();
         $rabbit_dao = new models\dao\Rabbit();
@@ -179,7 +181,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(1, $rabbit_id);
     }
 
-    public function testCreateFailsIfNoValuesIsPassed()
+    public function testCreateFailsIfNoValuesIsPassed(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -191,7 +193,7 @@ class DatabaseModelTest extends TestCase
         $dao->create([]);
     }
 
-    public function testCreateFailsIfRequiredPropertyIsntSet()
+    public function testCreateFailsIfRequiredPropertyIsntSet(): void
     {
         $this->expectException(\PDOException::class);
 
@@ -202,7 +204,7 @@ class DatabaseModelTest extends TestCase
         ]);
     }
 
-    public function testCreateFailsIfUnsupportedPropertyIsPassed()
+    public function testCreateFailsIfUnsupportedPropertyIsPassed(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -217,7 +219,7 @@ class DatabaseModelTest extends TestCase
         ]);
     }
 
-    public function testCreateFailsIfDependencyNotMet()
+    public function testCreateFailsIfDependencyNotMet(): void
     {
         $this->expectException(\PDOException::class);
 
@@ -229,7 +231,7 @@ class DatabaseModelTest extends TestCase
         ]));
     }
 
-    public function testListAll()
+    public function testListAll(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -243,7 +245,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame('Dorothé', $friends[1]['name']);
     }
 
-    public function testListAllWithSelectingProperties()
+    public function testListAllWithSelectingProperties(): void
     {
         $dao = new models\dao\Friend();
         $dao->create([
@@ -264,7 +266,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame('Also home', $friends[1]['address']);
     }
 
-    public function testListAllWithSelectingPropertiesFailsIfUnsupportedProperty()
+    public function testListAllWithSelectingPropertiesFailsIfUnsupportedProperty(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -277,17 +279,20 @@ class DatabaseModelTest extends TestCase
         $dao->listAll(['not_property']);
     }
 
-    public function testFind()
+    public function testFind(): void
     {
         $dao = new models\dao\Friend();
         $id = $dao->create(['name' => 'Joël']);
 
+        assert(is_int($id));
+
         $joel = $dao->find($id);
 
+        assert(isset($joel['name']));
         $this->assertSame('Joël', $joel['name']);
     }
 
-    public function testFindWithNoMatchingData()
+    public function testFindWithNoMatchingData(): void
     {
         $dao = new models\dao\Friend();
 
@@ -296,17 +301,18 @@ class DatabaseModelTest extends TestCase
         $this->assertNull($is_someone);
     }
 
-    public function testFindBy()
+    public function testFindBy(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
 
         $joel = $dao->findBy(['name' => 'Joël']);
 
+        assert(isset($joel['name']));
         $this->assertSame('Joël', $joel['name']);
     }
 
-    public function testFindByWithNoMatchingData()
+    public function testFindByWithNoMatchingData(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -316,10 +322,10 @@ class DatabaseModelTest extends TestCase
         $this->assertNull($someone);
     }
 
-    public function testFindByFailsWithEmptyValues()
+    public function testFindByFailsWithEmptyValues(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage('It is expected values not to be empty.');
+        $this->expectExceptionMessage('It is expected criteria not to be empty.');
 
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -327,7 +333,7 @@ class DatabaseModelTest extends TestCase
         $dao->findBy([]);
     }
 
-    public function testFindByFailsIfUnsupportedProperty()
+    public function testFindByFailsIfUnsupportedProperty(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -340,7 +346,7 @@ class DatabaseModelTest extends TestCase
         $dao->findBy(['not_property' => 'foo']);
     }
 
-    public function testListBy()
+    public function testListBy(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -353,7 +359,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame('Joël', $joels[1]['name']);
     }
 
-    public function testListByWithNullValue()
+    public function testListByWithNullValue(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël with no address', 'address' => null]);
@@ -366,7 +372,7 @@ class DatabaseModelTest extends TestCase
         $this->assertNull($joels[0]['address']);
     }
 
-    public function testListByWithArrayOfValues()
+    public function testListByWithArrayOfValues(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -380,7 +386,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame('Monique', $friends[1]['name']);
     }
 
-    public function testListByWithNoMatchingData()
+    public function testListByWithNoMatchingData(): void
     {
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -390,10 +396,10 @@ class DatabaseModelTest extends TestCase
         $this->assertSame([], $friends);
     }
 
-    public function testListByFailsWithEmptyValues()
+    public function testListByFailsWithEmptyValues(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
-        $this->expectExceptionMessage('It is expected values not to be empty.');
+        $this->expectExceptionMessage('It is expected criteria not to be empty.');
 
         $dao = new models\dao\Friend();
         $dao->create(['name' => 'Joël']);
@@ -401,7 +407,7 @@ class DatabaseModelTest extends TestCase
         $dao->listBy([]);
     }
 
-    public function testListByFailsIfUnsupportedProperty()
+    public function testListByFailsIfUnsupportedProperty(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -414,9 +420,10 @@ class DatabaseModelTest extends TestCase
         $dao->listBy(['not_property' => 'foo']);
     }
 
-    public function testExists()
+    public function testExists(): void
     {
         $dao = new models\dao\Friend();
+        /** @var string */
         $friend_id = $dao->create(['name' => 'Joël']);
 
         $exists = $dao->exists($friend_id);
@@ -424,10 +431,12 @@ class DatabaseModelTest extends TestCase
         $this->assertTrue($exists);
     }
 
-    public function testExistsWithMultipleValues()
+    public function testExistsWithMultipleValues(): void
     {
         $dao = new models\dao\Friend();
+        /** @var string */
         $friend_id_1 = $dao->create(['name' => 'Joël']);
+        /** @var string */
         $friend_id_2 = $dao->create(['name' => 'Monique']);
 
         $exists = $dao->exists([$friend_id_1, $friend_id_2]);
@@ -435,9 +444,10 @@ class DatabaseModelTest extends TestCase
         $this->assertTrue($exists);
     }
 
-    public function testExistsReturnsFalseIfAtLeastOneValueDoesNotExist()
+    public function testExistsReturnsFalseIfAtLeastOneValueDoesNotExist(): void
     {
         $dao = new models\dao\Friend();
+        /** @var string */
         $friend_id = $dao->create(['name' => 'Joël']);
 
         $exists = $dao->exists([$friend_id, -1]);
@@ -445,20 +455,23 @@ class DatabaseModelTest extends TestCase
         $this->assertFalse($exists);
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $dao = new models\dao\Friend();
         $id = $dao->create(['name' => 'Joël']);
+
+        assert(is_int($id));
 
         $dao->update($id, [
             'name' => 'Joëlle'
         ]);
 
         $friend = $dao->find($id);
+        assert(isset($friend['name']));
         $this->assertSame('Joëlle', $friend['name']);
     }
 
-    public function testUpdateWithUnknownId()
+    public function testUpdateWithUnknownId(): void
     {
         $dao = new models\dao\Friend();
 
@@ -469,7 +482,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $dao->count());
     }
 
-    public function testUpdateFailsIfNoValuesIsPassed()
+    public function testUpdateFailsIfNoValuesIsPassed(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -479,10 +492,12 @@ class DatabaseModelTest extends TestCase
         $dao = new models\dao\Friend();
         $id = $dao->create(['name' => 'Joël']);
 
+        assert(is_int($id));
+
         $dao->update($id, []);
     }
 
-    public function testUpdateFailsIfUnsupportedPropertyIsPassed()
+    public function testUpdateFailsIfUnsupportedPropertyIsPassed(): void
     {
         $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage(
@@ -492,15 +507,20 @@ class DatabaseModelTest extends TestCase
         $dao = new models\dao\Friend();
         $id = $dao->create(['name' => 'Joël']);
 
+        assert(is_int($id));
+
         $dao->update($id, [
             'not_property' => 'foo',
         ]);
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $dao = new models\dao\Friend();
         $id = $dao->create(['name' => 'Joël']);
+
+        assert(is_int($id));
+
         $this->assertSame(1, $dao->count());
 
         $dao->delete($id);
@@ -508,10 +528,12 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $dao->count());
     }
 
-    public function testDeleteWithArrayOfIds()
+    public function testDeleteWithArrayOfIds(): void
     {
         $dao = new models\dao\Friend();
+        /** @var string */
         $id_1 = $dao->create(['name' => 'Joël']);
+        /** @var string */
         $id_2 = $dao->create(['name' => 'Pat']);
         $this->assertSame(2, $dao->count());
 
@@ -520,7 +542,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $dao->count());
     }
 
-    public function testDeleteWithUnknownId()
+    public function testDeleteWithUnknownId(): void
     {
         $dao = new models\dao\Friend();
         $this->assertSame(0, $dao->count());
@@ -530,7 +552,7 @@ class DatabaseModelTest extends TestCase
         $this->assertSame(0, $dao->count());
     }
 
-    public function testDeleteAll()
+    public function testDeleteAll(): void
     {
         $dao = new models\dao\Friend();
         $id_1 = $dao->create(['name' => 'Joël']);

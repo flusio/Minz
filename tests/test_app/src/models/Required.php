@@ -11,5 +11,5 @@ class Required extends \Minz\Model
         ],
     ];
 
-    public $id;
+    public ?string $id;
 }

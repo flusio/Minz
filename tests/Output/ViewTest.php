@@ -7,14 +7,14 @@ use Minz\Errors;
 
 class ViewTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $view = new View('rabbits/items.phtml');
 
         $this->assertStringEndsWith('src/views/rabbits/items.phtml', $view->filepath());
     }
 
-    public function testConstructorFailsIfViewFileDoesntExist()
+    public function testConstructorFailsIfViewFileDoesntExist(): void
     {
         $this->expectException(Errors\OutputError::class);
         $this->expectExceptionMessage(
@@ -24,7 +24,7 @@ class ViewTest extends TestCase
         new View('rabbits/missing.phtml');
     }
 
-    public function testRender()
+    public function testRender(): void
     {
         $rabbits = [
             'Bugs',
@@ -41,7 +41,7 @@ class ViewTest extends TestCase
         $this->assertStringContainsString("Jean-Jean", $output);
     }
 
-    public function testDeclareDefaultVariables()
+    public function testDeclareDefaultVariables(): void
     {
         View::declareDefaultVariables([
             'title' => 'Hello Rabbits!',
@@ -52,21 +52,21 @@ class ViewTest extends TestCase
         $this->assertStringContainsString("<h1>Hello Rabbits!</h1>\n", $output);
     }
 
-    public function testContentType()
+    public function testContentType(): void
     {
         $view = new View('rabbits/items.phtml');
 
         $this->assertSame('text/html', $view->contentType());
     }
 
-    public function testContentTypeWithUnsupportedExtension()
+    public function testContentTypeWithUnsupportedExtension(): void
     {
         $view = new View('rabbits/items.nope');
 
         $this->assertNull($view->contentType());
     }
 
-    public function testContentTypeWithOverwrittenExtToContentType()
+    public function testContentTypeWithOverwrittenExtToContentType(): void
     {
         $old_extensions_to_content_types = View::$extensions_to_content_types;
         View::$extensions_to_content_types['.nope'] = 'text/plain';

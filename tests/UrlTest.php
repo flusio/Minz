@@ -4,9 +4,17 @@ namespace Minz;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @phpstan-import-type ConfigurationUrl from Configuration
+ *
+ * @phpstan-import-type RequestMethod from Request
+ */
 class UrlTest extends TestCase
 {
-    private $default_url_options;
+    /**
+     * @var ConfigurationUrl
+     */
+    private array $default_url_options;
 
     public function setUp(): void
     {
@@ -19,7 +27,7 @@ class UrlTest extends TestCase
         Url::setRouter(null);
     }
 
-    public function testFor()
+    public function testFor(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -30,7 +38,7 @@ class UrlTest extends TestCase
         $this->assertSame('/rabbits', $url);
     }
 
-    public function testForWithName()
+    public function testForWithName(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
@@ -42,12 +50,13 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @dataProvider viaProvider
+     * @dataProvider methodProvider
      */
-    public function testForWithAnyVia($via)
+    public function testForWithAnyVia(string $method): void
     {
         $router = new Router();
-        $router->addRoute($via, '/rabbits', 'rabbits#list');
+        // @phpstan-ignore-next-line
+        $router->addRoute($method, '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::for('rabbits#list');
@@ -55,7 +64,7 @@ class UrlTest extends TestCase
         $this->assertSame('/rabbits', $url);
     }
 
-    public function testForWithParams()
+    public function testForWithParams(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits/:id', 'rabbits#list');
@@ -66,7 +75,7 @@ class UrlTest extends TestCase
         $this->assertSame('/rabbits/42', $url);
     }
 
-    public function testForWithAdditionalParams()
+    public function testForWithAdditionalParams(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#list');
@@ -77,7 +86,7 @@ class UrlTest extends TestCase
         $this->assertSame('/rabbits?id=42', $url);
     }
 
-    public function testForWithUrlOptionsPath()
+    public function testForWithUrlOptionsPath(): void
     {
         Configuration::$url_options['path'] = '/path';
 
@@ -92,7 +101,7 @@ class UrlTest extends TestCase
         Configuration::$url_options['path'] = '';
     }
 
-    public function testForFailsIfRouterIsNotRegistered()
+    public function testForFailsIfRouterIsNotRegistered(): void
     {
         $this->expectException(Errors\UrlError::class);
         $this->expectExceptionMessage(
@@ -102,7 +111,7 @@ class UrlTest extends TestCase
         Url::for('rabbits#list');
     }
 
-    public function testForFailsIfActionPointerDoesNotExist()
+    public function testForFailsIfActionPointerDoesNotExist(): void
     {
         $this->expectException(Errors\UrlError::class);
         $this->expectExceptionMessage(
@@ -115,7 +124,7 @@ class UrlTest extends TestCase
         Url::for('rabbits#list');
     }
 
-    public function testForWithParamsFailsIfParameterIsMissing()
+    public function testForWithParamsFailsIfParameterIsMissing(): void
     {
         $this->expectException(Errors\UrlError::class);
         $this->expectExceptionMessage('Required `id` parameter is missing.');
@@ -127,7 +136,7 @@ class UrlTest extends TestCase
         Url::for('rabbits#list');
     }
 
-    public function testAbsoluteFor()
+    public function testAbsoluteFor(): void
     {
         Configuration::$url_options['host'] = 'my-domain.com';
 
@@ -142,8 +151,10 @@ class UrlTest extends TestCase
 
     /**
      * @dataProvider defaultPortProvider
+     *
+     * @param 'http'|'https' $protocol
      */
-    public function testAbsoluteForWithDefaultPort($protocol, $port)
+    public function testAbsoluteForWithDefaultPort(string $protocol, int $port): void
     {
         Configuration::$url_options['host'] = 'my-domain.com';
         Configuration::$url_options['port'] = $port;
@@ -158,7 +169,7 @@ class UrlTest extends TestCase
         $this->assertSame($protocol . '://my-domain.com/rabbits', $url);
     }
 
-    public function testAbsoluteForWithCustomPort()
+    public function testAbsoluteForWithCustomPort(): void
     {
         Configuration::$url_options['host'] = 'my-domain.com';
         Configuration::$url_options['port'] = 8080;
@@ -172,7 +183,7 @@ class UrlTest extends TestCase
         $this->assertSame('http://my-domain.com:8080/rabbits', $url);
     }
 
-    public function testAbsoluteForWithPath()
+    public function testAbsoluteForWithPath(): void
     {
         Configuration::$url_options['host'] = 'my-domain.com';
         Configuration::$url_options['path'] = '/path';
@@ -186,7 +197,10 @@ class UrlTest extends TestCase
         $this->assertSame('http://my-domain.com/path/rabbits', $url);
     }
 
-    public function viaProvider()
+    /**
+     * @return array<array{RequestMethod}>
+     */
+    public function methodProvider(): array
     {
         return [
             ['get'],
@@ -198,7 +212,10 @@ class UrlTest extends TestCase
         ];
     }
 
-    public function defaultPortProvider()
+    /**
+     * @return array<array{'http'|'https', int}>
+     */
+    public function defaultPortProvider(): array
     {
         return [
             ['http', 80],

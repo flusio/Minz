@@ -2,11 +2,12 @@
 
 namespace AppTest;
 
+use Minz\Request;
 use Minz\Response;
 
 class Rabbits
 {
-    public function items($request)
+    public function items(Request $request): Response
     {
         $rabbits = [
             'Bugs',
@@ -19,7 +20,7 @@ class Rabbits
         ]);
     }
 
-    public function show($request)
+    public function show(Request $request): Response
     {
         $rabbit_number = 'Rabbit #' . $request->param('id');
         return Response::ok('rabbits/show.phtml', [
@@ -27,12 +28,12 @@ class Rabbits
         ]);
     }
 
-    public function missingViewFile($request)
+    public function missingViewFile(Request $request): Response
     {
         return Response::ok('rabbits/missing.phtml');
     }
 
-    public function noResponse($request)
+    public function noResponse(Request $request): string
     {
         return 'It’s a string, not a Response!';
     }

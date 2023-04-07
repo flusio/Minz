@@ -7,14 +7,14 @@ use Minz\Errors;
 
 class FileTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $output = new File(\Minz\Configuration::$data_path . '/empty.pdf');
 
         $this->assertSame('application/pdf', $output->contentType());
     }
 
-    public function testConstructorFailsIfFileDoesntExist()
+    public function testConstructorFailsIfFileDoesntExist(): void
     {
         $this->expectException(Errors\OutputError::class);
         $this->expectExceptionMessage(
@@ -24,7 +24,7 @@ class FileTest extends TestCase
         new File(\Minz\Configuration::$data_path . '/missing.pdf');
     }
 
-    public function testConstructorFailsIfExtensionIsNotSupported()
+    public function testConstructorFailsIfExtensionIsNotSupported(): void
     {
         $this->expectException(Errors\OutputError::class);
         $this->expectExceptionMessage(
@@ -34,7 +34,7 @@ class FileTest extends TestCase
         new File(\Minz\Configuration::$data_path . '/unsupported.html');
     }
 
-    public function testRender()
+    public function testRender(): void
     {
         $output = new File(\Minz\Configuration::$data_path . '/empty.pdf');
 

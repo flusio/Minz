@@ -15,24 +15,20 @@ namespace Minz;
  */
 class ActionController
 {
-    /** @var string */
-    private $controller_namespace;
+    private string $controller_namespace;
 
-    /** @var string */
-    private $controller_name;
+    private string $controller_name;
 
-    /** @var string */
-    private $action_name;
+    private string $action_name;
 
     /**
-     * @param string $to
-     *     A string representation of controller#action
-     * @param string $namespace
-     *     Namespace where to find the controller (default is \$app_name)
+     * Load a controller by its name.
+     *
+     * A namespace can be given (default is \$app_name).
      */
-    public function __construct($to, $namespace = null)
+    public function __construct(string $name, ?string $namespace = null)
     {
-        list($controller_name, $action_name) = explode('#', $to);
+        list($controller_name, $action_name) = explode('#', $name);
         $controller_name = str_replace('/', '\\', $controller_name);
 
         if ($namespace === null) {
@@ -45,18 +41,12 @@ class ActionController
         $this->action_name = $action_name;
     }
 
-    /**
-     * @return string The name of the action's controller
-     */
-    public function controllerName()
+    public function controllerName(): string
     {
         return $this->controller_name;
     }
 
-    /**
-     * @return string The name of the action to execute
-     */
-    public function actionName()
+    public function actionName(): string
     {
         return $this->action_name;
     }
@@ -65,15 +55,13 @@ class ActionController
      * Call the controller's action, passing a request in parameter and
      * returning a response for the user.
      *
-     * @param \Minz\Request $request A request against which the action must be executed
-     *
      * @throws \Minz\Errors\ControllerError if the controller's file cannot be loaded
      * @throws \Minz\Errors\ActionError if the action cannot be called
      * @throws \Minz\Errors\ActionError if the action doesn't return a Response
      *
-     * @return \Minz\Response The response to return to the user
+     * @return \Generator|Response
      */
-    public function execute($request)
+    public function execute(Request $request): mixed
     {
         $app_name = Configuration::$app_name;
         $namespaced_controller = "{$this->controller_namespace}\\{$this->controller_name}";

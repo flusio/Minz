@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class ResponseTest extends TestCase
 {
-    public function testSetCode()
+    public function testSetCode(): void
     {
         $response = new Response(200);
 
@@ -15,17 +15,18 @@ class ResponseTest extends TestCase
         $this->assertSame(404, $response->code());
     }
 
-    public function testSetCodeFailsIfCodeIsInvalid()
+    public function testSetCodeFailsIfCodeIsInvalid(): void
     {
         $this->expectException(Errors\ResponseError::class);
         $this->expectExceptionMessage('666 is not a valid HTTP code.');
 
         $response = new Response(200);
 
+        // @phpstan-ignore-next-line
         $response->setCode(666);
     }
 
-    public function testSetHeader()
+    public function testSetHeader(): void
     {
         $response = new Response(200);
 
@@ -35,19 +36,20 @@ class ResponseTest extends TestCase
         $this->assertSame('application/xml', $headers['Content-Type']);
     }
 
-    public function testSetContentSecurityPolicy()
+    public function testSetContentSecurityPolicy(): void
     {
         $response = new Response(200);
 
         $response->setContentSecurityPolicy('script-src', "'self' 'unsafe-eval'");
 
         $headers = $response->headers(true);
+        /** @var array<string, string> $csp */
         $csp = $headers['Content-Security-Policy'];
         $this->assertArrayHasKey('script-src', $csp);
         $this->assertSame("'self' 'unsafe-eval'", $csp['script-src']);
     }
 
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $view = new Output\View('rabbits/items.phtml');
         $response = new Response(200, $view);
@@ -61,7 +63,7 @@ class ResponseTest extends TestCase
         ], $response->headers(true));
     }
 
-    public function testConstructorAdaptsTheContentTypeFromView()
+    public function testConstructorAdaptsTheContentTypeFromView(): void
     {
         $view = new Output\View('rabbits/items.txt');
         $response = new Response(200, $view);
@@ -70,7 +72,7 @@ class ResponseTest extends TestCase
         $this->assertSame('text/plain', $headers['Content-Type']);
     }
 
-    public function testConstructorAcceptsNoViews()
+    public function testConstructorAcceptsNoViews(): void
     {
         $response = new Response(200, null);
 
@@ -79,19 +81,21 @@ class ResponseTest extends TestCase
         $this->assertSame('text/plain', $headers['Content-Type']);
     }
 
-    public function testConstructorFailsIfInvalidCode()
+    public function testConstructorFailsIfInvalidCode(): void
     {
         $this->expectException(Errors\ResponseError::class);
         $this->expectExceptionMessage('666 is not a valid HTTP code.');
 
+        // @phpstan-ignore-next-line
         $response = new Response(666);
     }
 
-    public function testHeaders()
+    public function testHeaders(): void
     {
         $response = new Response(200);
         $response->setHeader('Content-Type', 'image/png');
 
+        /** @var string[] $headers */
         $headers = $response->headers();
 
         $content_type_header = current(array_filter($headers, function ($header) {
@@ -100,7 +104,7 @@ class ResponseTest extends TestCase
         $this->assertSame('Content-Type: image/png', $content_type_header);
     }
 
-    public function testHeadersWithComplexStructure()
+    public function testHeadersWithComplexStructure(): void
     {
         $response = new Response(200);
         $response->setHeader('Content-Security-Policy', [
@@ -108,6 +112,7 @@ class ResponseTest extends TestCase
             'style-src' => "'self' 'unsafe-inline'",
         ]);
 
+        /** @var string[] $headers */
         $headers = $response->headers();
 
         $csp_header = current(array_filter($headers, function ($header) {
@@ -119,7 +124,7 @@ class ResponseTest extends TestCase
         );
     }
 
-    public function testSetCookie()
+    public function testSetCookie(): void
     {
         $response = new Response(200);
 
@@ -137,7 +142,7 @@ class ResponseTest extends TestCase
         ], $cookie['options']);
     }
 
-    public function testSetCookieWithExpires()
+    public function testSetCookieWithExpires(): void
     {
         $response = new Response(200);
         $expires = Time::fromNow(1, 'month')->getTimestamp();
@@ -150,7 +155,7 @@ class ResponseTest extends TestCase
         $this->assertSame($expires, $cookie['options']['expires']);
     }
 
-    public function testSetCookieWithProductionConfiguration()
+    public function testSetCookieWithProductionConfiguration(): void
     {
         $old_url_options = Configuration::$url_options;
         Configuration::$url_options['host'] = 'mydomain.com';
@@ -173,7 +178,7 @@ class ResponseTest extends TestCase
         ], $cookie['options']);
     }
 
-    public function testRemoveCookie()
+    public function testRemoveCookie(): void
     {
         $response = new Response(200);
 
@@ -186,35 +191,35 @@ class ResponseTest extends TestCase
         $this->assertTrue($expires < Time::now()->getTimestamp());
     }
 
-    public function testOk()
+    public function testOk(): void
     {
         $response = Response::ok();
 
         $this->assertSame(200, $response->code());
     }
 
-    public function testCreated()
+    public function testCreated(): void
     {
         $response = Response::created();
 
         $this->assertSame(201, $response->code());
     }
 
-    public function testAccepted()
+    public function testAccepted(): void
     {
         $response = Response::accepted();
 
         $this->assertSame(202, $response->code());
     }
 
-    public function testNoContent()
+    public function testNoContent(): void
     {
         $response = Response::noContent();
 
         $this->assertSame(204, $response->code());
     }
 
-    public function testMovedPermanently()
+    public function testMovedPermanently(): void
     {
         $response = Response::movedPermanently('https://example.com');
 
@@ -223,7 +228,7 @@ class ResponseTest extends TestCase
         $this->assertSame('https://example.com', $headers['Location']);
     }
 
-    public function testFound()
+    public function testFound(): void
     {
         $response = Response::found('https://example.com');
 
@@ -232,7 +237,7 @@ class ResponseTest extends TestCase
         $this->assertSame('https://example.com', $headers['Location']);
     }
 
-    public function testRedirect()
+    public function testRedirect(): void
     {
         $router = new Router();
         $router->addRoute('get', '/rabbits', 'rabbits#items');
@@ -245,35 +250,35 @@ class ResponseTest extends TestCase
         $this->assertSame('/rabbits', $headers['Location']);
     }
 
-    public function testBadRequest()
+    public function testBadRequest(): void
     {
         $response = Response::badRequest();
 
         $this->assertSame(400, $response->code());
     }
 
-    public function testUnauthorized()
+    public function testUnauthorized(): void
     {
         $response = Response::unauthorized();
 
         $this->assertSame(401, $response->code());
     }
 
-    public function testNotFound()
+    public function testNotFound(): void
     {
         $response = Response::notFound();
 
         $this->assertSame(404, $response->code());
     }
 
-    public function testInternalServerError()
+    public function testInternalServerError(): void
     {
         $response = Response::internalServerError();
 
         $this->assertSame(500, $response->code());
     }
 
-    public function testText()
+    public function testText(): void
     {
         $response = Response::text(200, 'Foo bar');
 
@@ -281,7 +286,7 @@ class ResponseTest extends TestCase
         $this->assertSame('Foo bar', $response->render());
     }
 
-    public function testJson()
+    public function testJson(): void
     {
         $response = Response::json(200, [
             'foo' => 'bar',
@@ -293,7 +298,7 @@ class ResponseTest extends TestCase
         $this->assertSame('application/json', $headers['Content-Type']);
     }
 
-    public function testRender()
+    public function testRender(): void
     {
         $rabbits = [
             'Bugs',
@@ -312,9 +317,9 @@ class ResponseTest extends TestCase
         $this->assertStringContainsString("Jean-Jean", $output);
     }
 
-    public function testRenderWithEmptyViewPointer()
+    public function testRenderWithEmptyViewPointer(): void
     {
-        $response = Response::ok('');
+        $response = Response::ok(null);
 
         $output = $response->render();
 
