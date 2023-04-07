@@ -8,7 +8,7 @@ class ResponseTest extends TestCase
 {
     public function testSetCode()
     {
-        $response = new Response(200, '');
+        $response = new Response(200);
 
         $response->setCode(404);
 
@@ -20,14 +20,14 @@ class ResponseTest extends TestCase
         $this->expectException(Errors\ResponseError::class);
         $this->expectExceptionMessage('666 is not a valid HTTP code.');
 
-        $response = new Response(200, '');
+        $response = new Response(200);
 
         $response->setCode(666);
     }
 
     public function testSetHeader()
     {
-        $response = new Response(200, '');
+        $response = new Response(200);
 
         $response->setHeader('Content-Type', 'application/xml');
 
@@ -37,7 +37,7 @@ class ResponseTest extends TestCase
 
     public function testSetContentSecurityPolicy()
     {
-        $response = new Response(200, '');
+        $response = new Response(200);
 
         $response->setContentSecurityPolicy('script-src', "'self' 'unsafe-eval'");
 

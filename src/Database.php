@@ -10,10 +10,10 @@ namespace Minz;
  */
 class Database
 {
-    /** @var \Minz\Database */
+    /** @var \Minz\Database|null */
     private static $instance;
 
-    /** @var \PDO */
+    /** @var \PDO|null */
     private $pdo_connection;
 
     private $connect_to_db;

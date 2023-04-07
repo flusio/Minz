@@ -124,7 +124,7 @@ class FileTest extends TestCase
             'tmp_name' => $tmp_filepath,
             'error' => UPLOAD_ERR_OK,
         ]);
-        $tmp_destination = Configuration::$tmp_path . '/' . md5(rand());
+        $tmp_destination = Configuration::$tmp_path . '/' . bin2hex(random_bytes(10));
 
         $result = $file->move($tmp_destination);
 
@@ -145,7 +145,7 @@ class FileTest extends TestCase
             'tmp_name' => $tmp_filepath,
             'error' => $error,
         ]);
-        $tmp_destination = Configuration::$tmp_path . '/' . md5(rand());
+        $tmp_destination = Configuration::$tmp_path . '/' . bin2hex(random_bytes(10));
 
         $result = $file->move($tmp_destination);
 
@@ -166,7 +166,7 @@ class FileTest extends TestCase
             // This cannot be used in development or production environments.
             'is_uploaded_file' => false
         ]);
-        $tmp_destination = Configuration::$tmp_path . '/' . md5(rand());
+        $tmp_destination = Configuration::$tmp_path . '/' . bin2hex(random_bytes(10));
 
         $result = $file->move($tmp_destination);
 

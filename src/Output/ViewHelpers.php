@@ -18,7 +18,7 @@ class ViewHelpers
      *
      * @see https://www.php.net/manual/function.htmlspecialchars.php
      *
-     * @param string $variable
+     * @param string|null $variable
      *
      * @return string
      */

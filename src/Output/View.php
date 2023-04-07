@@ -189,7 +189,7 @@ class View implements Output
      * @throws \Minz\Errors\OutputError if the layout file doesn't exist
      * @throws \Minz\Errors\OutputError if the layout variables aren't an array
      */
-    private function layout($layout_name, $layout_variables = [])
+    protected function layout($layout_name, $layout_variables = [])
     {
         $layout_filepath = self::layoutFilepath($layout_name);
         if (!file_exists($layout_filepath)) {
@@ -213,12 +213,12 @@ class View implements Output
      *
      * It must be called from within the view file directly.
      *
-     * @param string $name The name of the file under src/views/
+     * @param string $pointer The name of the file under src/views/
      * @param mixed[] $variables A list of variables to pass to the included view
      *
      * @throws \Minz\Errors\OutputError if the included pointer file doesn't exist
      */
-    private function include($pointer, $variables = [])
+    protected function include($pointer, $variables = [])
     {
         $view = new View($pointer, $variables);
         return $view->render();
@@ -233,7 +233,7 @@ class View implements Output
      *
      * @return mixed
      */
-    private function safe($variable_name)
+    protected function safe($variable_name)
     {
         $variables = array_merge(self::$default_variables, $this->variables);
         if (!array_key_exists($variable_name, $variables)) {
@@ -255,7 +255,7 @@ class View implements Output
      *
      * @return string
      */
-    private function protect($variable)
+    protected function protect($variable)
     {
         return htmlspecialchars($variable, ENT_COMPAT, 'UTF-8');
     }

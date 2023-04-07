@@ -20,11 +20,12 @@ class DatabaseModel
     protected $properties;
 
     /**
-     * @throws \Minz\DatabaseModelError if the table name, or one of the
-     *                                  declared properties is invalid
-     * @throws \Minz\DatabaseModelError if the primary key name isn't declared
-     *                                  in properties
-     * @throws \Minz\Errors\DatabaseError if the database initialization fails
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If the table name, or one of the declared properties is invalid
+     * @throws \Minz\Errors\DatabaseModelError
+     *     If the primary key name isn't declared in properties
+     * @throws \Minz\Errors\DatabaseError
+     *     If the database initialization fails
      *
      * @see \Minz\Database::_construct()
      */
@@ -226,7 +227,7 @@ class DatabaseModel
     /**
      * Return whether all the given values exist in database.
      *
-     * @param mixed[] $primary_keys
+     * @param mixed|array $primary_keys
      *
      * @return boolean
      */
@@ -301,7 +302,9 @@ class DatabaseModel
     /**
      * Delete a row.
      *
-     * @param integer|string $primary_key The value of the row's primary key to delete
+     * @param integer|string|array $pk_values
+     *     The value of the row's primary key to delete, or an array of primary
+     *     keys.
      *
      * @throws \PDOException if an error occured in the SQL syntax
      */
@@ -324,7 +327,7 @@ class DatabaseModel
     /**
      * Return the number of model instances saved in database
      *
-     * @throws \Minz\DatabaseModelError if the query fails
+     * @throws \Minz\Errors\DatabaseModelError if the query fails
      *
      * @return integer
      */
@@ -349,10 +352,10 @@ class DatabaseModel
      *     if values is empty
      * @throws \Minz\Errors\DatabaseModelError
      *     if at least one property isn't declared by the model
+     * @throws \Minz\Errors\DatabaseModelError
+     *     if the query fails
      * @throws \PDOException
      *     if an error occured in the SQL syntax
-     *
-     * @throws \Minz\DatabaseModelError if the query fails
      *
      * @return integer
      */
@@ -423,7 +426,7 @@ class DatabaseModel
      *
      * @throws \PDOException if an error occured in the SQL syntax
      *
-     * @return \PDOStatement
+     * @return int|false
      */
     protected function exec($sql_statement)
     {
@@ -551,7 +554,7 @@ class DatabaseModel
     }
 
     /**
-     * @throws \Minz\DatabaseModelError if the table name is invalid
+     * @throws \Minz\Errors\DatabaseModelError if the table name is invalid
      */
     private function setTableName($table_name)
     {
@@ -565,7 +568,7 @@ class DatabaseModel
     }
 
     /**
-     * @throws \Minz\DatabaseModelError if at least one of the properties is invalid
+     * @throws \Minz\Errors\DatabaseModelError if at least one of the properties is invalid
      */
     private function setProperties($properties)
     {
@@ -581,7 +584,7 @@ class DatabaseModel
     }
 
     /**
-     * @throws \Minz\DatabaseModelError if the primary key name isn't declared
+     * @throws \Minz\Errors\DatabaseModelError if the primary key name isn't declared
      *                                  in properties
      */
     private function setPrimaryKeyName($primary_key_name)

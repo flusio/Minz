@@ -73,10 +73,10 @@ class Migrator
      * @param string $version
      *     The name version of the migration (be careful, migrations are sorted
      *     with the `strnatcmp` function)
-     * @param callback $migration
+     * @param callable $migration
      *     The migration function to execute, it should return true on success
      *     and must return false on error.
-     * @param callback $rollback
+     * @param callable|null $rollback
      *     An optional rollback function to execute, it should behave as
      *     migration (but by reversing its effect).
      *

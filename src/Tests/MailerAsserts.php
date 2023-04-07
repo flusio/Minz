@@ -52,7 +52,7 @@ trait MailerAsserts
      * Assert a mailer to declare the given "to" email.
      *
      * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-     * @param string $to
+     * @param string[] $to
      */
     public function assertEmailEqualsTo($mailer, $to)
     {

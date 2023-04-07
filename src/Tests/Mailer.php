@@ -48,7 +48,7 @@ class Mailer
      *
      * @param integer $n (default is 0)
      *
-     * @param \PHPMailer\PHPMailer\PHPMailer|null
+     * @return \PHPMailer\PHPMailer\PHPMailer|null
      */
     public static function take($n = 0)
     {

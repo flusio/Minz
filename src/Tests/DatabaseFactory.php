@@ -141,7 +141,7 @@ class DatabaseFactory
      * @param callable $callback This optional function can be called to
      *                           transform the "n" value.
      *
-     * @return integer|string
+     * @return \Closure
      */
     public static function sequence($start_n = 1, $callback = null)
     {

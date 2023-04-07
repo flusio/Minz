@@ -28,7 +28,9 @@ class ActionControllerTest extends TestCase
                 'default-src' => "'self'",
             ],
         ], $response->headers(true));
-        $this->assertSame('rabbits/items.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('rabbits/items.phtml', $output->pointer());
     }
 
     public function testExecuteWithSubDirectory()
@@ -39,7 +41,9 @@ class ActionControllerTest extends TestCase
         $response = $action_controller->execute($request);
 
         $this->assertSame(200, $response->code());
-        $this->assertSame('admin/rabbits/items.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('admin/rabbits/items.phtml', $output->pointer());
     }
 
     public function testExecuteWithNamespace()
@@ -50,7 +54,9 @@ class ActionControllerTest extends TestCase
         $response = $action_controller->execute($request);
 
         $this->assertSame(200, $response->code());
-        $this->assertSame('admin/rabbits/items.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('admin/rabbits/items.phtml', $output->pointer());
     }
 
     public function testExecuteFailsIfControllerDoesntExist()

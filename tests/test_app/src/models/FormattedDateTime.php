@@ -10,4 +10,6 @@ class FormattedDateTime extends \Minz\Model
             'format' => 'Y-m-d',
         ],
     ];
+
+    public $created_at;
 }

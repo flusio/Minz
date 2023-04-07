@@ -40,7 +40,7 @@ class Engine
      * default, the errors are returned as text.
      *
      * @param \Minz\Request $request The actual request from the user.
-     * @param array An optional array of options (see self::DEFAULT_OPTIONS)
+     * @param array $options An optional array of options (see self::DEFAULT_OPTIONS)
      *
      * @return \Minz\Response A response to return to the user.
      */

@@ -54,6 +54,7 @@ class RequestTest extends TestCase
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('Parameters are not in an array.');
 
+        // @phpstan-ignore-next-line
         new Request('GET', '/', 'a parameter ?');
     }
 
@@ -62,6 +63,7 @@ class RequestTest extends TestCase
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('Headers are not in an array.');
 
+        // @phpstan-ignore-next-line
         new Request('GET', '/', [], 'a header ?');
     }
 

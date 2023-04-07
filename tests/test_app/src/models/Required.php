@@ -10,4 +10,6 @@ class Required extends \Minz\Model
             'required' => true,
         ],
     ];
+
+    public $id;
 }

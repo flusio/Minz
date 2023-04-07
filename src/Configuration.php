@@ -295,7 +295,7 @@ class Configuration
         self::$tmp_path = self::getDefault(
             $raw_configuration,
             'tmp_path',
-            sys_get_temp_dir() . '/' . self::$app_name . '/' . md5(rand())
+            sys_get_temp_dir() . '/' . self::$app_name . '/' . bin2hex(random_bytes(10))
         );
         self::$database = self::getDatabase($raw_configuration);
         self::$mailer = self::getMailer($raw_configuration, $environment);

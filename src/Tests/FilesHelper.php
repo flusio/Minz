@@ -30,7 +30,7 @@ trait FilesHelper
     public function tmpCopyFile($filepath)
     {
         $tmp_path = \Minz\Configuration::$tmp_path;
-        $tmp_filepath = $tmp_path . '/' . md5(rand());
+        $tmp_filepath = $tmp_path . '/' . bin2hex(random_bytes(10));
         copy($filepath, $tmp_filepath);
         return $tmp_filepath;
     }

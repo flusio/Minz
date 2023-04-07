@@ -96,7 +96,7 @@ class Time
             self::$freezed_timestamp = $new_freezed_timestamp;
             return true;
         } else {
-            return sleep($seconds);
+            return sleep($seconds) === 0;
         }
     }
 

@@ -7,4 +7,6 @@ class SimpleDateTime extends \Minz\Model
     public const PROPERTIES = [
         'created_at' => 'datetime',
     ];
+
+    public $created_at;
 }

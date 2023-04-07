@@ -12,6 +12,8 @@ class ValidatorMessage extends \Minz\Model
         ],
     ];
 
+    public $status;
+
     public static function validateStatus($value)
     {
         if (in_array($value, ['new', 'finished'])) {

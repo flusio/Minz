@@ -11,6 +11,8 @@ class Validator extends \Minz\Model
         ],
     ];
 
+    public $status;
+
     public static function validateStatus($value)
     {
         return in_array($value, ['new', 'finished']);

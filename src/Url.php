@@ -10,14 +10,14 @@ namespace Minz;
  */
 class Url
 {
-    /** @var \Minz\Router */
+    /** @var \Minz\Router|null */
     private static $router;
 
     /**
      * Set the router so Url class can lookup for action pointers. It needs to
      * be called first.
      *
-     * @param \Minz\Router $router
+     * @param \Minz\Router|null $router
      */
     public static function setRouter($router)
     {

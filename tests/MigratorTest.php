@@ -44,6 +44,7 @@ class MigratorTest extends TestCase
         $this->expectExceptionMessage('foo migration cannot be called.');
 
         $migrator = new Migrator();
+        // @phpstan-ignore-next-line
         $migrator->addMigration('foo', null);
     }
 

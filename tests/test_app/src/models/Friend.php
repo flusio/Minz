@@ -19,6 +19,10 @@ class Friend extends \Minz\Model
         ],
     ];
 
+    public $id;
+    public $created_at;
+    public $name;
+
     public static function validateName($value)
     {
         return $value === 'Alice';

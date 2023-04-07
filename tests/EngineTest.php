@@ -48,7 +48,9 @@ class EngineTest extends TestCase
         ]);
 
         $this->assertSame(404, $response->code());
-        $this->assertSame('not_found.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('not_found.phtml', $output->pointer());
     }
 
     public function testRunReturnsErrorIfControllerFileIsMissing()
@@ -63,7 +65,9 @@ class EngineTest extends TestCase
         ]);
 
         $this->assertSame(500, $response->code());
-        $this->assertSame('internal_server_error.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('internal_server_error.phtml', $output->pointer());
     }
 
     public function testRunReturnsErrorIfActionIsMissing()
@@ -78,7 +82,9 @@ class EngineTest extends TestCase
         ]);
 
         $this->assertSame(500, $response->code());
-        $this->assertSame('internal_server_error.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('internal_server_error.phtml', $output->pointer());
     }
 
     public function testRunReturnsErrorIfViewFileIsMissing()
@@ -93,6 +99,8 @@ class EngineTest extends TestCase
         ]);
 
         $this->assertSame(500, $response->code());
-        $this->assertSame('internal_server_error.phtml', $response->output()->pointer());
+        /** @var \Minz\Output\View */
+        $output = $response->output();
+        $this->assertSame('internal_server_error.phtml', $output->pointer());
     }
 }

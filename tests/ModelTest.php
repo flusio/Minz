@@ -153,7 +153,7 @@ class ModelTest extends TestCase
     public function testToValuesWithComputedProperty()
     {
         $model = new models\Computed();
-        $model->computed = 42;
+        $model->count = 42;
 
         $values = $model->toValues();
 

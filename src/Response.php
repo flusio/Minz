@@ -113,13 +113,13 @@ class Response
     /** @var integer */
     private $code;
 
-    /** @var string[] */
+    /** @var array<string, mixed> */
     private $headers = [];
 
     /** @var array */
     private $cookies = [];
 
-    /** @var \Minz\Output\Output */
+    /** @var \Minz\Output\Output|null */
     private $output;
 
     /**
@@ -416,7 +416,7 @@ class Response
      *
      * @param integer $code
      *     The HTTP status code.
-     * @param \Minz\Output\Output $output
+     * @param \Minz\Output\Output|null $output
      *     The Output to set to the response (optional).
      *
      * @throws \Minz\Errors\ResponseError
@@ -444,7 +444,7 @@ class Response
     }
 
     /**
-     * @param \Minz\Output\Output $output
+     * @param \Minz\Output\Output|null $output
      *
      * @return void
      */
@@ -483,7 +483,7 @@ class Response
      *
      * @param string $name
      *     The header name to set.
-     * @param string $value
+     * @param mixed $value
      *     The value of the header.
      *
      * @return void
@@ -547,7 +547,7 @@ class Response
      *     that they should be processed in order to be passed to the PHP
      *     `header()` function.
      *
-     * @return string[]
+     * @return array
      */
     public function headers($raw = false)
     {

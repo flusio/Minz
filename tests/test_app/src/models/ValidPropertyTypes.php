@@ -10,4 +10,9 @@ class ValidPropertyTypes extends \Minz\Model
         'datetime' => 'datetime',
         'boolean' => 'boolean',
     ];
+
+    public $integer;
+    public $string;
+    public $datetime;
+    public $boolean;
 }

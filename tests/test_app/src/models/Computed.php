@@ -10,4 +10,6 @@ class Computed extends \Minz\Model
             'computed' => true,
         ],
     ];
+
+    public $count;
 }

@@ -56,7 +56,7 @@ class DatabaseTest extends TestCase
             'The database is not set in the configuration file.'
         );
 
-        Configuration::$database = null;
+        Configuration::$database = [];
 
         Database::get();
     }
@@ -173,7 +173,7 @@ class DatabaseTest extends TestCase
             'The database is not set in the configuration file.'
         );
 
-        Configuration::$database = null;
+        Configuration::$database = [];
 
         Database::drop();
     }
