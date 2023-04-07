@@ -16,6 +16,8 @@ class Database
     /** @var \PDO */
     private $pdo_connection;
 
+    private $connect_to_db;
+
     /**
      * Initialize a database. Note it is private, you must use `\Minz\Database::get`
      * to get an instance.
@@ -135,7 +137,7 @@ class Database
      */
     public function inTransaction()
     {
-        return $this->pdoCall('inTransaction', $sql_statement);
+        return $this->pdoCall('inTransaction');
     }
 
     /**
@@ -202,7 +204,7 @@ class Database
         }
 
         if (!is_callable([$this->pdo_connection, $name])) {
-            throw new BadMethodCallException('Call to undefined method ' . get_called_class() . '::' . $name);
+            throw new \BadMethodCallException('Call to undefined method ' . get_called_class() . '::' . $name);
         }
 
         return $this->pdo_connection->$name(...$arguments);

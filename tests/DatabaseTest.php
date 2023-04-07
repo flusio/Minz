@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class DatabaseTest extends TestCase
 {
+    private $initial_configuration;
+
     public function setUp(): void
     {
         $this->initial_configuration = Configuration::$database;

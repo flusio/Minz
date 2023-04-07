@@ -344,7 +344,7 @@ class MigratorTest extends TestCase
         $migrator = new Migrator();
         $migrator->addMigration('foo', function () {
             return true;
-        }, function () use (&$spy) {
+        }, function () {
             throw new \Exception('Oops, it failed.');
         });
         $migrator->migrate();

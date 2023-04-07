@@ -10,6 +10,8 @@ namespace Minz\Output;
  */
 class Text implements Output
 {
+    private $text;
+
     public function __construct($text)
     {
         $this->text = $text;
