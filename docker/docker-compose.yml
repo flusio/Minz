@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+    php:
+        build: .
+        volumes:
+            - ..:/var/www/html:z
+        user: $USER
+        links:
+            - database
+        environment:
+            - DB_DSN
+            - DB_USERNAME
+            - DB_PASSWORD
+
+    database:
+        image: postgres:11-alpine
+        environment:
+            POSTGRES_DB: minz_test
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres

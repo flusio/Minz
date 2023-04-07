@@ -1,0 +1,6 @@
+SCRIPT_PATH=$(dirname $(realpath -s $0))
+export COMPOSE_PROJECT_NAME=minz
+export COMPOSE_FILE=$SCRIPT_PATH/../docker-compose.yml
+export USER=$(id -u):$(id -g)
+
+docker-compose run -T --rm php php "$@"

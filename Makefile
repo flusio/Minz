@@ -1,9 +1,15 @@
 .DEFAULT_GOAL := help
 
+ifdef NODOCKER
+	PHP = php
+else
+	PHP = ./docker/bin/php
+endif
+
 ifdef PGSQL
-	DB_DSN='pgsql:host=localhost;port=5432;dbname=minz_test'
+	DB_DSN='pgsql:host=database;port=5432;dbname=minz_test'
 	DB_USERNAME='postgres'
-	DB_PASSWORD='password'
+	DB_PASSWORD='postgres'
 else
 	DB_DSN='sqlite::memory:'
 	DB_USERNAME=none
@@ -26,14 +32,14 @@ else
 	PHPUNIT_FILE = ./tests
 endif
 
-.PHONY: postgres
-postgres: ## Start a Postgres database in a Docker container
-	docker run --name minz-postgres --rm -p 5432:5432 -e POSTGRES_DB=minz_test -e POSTGRES_PASSWORD=password postgres:12-alpine
+.PHONY: docker-build
+docker-build: ## Rebuild the Docker images
+	docker-compose -p minz -f docker/docker-compose.yml build
 
 .PHONY: test
 test: bin/phpunit ## Run the tests suite
 	DB_DSN=$(DB_DSN) DB_USERNAME=$(DB_USERNAME) DB_PASSWORD=$(DB_PASSWORD) \
-		php ./bin/phpunit \
+		$(PHP) ./bin/phpunit \
 		$(COVERAGE) --whitelist ./src \
 		--bootstrap ./tests/bootstrap.php \
 		--testdox \
@@ -42,11 +48,11 @@ test: bin/phpunit ## Run the tests suite
 
 .PHONY: lint
 lint: bin/phpcs ## Run the linter on the PHP files
-	php ./bin/phpcs --standard=PSR12 ./src ./tests
+	$(PHP) ./bin/phpcs --standard=PSR12 ./src ./tests
 
 .PHONY: lint-fix
 lint-fix: bin/phpcbf ## Fix the errors raised by the linter
-	php ./bin/phpcbf --standard=PSR12 ./src ./tests
+	$(PHP) ./bin/phpcbf --standard=PSR12 ./src ./tests
 
 .PHONY: help
 help:

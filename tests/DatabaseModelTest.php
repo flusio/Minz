@@ -440,7 +440,7 @@ class DatabaseModelTest extends TestCase
         $dao = new models\dao\Friend();
         $friend_id = $dao->create(['name' => 'Joël']);
 
-        $exists = $dao->exists([$friend_id, 'does not exist']);
+        $exists = $dao->exists([$friend_id, -1]);
 
         $this->assertFalse($exists);
     }

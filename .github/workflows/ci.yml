@@ -7,6 +7,7 @@ on:
         branches: [ main ]
 
 env:
+    NODOCKER: true
     APP_ENVIRONMENT: test
     DB_HOST: localhost
     DB_USERNAME: postgres
@@ -26,7 +27,7 @@ jobs:
 
         services:
             postgres:
-                image: postgres:12-alpine
+                image: postgres:11-alpine
                 env:
                     POSTGRES_USER: postgres
                     POSTGRES_PASSWORD: postgres
