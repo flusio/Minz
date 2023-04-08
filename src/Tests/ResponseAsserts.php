@@ -21,27 +21,6 @@ use Minz\Response;
 trait ResponseAsserts
 {
     /**
-     * Assert that a Response is matching the given conditions (deprecated).
-     *
-     * @param ResponseHttpCode $code
-     * @param ?string $output
-     *     The rendered output that the response must match with (optional), if
-     *     code is 301 or 302, it will check the Location header instead
-     */
-    public function assertResponse(Response $response, int $code, ?string $output = null): void
-    {
-        $response_output = $response->render();
-        $this->assertSame($code, $response->code(), 'Output is: ' . $response_output);
-
-        if ($output !== null && ($code === 301 || $code === 302)) {
-            $response_headers = $response->headers(true);
-            $this->assertSame($output, $response_headers['Location']);
-        } elseif ($output !== null) {
-            $this->assertStringContainsString($output, $response_output);
-        }
-    }
-
-    /**
      * Assert that a Response code is matching the given one.
      *
      * A location can be given to test the redirections destinations.
@@ -98,23 +77,11 @@ trait ResponseAsserts
      */
     public function assertResponseHeaders(Response $response, array $headers): void
     {
-        // I would use assertArraySubset, but it's deprecated in PHPUnit 8
-        // and will be removed in PHPUnit 9.
         $response_headers = $response->headers(true);
         foreach ($headers as $header => $value) {
             $this->assertArrayHasKey($header, $response_headers);
             $this->assertEquals($value, $response_headers[$header]);
         }
-    }
-
-    /**
-     * Alias for assertResponseHeaders (deprecated).
-     *
-     * @param ResponseHeaders $headers
-     */
-    public function assertHeaders(Response $response, array $headers): void
-    {
-        $this->assertResponseHeaders($response, $headers);
     }
 
     /**
@@ -129,15 +96,5 @@ trait ResponseAsserts
         $this->assertTrue(is_callable([$output, 'pointer']), 'Response has no pointer');
         $pointer = $output->pointer();
         $this->assertEquals($expected_pointer, $pointer);
-    }
-
-    /**
-     * Alias for assertResponsePointer (deprecated).
-     *
-     * @param ViewPointer $expected_pointer
-     */
-    public function assertPointer(Response $response, string $expected_pointer): void
-    {
-        $this->assertResponsePointer($response, $expected_pointer);
     }
 }

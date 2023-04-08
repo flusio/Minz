@@ -86,19 +86,6 @@ if (!function_exists('url_full_public')) {
     }
 }
 
-if (!function_exists('csrf_token')) {
-    /**
-     * Deprecated, CSRF token should be pass to the view as a variable.
-     *
-     * @see \Minz\CSRF::generate
-     */
-    function csrf_token(): string
-    {
-        \Minz\Log::notice('csrf_token() view function is deprecated.');
-        return \Minz\CSRF::generate();
-    }
-}
-
 if (!function_exists('_d')) {
     /**
      * @see \Minz\Output\ViewHelpers::formatDate
