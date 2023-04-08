@@ -241,7 +241,7 @@ class ResponseTest extends TestCase
     {
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#items');
-        Url::setRouter($router);
+        \Minz\Engine::init($router);
 
         $response = Response::redirect('rabbits#items');
 

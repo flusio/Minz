@@ -18,17 +18,6 @@ namespace Minz;
  */
 class Url
 {
-    private static ?Router $router;
-
-    /**
-     * Set the router so Url class can lookup for action pointers. It needs to
-     * be called first.
-     */
-    public static function setRouter(?Router $router): void
-    {
-        self::$router = $router;
-    }
-
     /**
      * Return the relative URL corresponding to an action.
      *
@@ -44,14 +33,16 @@ class Url
      */
     public static function for(string $pointer, array $parameters = []): string
     {
-        if (!self::$router) {
+        $router = Engine::router();
+
+        if (!$router) {
             throw new Errors\UrlError(
-                'You must set a Router to the Url class before using it.'
+                'You must init the Engine with a Router before calling this method.'
             );
         }
 
         try {
-            $uri = self::$router->uriByName($pointer, $parameters);
+            $uri = $router->uriByName($pointer, $parameters);
             return self::path() . $uri;
         } catch (Errors\RouteNotFoundError $e) {
             // Do nothing on purpose
@@ -62,7 +53,7 @@ class Url
         $methods = Request::VALID_METHODS;
         foreach ($methods as $method) {
             try {
-                $uri = self::$router->uriByPointer($method, $pointer, $parameters);
+                $uri = $router->uriByPointer($method, $pointer, $parameters);
                 return self::path() . $uri;
             } catch (Errors\RouteNotFoundError $e) {
                 // Do nothing on purpose
