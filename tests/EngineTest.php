@@ -10,11 +10,11 @@ class EngineTest extends TestCase
     {
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#items');
-        $engine = new \Minz\Engine($router);
+        \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
-        $response = $engine->run($request);
+        $response = \Minz\Engine::run($request);
 
         $output = $response->render();
         $this->assertSame(200, $response->code());
@@ -28,11 +28,11 @@ class EngineTest extends TestCase
     {
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits/:id', 'rabbits#show');
-        $engine = new \Minz\Engine($router);
+        \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits/42');
 
         /** @var Response */
-        $response = $engine->run($request);
+        $response = \Minz\Engine::run($request);
 
         $this->assertSame(200, $response->code(), 'Rabbit #42');
         $this->assertSame('42', $request->param('id'));
@@ -42,11 +42,11 @@ class EngineTest extends TestCase
     {
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#items');
-        $engine = new \Minz\Engine($router);
+        \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/not-found');
 
         /** @var Response */
-        $response = $engine->run($request, [
+        $response = \Minz\Engine::run($request, [
             'not_found_view_pointer' => 'not_found.phtml',
         ]);
 
@@ -60,11 +60,11 @@ class EngineTest extends TestCase
     {
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'missing#items');
-        $engine = new \Minz\Engine($router);
+        \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
-        $response = $engine->run($request, [
+        $response = \Minz\Engine::run($request, [
             'internal_server_error_view_pointer' => 'internal_server_error.phtml',
         ]);
 
@@ -78,11 +78,11 @@ class EngineTest extends TestCase
     {
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#missing');
-        $engine = new \Minz\Engine($router);
+        \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
-        $response = $engine->run($request, [
+        $response = \Minz\Engine::run($request, [
             'internal_server_error_view_pointer' => 'internal_server_error.phtml',
         ]);
 
@@ -96,11 +96,11 @@ class EngineTest extends TestCase
     {
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#missingViewFile');
-        $engine = new \Minz\Engine($router);
+        \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
-        $response = $engine->run($request, [
+        $response = \Minz\Engine::run($request, [
             'internal_server_error_view_pointer' => 'internal_server_error.phtml',
         ]);
 

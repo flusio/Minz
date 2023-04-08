@@ -310,24 +310,21 @@ namespace App;
 
 class Application
 {
-    private $router;
-
     public function __construct()
     {
         // This is where we’ll declare our routes
-        $this->router = new \Minz\Router();
+        $router = new \Minz\Router();
 
         // We create a new route to connect the URL `GET /` to our action.
         // The syntax is `controller#action`.
-        $this->router->addRoute('GET', '/', 'Home#show');
+        $router->addRoute('GET', '/', 'Home#show');
+
+        \Minz\Engine::init($router);
     }
 
     public function run($request)
     {
-        // Don't worry about this part for now, we’ll see it in details in a
-        // future chapter. It's here that we're performing the routing.
-        $engine = new \Minz\Engine($this->router);
-        return $engine->run($request);
+        return \Minz\Engine::run($request);
     }
 }
 ```

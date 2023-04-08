@@ -14,11 +14,11 @@ namespace Minz;
  */
 class Engine
 {
-    private Router $router;
+    private static Router $router;
 
-    public function __construct(Router $router)
+    public static function init(Router $router): void
     {
-        $this->router = $router;
+        self::$router = $router;
     }
 
     /**
@@ -38,7 +38,7 @@ class Engine
      *
      * @return \Generator|Response
      */
-    public function run(Request $request, array $options = []): mixed
+    public static function run(Request $request, array $options = []): mixed
     {
         $options = array_merge([
             'controller_namespace' => null,
@@ -50,7 +50,7 @@ class Engine
             list(
                 $to,
                 $parameters
-            ) = $this->router->match($request->method(), $request->path());
+            ) = self::$router->match($request->method(), $request->path());
         } catch (Errors\RouteNotFoundError $e) {
             if ($options['not_found_view_pointer']) {
                 $output = new Output\View(
