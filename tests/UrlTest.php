@@ -24,14 +24,14 @@ class UrlTest extends TestCase
     public function tearDown(): void
     {
         Configuration::$url_options = $this->default_url_options;
-        Url::setRouter(null);
+        Engine::reset();
     }
 
     public function testFor(): void
     {
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::for('rabbits#list');
 
@@ -42,7 +42,7 @@ class UrlTest extends TestCase
     {
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list', 'rabbits');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::for('rabbits');
 
@@ -57,7 +57,7 @@ class UrlTest extends TestCase
         $router = new Router();
         // @phpstan-ignore-next-line
         $router->addRoute($method, '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::for('rabbits#list');
 
@@ -68,7 +68,7 @@ class UrlTest extends TestCase
     {
         $router = new Router();
         $router->addRoute('GET', '/rabbits/:id', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::for('rabbits#list', ['id' => 42]);
 
@@ -79,7 +79,7 @@ class UrlTest extends TestCase
     {
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::for('rabbits#list', ['id' => 42]);
 
@@ -92,7 +92,7 @@ class UrlTest extends TestCase
 
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::for('rabbits#list');
 
@@ -105,7 +105,7 @@ class UrlTest extends TestCase
     {
         $this->expectException(Errors\UrlError::class);
         $this->expectExceptionMessage(
-            'You must set a Router to the Url class before using it.'
+            'You must init the Engine with a Router before calling this method.'
         );
 
         Url::for('rabbits#list');
@@ -119,7 +119,7 @@ class UrlTest extends TestCase
         );
 
         $router = new Router();
-        Url::setRouter($router);
+        Engine::init($router);
 
         Url::for('rabbits#list');
     }
@@ -131,7 +131,7 @@ class UrlTest extends TestCase
 
         $router = new Router();
         $router->addRoute('GET', '/rabbits/:id', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         Url::for('rabbits#list');
     }
@@ -142,7 +142,7 @@ class UrlTest extends TestCase
 
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::absoluteFor('rabbits#list');
 
@@ -162,7 +162,7 @@ class UrlTest extends TestCase
 
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::absoluteFor('rabbits#list');
 
@@ -176,7 +176,7 @@ class UrlTest extends TestCase
 
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::absoluteFor('rabbits#list');
 
@@ -190,7 +190,7 @@ class UrlTest extends TestCase
 
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
-        Url::setRouter($router);
+        Engine::init($router);
 
         $url = Url::absoluteFor('rabbits#list');
 
