@@ -14,7 +14,7 @@ namespace Minz\Tests;
 trait TimeHelper
 {
     /**
-     * @before
+     * @after
      */
     public function unfreeze(): void
     {
