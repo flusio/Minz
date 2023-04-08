@@ -205,6 +205,21 @@ echo "Hello {$name}!";
 You can notice the difference by opening [localhost](http://localhost/) and
 [localhost/?name=Charlie](http://localhost/?name=Charlie).
 
+Now, you might think it’s tedious and prone to errors to initialize the Request
+manually. That’s why there’s a method for that: `initFromGlobals()`.
+Internally, it does essentially what we saw above.
+
+```php
+<?php
+
+// ...
+
+$request = \Minz\Request::initFromGlobals();
+
+$name = $request->param('name', 'World');
+echo "Hello {$name}!";
+```
+
 **To learn more, [explore the `\Minz\Request` class](/src/Request.php).**
 
 ## Introducing Responses
@@ -223,7 +238,7 @@ it to return a `text` response:
 
 // ...
 
-$request = new \Minz\Request($http_method, $http_uri, $http_parameters, $http_headers);
+$request = \Minz\Request::initFromGlobals();
 
 $name = $request->param('name', 'World');
 
@@ -336,7 +351,7 @@ index file:
 
 // ...
 
-$request = new \Minz\Request($http_method, $http_uri, $http_parameters, $http_headers);
+$request = \Minz\Request::initFromGlobals();
 
 $application = new \App\Application();
 $response = $application->run($request);

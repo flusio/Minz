@@ -19,46 +19,13 @@ namespace Minz;
  * initialize in an application. For instance, in `public/index.php`:
  *
  * ```php
- * $http_method = strtolower($_SERVER['REQUEST_METHOD']);
- * $request_method = $http_method === 'head' ? 'get' : $http_method;
- * $request_path = $_SERVER['REQUEST_URI'];
- * $request_parameters = array_merge($_GET, $_POST, $_FILES);
- * $request_headers = array_merge($_SERVER, ['COOKIE' => $_COOKIE]);
- *
- * $request = new \Minz\Request(
- *     $request_method,
- *     $request_path,
- *     $request_parameters,
- *     $request_headers
- * );
+ * $request = \Minz\Request::initFromGlobals();
  * ```
  *
  * Requests can also be used to handle command line (e.g. in a `cli.php` file):
  *
  * ```php
- * $cli_command = [];
- * $request_parameters = [];
- *
- * // First argument is skipped since it’s the name of the script
- * $arguments = array_slice($argv, 1);
- * foreach ($arguments as $argument) {
- *     $parameter_regex = '/^--(?P<name>\w+)(=(?P<value>.+))?$/sm';
- *     $result = preg_match($parameter_regex, $argument, $matches);
- *     if ($result) {
- *         $request_parameters[$matches['name']] = $matches['value'] ?? true;
- *     } else {
- *         $cli_command[] = $argument;
- *     }
- * }
- *
- * $request_path = implode('/', $cli_command);
- * if (!$request_path) {
- *     $request_path = '/';
- * } elseif ($request_path[0] !== '/') {
- *     $request_path = '/' . $request_path;
- * }
- *
- * $request = new \Minz\Request('cli', $request_path, $request_parameters);
+ * $request = \Minz\Request::initFromCli($argv);
  * ```
  *
  * With the above code, you can accept commands of this form:
@@ -130,6 +97,67 @@ class Request
 
     /** @var RequestHeaders */
     private array $headers;
+
+    /**
+     * Create a Request reading the global variables.
+     *
+     * @throws \Minz\Errors\RequestError
+     *     Raised if the REQUEST_METHOD variable is invalid.
+     */
+    public static function initFromGlobals(): Request
+    {
+        $request_method = strtoupper($_SERVER['REQUEST_METHOD']);
+
+        $http_method = $request_method === 'HEAD' ? 'GET' : $request_method;
+        if (!in_array($http_method, self::VALID_METHODS)) {
+            throw new Errors\RequestError("The HTTP method '{$http_method}' is not supported.");
+        }
+
+        /** @var RequestMethod */
+        $http_method = $http_method;
+
+        $http_uri = $_SERVER['REQUEST_URI'];
+        $http_parameters = array_merge($_GET, $_POST, $_FILES);
+        $http_headers = array_merge($_SERVER, [
+            'COOKIE' => $_COOKIE,
+        ]);
+
+        return new Request($http_method, $http_uri, $http_parameters, $http_headers);
+    }
+
+    /**
+     * Create a Request reading the CLI arguments.
+     *
+     * @param non-empty-list<string> $argv
+     */
+    public static function initFromCli(array $argv): Request
+    {
+        // Read command line parameters to create a Request
+        $command = [];
+        $parameters = [];
+
+        // We need to skip the first argument which is the name of the script
+        $arguments = array_slice($argv, 1);
+        foreach ($arguments as $argument) {
+            $result = preg_match('/^--(?P<option>\w+)(=(?P<argument>.+))?$/sm', $argument, $matches);
+            if ($result) {
+                $parameters[$matches['option']] = $matches['argument'] ?? true;
+            } else {
+                $command[] = $argument;
+            }
+        }
+
+        $request_uri = implode('/', $command);
+        if (!$request_uri) {
+            $request_uri = '/help';
+        } elseif ($request_uri[0] !== '/') {
+            $request_uri = '/' . $request_uri;
+        }
+
+        $parameters['bin'] = $argv[0];
+
+        return new \Minz\Request('CLI', $request_uri, $parameters);
+    }
 
     /**
      * Create a Request
@@ -217,14 +245,6 @@ class Request
             if ($path[0] !== '/') {
                 throw new Errors\RequestError("{$uri} URI path must start with a slash.");
             }
-        }
-
-        if (!is_array($parameters)) {
-            throw new Errors\RequestError('Parameters are not in an array.');
-        }
-
-        if (!is_array($headers)) {
-            throw new Errors\RequestError('Headers are not in an array.');
         }
 
         // If a path is specified in url_options, we must remove its value

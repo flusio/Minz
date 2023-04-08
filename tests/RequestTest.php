@@ -8,6 +8,74 @@ class RequestTest extends TestCase
 {
     use Tests\FilesHelper;
 
+    public function testInitFromGlobals(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'get';
+        $_SERVER['REQUEST_URI'] = '/path';
+        $_GET['foo'] = 'bar';
+        $_POST['spam'] = 'egg';
+        $_FILES['some'] = 'file';
+        $_COOKIE['a'] = 'cookie';
+
+        $request = Request::initFromGlobals();
+
+        unset($_SERVER['REQUEST_METHOD']);
+        unset($_SERVER['REQUEST_URI']);
+        unset($_GET['foo']);
+        unset($_POST['spam']);
+        unset($_FILES['some']);
+        unset($_COOKIE['a']);
+
+        $this->assertSame('GET', $request->method());
+        $this->assertSame('/path', $request->path());
+        $this->assertSame('bar', $request->param('foo'));
+        $this->assertSame('egg', $request->param('spam'));
+        $this->assertSame('file', $request->param('some'));
+        $this->assertSame('cookie', $request->cookie('a'));
+    }
+
+    public function testInitFromGlobalsFailsIfRequestMethodIsInvalid(): void
+    {
+        $this->expectException(Errors\RequestError::class);
+        $this->expectExceptionMessage("The HTTP method 'UNSUPPORTED' is not supported.");
+
+        $_SERVER['REQUEST_METHOD'] = 'unsupported';
+
+        $request = Request::initFromGlobals();
+    }
+
+    public function testInitFromCli(): void
+    {
+        $argv = [
+            './cli',
+            'users',
+            'create',
+            '--foo=bar',
+            '--spam',
+        ];
+
+        $request = Request::initFromCli($argv);
+
+        $this->assertSame('CLI', $request->method());
+        $this->assertSame('/users/create', $request->path());
+        $this->assertSame('./cli', $request->param('bin'));
+        $this->assertSame('bar', $request->param('foo'));
+        $this->assertTrue($request->param('spam'));
+    }
+
+    public function testInitFromCliWhenNoArguments(): void
+    {
+        $argv = [
+            './cli',
+        ];
+
+        $request = Request::initFromCli($argv);
+
+        $this->assertSame('CLI', $request->method());
+        $this->assertSame('/help', $request->path());
+        $this->assertSame('./cli', $request->param('bin'));
+    }
+
     public function testConstructorFailsIfUriIsEmpty(): void
     {
         $this->expectException(Errors\RequestError::class);
