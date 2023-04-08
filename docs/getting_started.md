@@ -120,7 +120,7 @@ classes. Create a new `autoload.php` file at the root of your project:
 
 spl_autoload_register(
     function ($class_name) {
-        $app_namespace = 'hello';
+        $app_namespace = 'App';
         $app_path = __DIR__;
         $lib_path = $app_path . '/lib';
 
@@ -158,8 +158,6 @@ create `configuration/environment_development.php`:
 <?php
 
 return [
-    'app_name' => 'hello',
-
     'secret_key' => 'a secret key',
 
     'url_options' => [
@@ -279,7 +277,7 @@ First, let’s create a controller with a single action. Create a new file named
 ```php
 <?php
 
-namespace hello;
+namespace App;
 
 // The Home class is our controller
 class Home
@@ -308,7 +306,7 @@ write tests: let’s write a new `src/Application.php` file.
 ```php
 <?php
 
-namespace hello;
+namespace App;
 
 class Application
 {
@@ -349,7 +347,7 @@ index file:
 
 $request = new \Minz\Request($http_method, $http_uri, $http_parameters, $http_headers);
 
-$application = new \hello\Application();
+$application = new \App\Application();
 $response = $application->run($request);
 
 // ...
@@ -410,7 +408,7 @@ It’s now time to write our first tests in `tests/HomeTest.php`:
 ```php
 <?php
 
-namespace hello;
+namespace App;
 
 class HomeTest extends \PHPUnit\Framework\TestCase
 {
@@ -473,7 +471,7 @@ in order to facilitate our tests.
 
 Remember when I told you that the `Application` class was just a convention? It
 was to allow the `appRun` method provided by the `ApplicationHelper` class to
-work. It does a bit of magic by loading the application from `\hello\Application`,
+work. It does a bit of magic by loading the application from `\App\Application`,
 creating a `\Minz\Request` from the parameters that you give to it, and
 executing it against the `run` method of `Application`. Finally it returns the
 `\Minz\Response` returned by the controller action. The beauty of this method
