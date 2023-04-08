@@ -18,8 +18,8 @@ Minz.** You’ll often have to interact with them.
       to load environment variables;
 - **[`\Minz\Request`](/src/Request.php) abstracts HTTP or CLI requests;**
 - **[`\Minz\Response`](/src/Response.php) abstracts HTTP or CLI responses,** it
-  embeds a [`\Minz\Output\Output`](/src/Output/Output.php) (interface) which is
-  in charge of rendering the content. Here is the list of available outputs:
+  embeds a [`\Minz\Output`](/src/Output.php) (interface) which is in charge of
+  rendering the content. Here is the list of available outputs:
     - **[`\Minz\Output\View`](/src/Output/View.php) is a simple template system to render your content,**
       often used for (but not limited to) HTML;
     - [`\Minz\Output\Text`](/src/Output/Text.php) renders text;

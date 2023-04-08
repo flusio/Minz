@@ -1,6 +1,6 @@
 <?php
 
-namespace Minz\Output;
+namespace Minz;
 
 /**
  * An Output represents the content returned to a user.

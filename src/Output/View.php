@@ -18,7 +18,7 @@ use Minz\Errors;
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
-class View implements Output
+class View implements \Minz\Output
 {
     /** @var array<string, string> */
     public static array $extensions_to_content_types = [

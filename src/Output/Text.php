@@ -8,7 +8,7 @@ namespace Minz\Output;
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
-class Text implements Output
+class Text implements \Minz\Output
 {
     private string $text;
 

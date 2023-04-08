@@ -52,10 +52,10 @@ use Minz\Output;
  * they are a lot easier to use. It’s important to know the mechanics though.
  * It can be useful to create new kind of outputs for instance.
  *
+ * @see \Minz\Output
  * @see \Minz\Output\File
  * @see \Minz\Output\Text
  * @see \Minz\Output\View
- * @see \Minz\Output\Output
  *
  * The responses are returned to the calling script which must generate the
  * corresponding headers, cookies and content. For instance, in `public/index.php`:
@@ -165,7 +165,7 @@ class Response
     /** @var ResponseCookies */
     private array $cookies = [];
 
-    private ?Output\Output $output;
+    private ?Output $output;
 
     /**
      * Create a OK response (HTTP 200) with an optional Output\View.
@@ -407,7 +407,7 @@ class Response
      * @throws \Minz\Errors\ResponseError
      *     Raised if the code is not a valid HTTP status code.
      */
-    public function __construct(int $code, ?Output\Output $output = null)
+    public function __construct(int $code, ?Output $output = null)
     {
         $this->setCode($code);
         $this->setOutput($output);
@@ -420,12 +420,12 @@ class Response
         $this->setHeader('Content-Security-Policy', self::DEFAULT_CSP);
     }
 
-    public function output(): ?Output\Output
+    public function output(): ?Output
     {
         return $this->output;
     }
 
-    public function setOutput(?Output\Output $output): void
+    public function setOutput(?Output $output): void
     {
         $this->output = $output;
     }

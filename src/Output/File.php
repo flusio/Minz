@@ -10,7 +10,7 @@ use Minz\Errors;
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
-class File implements Output
+class File implements \Minz\Output
 {
     public const EXTENSION_TO_CONTENT_TYPE = [
         'css' => 'text/css',
