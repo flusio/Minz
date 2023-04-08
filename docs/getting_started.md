@@ -29,7 +29,7 @@ action.** In the end, you’ll also learn how to test controller actions to
 be sure they always do what you want.
 
 The classes featured in this chapter are: `\Minz\Request`, `\Minz\Response`,
-`\Minz\Router`, `\Minz\Configuration` and `\Minz\Environment`.
+`\Minz\Router`, `\Minz\Configuration`.
 
 ## Serving the index file
 
@@ -145,7 +145,6 @@ $app_path = realpath(__DIR__ . '/..');
 include $app_path . '/autoload.php';
 
 \Minz\Configuration::load('development', $app_path);
-\Minz\Environment::initialize();
 
 echo 'Hello World!';
 ```
@@ -172,11 +171,6 @@ a lot of things like the database and mailer information, some paths, or even
 your application configuration.
 
 **To learn more, [explore the `\Minz\Configuration` class](/src/Configuration.php).**
-
-You may have noticed the presence of an `Environment` initialization. It simply
-configures how to report PHP errors depending on your actual configuration.
-
-**To learn more, [explore the `\Minz\Environment` class](/src/Environment.php).**
 
 ## Introducing Requests
 
@@ -389,7 +383,6 @@ $app_path = realpath(__DIR__ . '/..');
 
 include $app_path . '/autoload.php';
 \Minz\Configuration::load('test', $app_path);
-\Minz\Environment::initialize();
 ```
 
 Note how similar it is compared to the beginning of the index file. You might

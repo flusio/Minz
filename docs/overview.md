@@ -16,8 +16,6 @@ Minz.** You’ll often have to interact with them.
   configuration;**
     - [`\Minz\Dotenv`](/src/Dotenv.php) is often used in configuration files,
       to load environment variables;
-    - [`\Minz\Environment`](/src/Environment.php) is initialized at the same
-      time as configuration to setup logs, error reporting and session;
 - **[`\Minz\Request`](/src/Request.php) abstracts HTTP or CLI requests;**
 - **[`\Minz\Response`](/src/Response.php) abstracts HTTP or CLI responses,** it
   embeds a [`\Minz\Output\Output`](/src/Output/Output.php) (interface) which is
