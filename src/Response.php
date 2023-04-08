@@ -75,6 +75,9 @@ use Minz\Output;
  * }
  *
  * echo $response->render();
+ *
+ * // Can be shortened in
+ * $response->sendByHttp();
  * ```
  *
  * In a CLI script, it is quite different since cookies and headers aren't
@@ -92,6 +95,9 @@ use Minz\Output;
  * } else {
  *     exit(1);
  * }
+ *
+ * // Can be shortened in
+ * $response->sendToCli();
  * ```
  *
  * @phpstan-import-type UrlPointer from Url
@@ -613,6 +619,42 @@ class Response
             return $this->output->render();
         } else {
             return '';
+        }
+    }
+
+    public function sendByHttp(bool $echo_output = true): void
+    {
+        http_response_code($this->code());
+
+        foreach ($this->cookies() as $cookie) {
+            setcookie($cookie['name'], $cookie['value'], $cookie['options']);
+        }
+
+        /** @var string[] */
+        $headers = $this->headers();
+        foreach ($headers as $header) {
+            header($header);
+        }
+
+        if ($echo_output) {
+            echo $this->render();
+        }
+    }
+
+    public function sendToCli(): void
+    {
+        $output = $this->render();
+        if ($output && $output[-1] === "\n") {
+            echo $output;
+        } elseif ($output) {
+            echo $output . "\n";
+        }
+
+        $code = $this->code();
+        if ($code >= 200 && $code < 300) {
+            exit(0);
+        } else {
+            exit($code);
         }
     }
 }

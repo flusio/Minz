@@ -259,6 +259,23 @@ This is because we’re now returning text and not HTML (i.e. Minz generates a
 `Content-Type: text/plain` header). In fact, the `text()` method is usually
 used with command line actions. We’ll fix that in a future chapter.
 
+As for Requests, it’s possible to shorten the code to send the Response to the
+client:
+
+```php
+<?php
+
+// ...
+
+$request = \Minz\Request::initFromGlobals();
+
+$name = $request->param('name', 'World');
+
+$response = \Minz\Response::text(200, "Hello {$name}!");
+
+$response->sendByHttp();
+```
+
 **To learn more, [explore the `\Minz\Response` class](/src/Response.php).**
 
 ## Introducing routing and controllers
@@ -356,7 +373,7 @@ $request = \Minz\Request::initFromGlobals();
 $application = new \App\Application();
 $response = $application->run($request);
 
-// ...
+$response->sendByHttp();
 ```
 
 You can test that the application still work by opening again [localhost](http://localhost/)
