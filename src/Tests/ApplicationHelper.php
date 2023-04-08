@@ -2,15 +2,22 @@
 
 namespace Minz\Tests;
 
+use Minz\Request;
+use Minz\Response;
+
 /**
  * Provide an appRun() method to help to run requests over Application.
+ *
+ * @phpstan-import-type RequestMethod from Request
+ * @phpstan-import-type RequestParameters from Request
+ * @phpstan-import-type RequestHeaders from Request
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 trait ApplicationHelper
 {
-    protected static $application;
+    protected static ?object $application;
 
     /**
      * Try to load an application based on a convention: the class must be
@@ -25,14 +32,19 @@ trait ApplicationHelper
      *
      * @beforeClass
      */
-    public static function loadApplication()
+    public static function loadApplication(): void
     {
         $app_name = \Minz\Configuration::$app_name;
         $application_class_name = "\\{$app_name}\\Application";
         try {
-            self::$application = new $application_class_name();
+            $application = new $application_class_name();
         } catch (\Error $e) {
             // fail silently, the application must be set manually
+            return;
+        }
+
+        if (is_callable([$application, 'run'])) {
+            self::$application = $application;
         }
     }
 
@@ -42,16 +54,19 @@ trait ApplicationHelper
      *
      * @see \Minz\Request
      *
-     * @param string $method
-     * @param string $uri
-     * @param array $parameters
-     * @param array $headers
-     *
-     * @return \Minz\Response
+     * @param RequestMethod $method
+     * @param RequestParameters $parameters
+     * @param RequestHeaders $headers
      */
-    public function appRun($method, $uri, $parameters = [], $headers = [])
+    public function appRun(string $method, string $uri, array $parameters = [], array $headers = []): Response
     {
-        $request = new \Minz\Request($method, $uri, $parameters, $headers);
+        if (!self::$application) {
+            $app_name = \Minz\Configuration::$app_name;
+            $application_class_name = "\\{$app_name}\\Application";
+            throw new \RuntimeException("{$application_class_name} doesn't exist, or run() is not callable.");
+        }
+
+        $request = new Request($method, $uri, $parameters, $headers);
         return self::$application->run($request);
     }
 }

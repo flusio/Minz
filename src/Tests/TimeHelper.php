@@ -16,7 +16,7 @@ trait TimeHelper
     /**
      * @before
      */
-    public function unfreeze()
+    public function unfreeze(): void
     {
         \Minz\Time::unfreeze();
     }
@@ -24,7 +24,7 @@ trait TimeHelper
     /**
      * @param \DateTime|integer $timestamp
      */
-    public function freeze($timestamp)
+    public function freeze(mixed $timestamp): void
     {
         \Minz\Time::freeze($timestamp);
     }

@@ -2,10 +2,18 @@
 
 namespace Minz\Tests;
 
+use Minz\Response;
+
 /**
  * Provide some assert methods to help to test the response.
  *
  * @see \Minz\Response
+ *
+ * @phpstan-import-type ResponseHttpCode from Response
+ *
+ * @phpstan-import-type ResponseHeaders from Response
+ *
+ * @phpstan-import-type ViewPointer from \Minz\Output\View
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
@@ -15,13 +23,12 @@ trait ResponseAsserts
     /**
      * Assert that a Response is matching the given conditions (deprecated).
      *
-     * @param \Minz\Response $response
-     * @param integer $code The HTTP code that the response must match with
-     * @param string $output The rendered output that the response must match
-     *                       with (optional), if code is 301 or 302, it will
-     *                       check the Location header instead
+     * @param ResponseHttpCode $code
+     * @param ?string $output
+     *     The rendered output that the response must match with (optional), if
+     *     code is 301 or 302, it will check the Location header instead
      */
-    public function assertResponse($response, $code, $output = null)
+    public function assertResponse(Response $response, int $code, ?string $output = null): void
     {
         $response_output = $response->render();
         $this->assertSame($code, $response->code(), 'Output is: ' . $response_output);
@@ -37,11 +44,11 @@ trait ResponseAsserts
     /**
      * Assert that a Response code is matching the given one.
      *
-     * @param \Minz\Response $response
-     * @param integer $code The HTTP code that the response must match with
-     * @param string $location If code is 301 or 302, the location must match this variable
+     * A location can be given to test the redirections destinations.
+     *
+     * @param ResponseHttpCode $code
      */
-    public function assertResponseCode($response, $code, $location = null)
+    public function assertResponseCode(Response $response, int $code, ?string $location = null): void
     {
         $this->assertEquals($code, $response->code());
 
@@ -53,60 +60,43 @@ trait ResponseAsserts
 
     /**
      * Assert that a Response output equals to the given string
-     *
-     * @param \Minz\Response $response
-     * @param string $string The string the output must equal
      */
-    public function assertResponseEquals($response, $string)
+    public function assertResponseEquals(Response $response, string $output): void
     {
-        $output = $response->render();
-        $this->assertEquals($string, $output);
+        $this->assertEquals($output, $response->render());
     }
 
     /**
      * Assert that a Response output contains the given string
-     *
-     * @param \Minz\Response $response
-     * @param string $string The string the output must contain
      */
-    public function assertResponseContains($response, $string)
+    public function assertResponseContains(Response $response, string $output): void
     {
-        $output = $response->render();
-        $this->assertStringContainsString($string, $output);
+        $this->assertStringContainsString($output, $response->render());
     }
 
     /**
      * Assert that a Response output contains the given string (ignoring
      * differences in casing).
-     *
-     * @param \Minz\Response $response
-     * @param string $string The string the output must contain
      */
-    public function assertResponseContainsIgnoringCase($response, $string)
+    public function assertResponseContainsIgnoringCase(Response $response, string $output): void
     {
-        $output = $response->render();
-        $this->assertStringContainsStringIgnoringCase($string, $output);
+        $this->assertStringContainsStringIgnoringCase($output, $response->render());
     }
 
     /**
      * Assert that a Response output doesn’t contain the given string
-     *
-     * @param \Minz\Response $response
-     * @param string $string The string the output must not contain
      */
-    public function assertResponseNotContains($response, $string)
+    public function assertResponseNotContains(Response $response, string $output): void
     {
-        $output = $response->render();
-        $this->assertStringNotContainsString($string, $output);
+        $this->assertStringNotContainsString($output, $response->render());
     }
 
     /**
      * Assert that a Response declares the given headers.
      *
-     * @param \Minz\Response $response
-     * @param string[] $headers
+     * @param ResponseHeaders $headers
      */
-    public function assertResponseHeaders($response, $headers)
+    public function assertResponseHeaders(Response $response, array $headers): void
     {
         // I would use assertArraySubset, but it's deprecated in PHPUnit 8
         // and will be removed in PHPUnit 9.
@@ -119,8 +109,10 @@ trait ResponseAsserts
 
     /**
      * Alias for assertResponseHeaders (deprecated).
+     *
+     * @param ResponseHeaders $headers
      */
-    public function assertHeaders($response, $headers)
+    public function assertHeaders(Response $response, array $headers): void
     {
         $this->assertResponseHeaders($response, $headers);
     }
@@ -128,10 +120,9 @@ trait ResponseAsserts
     /**
      * Assert that a Response output is set with the given pointer.
      *
-     * @param \Minz\Response $response
-     * @param string $expected_pointer
+     * @param ViewPointer $expected_pointer
      */
-    public function assertResponsePointer($response, $expected_pointer)
+    public function assertResponsePointer(Response $response, string $expected_pointer): void
     {
         $output = $response->output();
         $this->assertNotNull($output, 'Response has no output');
@@ -142,8 +133,10 @@ trait ResponseAsserts
 
     /**
      * Alias for assertResponsePointer (deprecated).
+     *
+     * @param ViewPointer $expected_pointer
      */
-    public function assertPointer($response, $expected_pointer)
+    public function assertPointer(Response $response, string $expected_pointer): void
     {
         $this->assertResponsePointer($response, $expected_pointer);
     }

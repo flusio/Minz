@@ -47,10 +47,8 @@ class Environment
      * @see https://www.php.net/manual/function.openlog
      * @see https://www.php.net/manual/errorfunc.configuration.php#ini.error-reporting
      * @see https://github.com/php/php-src/blob/master/php.ini-production
-     *
-     * @return void
      */
-    public static function initialize()
+    public static function initialize(): void
     {
         // Configure the system logger.
         $app_name = Configuration::$app_name;
@@ -85,15 +83,11 @@ class Environment
      * Set the session name to the app name, and start the session with a
      * correct configuration for the cookie.
      *
-     * @param string $samesite
-     *     How to restrict the cookie in the browser. Possible values are Lax
-     *     (default), Strict or None.
+     * @param 'Lax'|'Strict'|'None' $samesite
      *
      * @see https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-     *
-     * @return void
      */
-    public static function startSession($samesite = 'Lax')
+    public static function startSession(string $samesite = 'Lax'): void
     {
         $url_options = Configuration::$url_options;
         session_name(Configuration::$app_name);

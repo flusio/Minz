@@ -11,17 +11,23 @@ namespace Minz\Tests;
  */
 trait InitializerHelper
 {
-    /** @var string */
-    protected static $schema;
+    protected static string $schema;
 
     /**
      * Load the schema from the configuration $schema_path.
      *
      * @beforeClass
      */
-    public static function loadSchema()
+    public static function loadSchema(): void
     {
-        self::$schema = @file_get_contents(\Minz\Configuration::$schema_path);
+        $schema_path = \Minz\Configuration::$schema_path;
+        $schema = @file_get_contents($schema_path);
+
+        if ($schema === false) {
+            throw new \RuntimeException("SQL schema under {$schema_path} cannot be read.");
+        }
+
+        self::$schema = $schema;
     }
 
     /**
@@ -29,7 +35,7 @@ trait InitializerHelper
      *
      * @before
      */
-    public function initDatabase()
+    public function initDatabase(): void
     {
         if (\Minz\Configuration::$database && self::$schema) {
             \Minz\Database::reset();
@@ -41,7 +47,7 @@ trait InitializerHelper
     /**
      * @before
      */
-    public function resetSession()
+    public function resetSession(): void
     {
         session_unset();
     }
@@ -49,7 +55,7 @@ trait InitializerHelper
     /**
      * @before
      */
-    public function resetTestMailer()
+    public function resetTestMailer(): void
     {
         Mailer::clear();
     }

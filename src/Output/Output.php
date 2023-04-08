@@ -15,15 +15,11 @@ interface Output
 {
     /**
      * Generate and return the content.
-     *
-     * @return string
      */
-    public function render();
+    public function render(): string;
 
     /**
      * Returns the content type to set in HTTP headers
-     *
-     * @return string
      */
-    public function contentType();
+    public function contentType(): string;
 }

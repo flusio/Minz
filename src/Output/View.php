@@ -31,7 +31,7 @@ class View implements Output
 
     private string $filepath;
 
-    private ?string $content_type = null;
+    private string $content_type;
 
     /** @var ViewPointer */
     private string $pointer;
@@ -108,7 +108,7 @@ class View implements Output
         $this->filepath = $filepath;
     }
 
-    public function contentType(): ?string
+    public function contentType(): string
     {
         return $this->content_type;
     }
@@ -118,6 +118,8 @@ class View implements Output
      */
     public function setContentType(string $pointer): void
     {
+        $this->content_type = 'text/html';
+
         foreach (self::$extensions_to_content_types as $ext => $content_type) {
             $ext_length = strlen($ext);
             $ends_with_extension = substr($pointer, -$ext_length, $ext_length) === $ext;

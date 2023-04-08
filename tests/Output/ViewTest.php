@@ -63,7 +63,7 @@ class ViewTest extends TestCase
     {
         $view = new View('rabbits/items.nope');
 
-        $this->assertNull($view->contentType());
+        $this->assertSame('text/html', $view->contentType());
     }
 
     public function testContentTypeWithOverwrittenExtToContentType(): void
