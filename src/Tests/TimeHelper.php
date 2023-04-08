@@ -21,11 +21,8 @@ trait TimeHelper
         \Minz\Time::unfreeze();
     }
 
-    /**
-     * @param \DateTime|integer $timestamp
-     */
-    public function freeze(mixed $timestamp): void
+    public function freeze(\DateTimeInterface $datetime): void
     {
-        \Minz\Time::freeze($timestamp);
+        \Minz\Time::freeze($datetime);
     }
 }
