@@ -3,23 +3,21 @@
 namespace Minz;
 
 /**
- * Wrapper around `date_create()` function, to provide test capabilities.
+ * Wrapper around DateTime, to provide test capabilities.
+ *
+ * @author Marien Fressinaud <dev@marienfressinaud.fr>
+ * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Time
 {
-    /** @var \DateTime|integer|null */
-    public static mixed $freezed_timestamp = null;
+    public static ?\DateTimeImmutable $freezed_now = null;
 
-    public static function now(): \DateTime
+    public static function now(): \DateTimeImmutable
     {
-        if (self::$freezed_timestamp && is_int(self::$freezed_timestamp)) {
-            $date = new \DateTime();
-            $date->setTimestamp(self::$freezed_timestamp);
-            return $date;
-        } elseif (self::$freezed_timestamp && self::$freezed_timestamp instanceof \DateTime) {
-            return clone self::$freezed_timestamp;
+        if (self::$freezed_now) {
+            return self::$freezed_now;
         } else {
-            return new \DateTime('now');
+            return new \DateTimeImmutable('now');
         }
     }
 
@@ -29,11 +27,9 @@ class Time
      * @see https://www.php.net/manual/datetime.modify.php
      * @see https://www.php.net/manual/datetime.formats.relative.php
      */
-    public static function relative(string $modifier): \DateTime
+    public static function relative(string $modifier): \DateTimeImmutable
     {
-        $datetime = self::now();
-        $datetime->modify($modifier);
-        return $datetime;
+        return self::now()->modify($modifier);
     }
 
     /**
@@ -41,7 +37,7 @@ class Time
      *
      * @see https://www.php.net/manual/en/datetime.formats.relative.php
      */
-    public static function fromNow(int $number, string $unit): \DateTime
+    public static function fromNow(int $number, string $unit): \DateTimeImmutable
     {
         return self::relative("+{$number} {$unit}");
     }
@@ -51,7 +47,7 @@ class Time
      *
      * @see https://www.php.net/manual/en/datetime.formats.relative.php
      */
-    public static function ago(int $number, string $unit): \DateTime
+    public static function ago(int $number, string $unit): \DateTimeImmutable
     {
         return self::relative("-{$number} {$unit}");
     }
@@ -66,13 +62,8 @@ class Time
      */
     public static function sleep(int $seconds): bool
     {
-        if (self::$freezed_timestamp && is_int(self::$freezed_timestamp)) {
-            self::$freezed_timestamp += $seconds;
-            return true;
-        } elseif (self::$freezed_timestamp && self::$freezed_timestamp instanceof \DateTime) {
-            $new_freezed_timestamp = clone self::$freezed_timestamp;
-            $new_freezed_timestamp->modify("+{$seconds} seconds");
-            self::$freezed_timestamp = $new_freezed_timestamp;
+        if (self::$freezed_now) {
+            self::$freezed_now = self::$freezed_now->modify("+{$seconds} seconds");
             return true;
         } else {
             return sleep($seconds) === 0;
@@ -80,13 +71,11 @@ class Time
     }
 
     /**
-     * Freeze the time at a given datetime (can also be a timestamp)
-     *
-     * @param \DateTime|integer $datetime
+     * Freeze the time at a given datetime
      */
-    public static function freeze(mixed $datetime): void
+    public static function freeze(\DateTimeInterface $datetime): void
     {
-        self::$freezed_timestamp = $datetime;
+        self::$freezed_now = \DateTimeImmutable::createFromInterface($datetime);
     }
 
     /**
@@ -94,6 +83,6 @@ class Time
      */
     public static function unfreeze(): void
     {
-        self::$freezed_timestamp = null;
+        self::$freezed_now = null;
     }
 }
