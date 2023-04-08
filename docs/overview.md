@@ -33,8 +33,6 @@ Minz.** You’ll often have to interact with them.
 - [`\Minz\Engine`](/src/Engine.php) does the plumbing of your application,
   executing a controller action based on a given request and returning its
   response;
-    - [`\Minz\ActionController`](/src/ActionController.php) is used by the
-      engine to execute the action, you’ll probably never interact with it.
 
 **To learn how to use these classes, [read the “getting started” guide.](/docs/getting_started.md)**
 

@@ -9,7 +9,7 @@ class EngineTest extends TestCase
     public function testRun(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#items');
+        $router->addRoute('GET', '/rabbits', 'Rabbits#items');
         \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits');
 
@@ -27,7 +27,7 @@ class EngineTest extends TestCase
     public function testRunWithParamInRoute(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits/:id', 'rabbits#show');
+        $router->addRoute('GET', '/rabbits/:id', 'Rabbits#show');
         \Minz\Engine::init($router);
         $request = new \Minz\Request('GET', '/rabbits/42');
 
@@ -41,7 +41,7 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfRouteNotFound(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#items');
+        $router->addRoute('GET', '/rabbits', 'Rabbits#items');
         \Minz\Engine::init($router, [
             'not_found_view_pointer' => 'not_found.phtml',
         ]);
@@ -59,7 +59,7 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfControllerFileIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits', 'missing#items');
+        $router->addRoute('GET', '/rabbits', 'Missing#items');
         \Minz\Engine::init($router, [
             'internal_server_error_view_pointer' => 'internal_server_error.phtml',
         ]);
@@ -77,7 +77,7 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfActionIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#missing');
+        $router->addRoute('GET', '/rabbits', 'Rabbits#missing');
         \Minz\Engine::init($router, [
             'internal_server_error_view_pointer' => 'internal_server_error.phtml',
         ]);
@@ -95,7 +95,7 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfViewFileIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#missingViewFile');
+        $router->addRoute('GET', '/rabbits', 'Rabbits#missingViewFile');
         \Minz\Engine::init($router, [
             'internal_server_error_view_pointer' => 'internal_server_error.phtml',
         ]);

@@ -80,7 +80,7 @@ class Engine
 
         try {
             list(
-                $to,
+                $route_pointer,
                 $parameters
             ) = self::$router->match($request->method(), $request->path());
         } catch (Errors\RouteNotFoundError $e) {
@@ -92,12 +92,56 @@ class Engine
         }
 
         try {
-            $action_controller = new ActionController($to, self::$options['controller_namespace']);
-            return $action_controller->execute($request);
+            return self::executeRoutePointer($route_pointer, $request);
         } catch (\Exception $e) {
             Log::error((string)$e);
             return self::internalServerErrorResponse($e);
         }
+    }
+
+    /**
+     * @return \Generator|Response
+     */
+    private static function executeRoutePointer(string $route_pointer, Request $request): mixed
+    {
+        $namespace = self::$options['controller_namespace'];
+
+        list($controller_name, $action_name) = explode('#', $route_pointer);
+        $controller_name = str_replace('/', '\\', $controller_name);
+
+        if ($namespace === null) {
+            $app_name = Configuration::$app_name;
+            $namespace = "\\{$app_name}";
+        }
+
+        $namespaced_controller = "{$namespace}\\{$controller_name}";
+
+        try {
+            $controller = new $namespaced_controller();
+        } catch (\Error $e) {
+            throw new Errors\ControllerError(
+                "{$namespaced_controller} controller class cannot be found."
+            );
+        }
+
+        if (!is_callable([$controller, $action_name])) {
+            throw new Errors\ActionError(
+                "{$action_name} action cannot be called on {$namespaced_controller} controller."
+            );
+        }
+
+        $response = $controller->$action_name($request);
+
+        // Response can be yield, but in this case, its up to the developer to
+        // check what is yield. I would not recommend to use that (it's not
+        // even tested!), but eh, it can be convenient :)
+        if (!($response instanceof Response) && !($response instanceof \Generator)) {
+            throw new Errors\ActionError(
+                "{$action_name} action in {$namespaced_controller} controller does not return a Response."
+            );
+        }
+
+        return $response;
     }
 
     private static function notFoundResponse(\Exception $error): Response
