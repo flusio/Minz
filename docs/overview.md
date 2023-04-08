@@ -44,6 +44,16 @@ Minz.** You’ll often have to interact with them.
   database, it acts as a wrapper around the PHP [\PDO class](https://www.php.net/manual/book.pdo.php);
 - [`\Minz\Migrator`](/src/Migrator.php) manages migrations of your data (not
   only from the database!)
+- [`\Minz\Validable`](/src/Validable.php) a trait to validate the models
+  properties values. It is used alongside with `Check`s:
+    - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
+      extended by the other classes;
+    - [`\Minz\Validable\Format`](/src/Validable/Format.php) allows to check the
+      format of a string;
+    - [`\Minz\Validable\Length`](/src/Validable/Length.php) allows to check the
+      min and/or max length of a string;
+    - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check
+      that a property is present (not null nor an empty string).
 
 ## Additional classes
 

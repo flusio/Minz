@@ -20,7 +20,6 @@ class ModelTest extends TestCase
             'id' => [
                 'type' => 'integer',
                 'required' => false,
-                'validator' => null,
                 'computed' => false,
             ],
         ], $property_declarations);
@@ -41,26 +40,22 @@ class ModelTest extends TestCase
             'integer' => [
                 'type' => 'integer',
                 'required' => false,
-                'validator' => null,
                 'computed' => false,
             ],
             'string' => [
                 'type' => 'string',
                 'required' => false,
-                'validator' => null,
                 'computed' => false,
             ],
             'datetime' => [
                 'type' => 'datetime',
                 'required' => false,
-                'validator' => null,
                 'computed' => false,
                 'format' => Model::DATETIME_FORMAT,
             ],
             'boolean' => [
                 'type' => 'boolean',
                 'required' => false,
-                'validator' => null,
                 'computed' => false,
             ],
         ], $property_declarations);
@@ -75,18 +70,6 @@ class ModelTest extends TestCase
         Model::declareProperties(
             models\BadType::class,
             models\BadType::PROPERTIES
-        );
-    }
-
-    public function testPropertyDeclarationsFailsIfValidatorIsUncallable(): void
-    {
-        $this->expectException(Errors\ModelPropertyError::class);
-        $this->expectExceptionCode(Model::ERROR_PROPERTY_VALIDATOR_INVALID);
-        $this->expectExceptionMessage('`not_callable` validator cannot be called.');
-
-        Model::declareProperties(
-            models\BadValidator::class,
-            models\BadValidator::PROPERTIES
         );
     }
 
@@ -310,175 +293,5 @@ class ModelTest extends TestCase
         $model = new models\ValidPropertyTypes();
 
         $model->fromValues(['not_a_property' => 'foo']);
-    }
-
-    public function testValidateReturnsNoErrorsIfValid(): void
-    {
-        $model = new models\Validator();
-        $model->status = 'new';
-
-        $errors = $model->validate();
-
-        $this->assertEmpty($errors);
-    }
-
-    public function testValidateReturnsErrorIfRequiredPropertyIsNull(): void
-    {
-        $model = new models\Required();
-        $model->id = null;
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'id' => [
-                    'code' => Model::ERROR_REQUIRED,
-                    'description' => 'Required `id` property is missing.',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateReturnsErrorIfRequiredStringPropertyIsEmpty(): void
-    {
-        $model = new models\Required();
-        $model->id = '';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'id' => [
-                    'code' => Model::ERROR_REQUIRED,
-                    'description' => 'Required `id` property is missing.',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateReturnsErrorIfIntegerTypeDoesNotMatch(): void
-    {
-        $model = new models\ValidPropertyTypes();
-        $model->integer = 'not an integer';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'integer' => [
-                    'code' => Model::ERROR_VALUE_TYPE_INVALID,
-                    'description' => '`integer` property must be an integer.',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateReturnsErrorIfDatetimeTypeDoesNotMatch(): void
-    {
-        $model = new models\ValidPropertyTypes();
-        $model->datetime = 'not a datetime';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'datetime' => [
-                    'code' => Model::ERROR_VALUE_TYPE_INVALID,
-                    'description' => '`datetime` property must be a \DateTime.',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateReturnsErrorIfBooleanTypeDoesNotMatch(): void
-    {
-        $model = new models\ValidPropertyTypes();
-        $model->boolean = 'not a boolean';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'boolean' => [
-                    'code' => Model::ERROR_VALUE_TYPE_INVALID,
-                    'description' => '`boolean` property must be a boolean.',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateReturnsErrorIfValidatorReturnsFalse(): void
-    {
-        $model = new models\Validator();
-        $model->status = 'not valid';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'status' => [
-                    'code' => Model::ERROR_VALUE_INVALID,
-                    'description' => '`status` property is invalid (not valid).',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateReturnsErrorIfValidatorReturnsCustomMessage(): void
-    {
-        $model = new models\ValidatorMessage();
-        $model->status = 'not valid';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'status' => [
-                    'code' => Model::ERROR_VALUE_INVALID,
-                    'description' => 'must be either new or finished',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateCanReturnSeveralErrors(): void
-    {
-        $model = new models\Friend();
-        $model->id = 'an id';
-        $model->created_at = null;
-        $model->name = 'not valid';
-
-        $errors = $model->validate();
-
-        $this->assertSame(
-            [
-                'created_at' => [
-                    'code' => Model::ERROR_REQUIRED,
-                    'description' => 'Required `created_at` property is missing.',
-                ],
-                'name' => [
-                    'code' => Model::ERROR_VALUE_INVALID,
-                    'description' => '`name` property is invalid (not valid).',
-                ],
-            ],
-            $errors
-        );
-    }
-
-    public function testValidateDoesNotCallValidatorIfStringValueIsEmpty(): void
-    {
-        $model = new models\Validator();
-        $model->status = '';
-
-        $errors = $model->validate();
-
-        $this->assertEmpty($errors);
     }
 }

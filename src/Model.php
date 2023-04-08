@@ -33,7 +33,7 @@ namespace Minz;
  * where keys are property names, and the values their declarations. A
  * declaration can be a simple string defining a type (string, integer,
  * datetime or boolean), or an array with a required `type` key and optional
- * `required`, `validator` and `format` keys. For example:
+ * `required`, and `format` keys. For example:
  *
  *     [
  *         'id' => 'integer',
@@ -51,19 +51,11 @@ namespace Minz;
  *         'status' => [
  *             'type' => 'string',
  *             'required' => true,
- *             'validator' => '\MyApp\models\MyModel::validateStatus',
  *         ],
  *     ]
  *
  * The format option can only be used on datetime properties and handles the
  * format in database. It's set to Model::DATETIME_FORMAT by default.
- *
- * A validator must return true if the value is correct, or false otherwise. It
- * also can return a string to detail the reason of the error.
- *
- * A model can be validated then:
- *
- *     $errors = $my_model->validate();
  *
  * Finally, a property can be computed from the database (e.g. to count related
  * items for instance), in which case we might want the `fromValues()` method
@@ -79,7 +71,6 @@ namespace Minz;
  * @phpstan-type PropertyDeclaration array{
  *     'type': value-of<Model::VALID_PROPERTY_TYPES>,
  *     'required': bool,
- *     'validator': ?callable,
  *     'computed': bool,
  *     'format'?: string,
  * }
@@ -102,12 +93,8 @@ class Model
     // @see https://www.postgresql.org/docs/current/datatype-datetime.html#DATATYPE-DATETIME-OUTPUT
     public const DATETIME_FORMAT = 'Y-m-d H:i:sP';
 
-    public const ERROR_REQUIRED = 'required';
-    public const ERROR_VALUE_TYPE_INVALID = 'value_type_invalid';
-    public const ERROR_VALUE_INVALID = 'value_invalid';
     public const ERROR_PROPERTY_UNDECLARED = 'property_undeclared';
     public const ERROR_PROPERTY_TYPE_INVALID = 'property_type_invalid';
-    public const ERROR_PROPERTY_VALIDATOR_INVALID = 'property_validator_invalid';
 
     /**
      * Cache the property declarations of models
@@ -134,15 +121,13 @@ class Model
      * Declare properties of the given model.
      *
      * The $properties var can be incomplete (a string only, or without the
-     * required or validator options). This method checks the properties are
-     * valid and cache the complete declarations.
+     * required). This method checks the properties are valid and cache the
+     * complete declarations.
      *
      * @param array<string, mixed> $properties
      *
      * @throws \Minz\Errors\ModelPropertyError
      *     If a type is invalid
-     * @throws \Minz\Errors\ModelPropertyError
-     *     If validator is declared but cannot be called
      **/
     public static function declareProperties(string $model_class_name, array $properties): void
     {
@@ -161,17 +146,6 @@ class Model
             }
 
             if (
-                isset($declaration['validator']) &&
-                !is_callable($declaration['validator'])
-            ) {
-                throw new Errors\ModelPropertyError(
-                    $property,
-                    self::ERROR_PROPERTY_VALIDATOR_INVALID,
-                    "`{$declaration['validator']}` validator cannot be called."
-                );
-            }
-
-            if (
                 $declaration['type'] === 'datetime' &&
                 !isset($declaration['format'])
             ) {
@@ -181,7 +155,6 @@ class Model
             $clean_declaration = [
                 'type' => $declaration['type'],
                 'required' => $declaration['required'] ?? false,
-                'validator' => $declaration['validator'] ?? null,
                 'computed' => $declaration['computed'] ?? false,
             ];
 
@@ -285,83 +258,5 @@ class Model
 
             $this->$property = $value;
         }
-    }
-
-    /**
-     * Return the errors of the model by checking its values against the declarations.
-     *
-     * The array is empty if there are no errors.
-     *
-     * Otherwise, the array is indexed by the properties names and the values
-     * are arrays with a `code` (the \Minz\Model::ERROR_* constants) and a
-     * `description`.
-     *
-     * @return array<string, array{
-     *     'code': self::ERROR_*,
-     *     'description': string,
-     * }>
-     */
-    public function validate(): array
-    {
-        $errors = [];
-        foreach (self::propertyDeclarations(get_called_class()) as $property => $declaration) {
-            $type = $declaration['type'];
-            $value = $this->$property;
-
-            $is_empty = !isset($value) || ($type === 'string' && empty($value));
-            if ($declaration['required'] && $is_empty) {
-                $errors[$property] = [
-                    'code' => self::ERROR_REQUIRED,
-                    'description' => "Required `{$property}` property is missing.",
-                ];
-                continue;
-            }
-
-            if (!$is_empty) {
-                if ($type === 'integer' && !is_int($value)) {
-                    $errors[$property] = [
-                        'code' => self::ERROR_VALUE_TYPE_INVALID,
-                        'description' => "`{$property}` property must be an integer.",
-                    ];
-                    continue;
-                }
-
-                if ($type === 'datetime' && !($value instanceof \DateTime)) {
-                    $errors[$property] = [
-                        'code' => self::ERROR_VALUE_TYPE_INVALID,
-                        'description' => "`{$property}` property must be a \DateTime.",
-                    ];
-                    continue;
-                }
-
-                if ($type === 'boolean' && !is_bool($value)) {
-                    $errors[$property] = [
-                        'code' => self::ERROR_VALUE_TYPE_INVALID,
-                        'description' => "`{$property}` property must be a boolean.",
-                    ];
-                    continue;
-                }
-
-                if ($declaration['validator']) {
-                    $validator_result = $declaration['validator']($value);
-
-                    if ($validator_result !== true) {
-                        if ($validator_result === false) {
-                            $error_message = "`{$property}` property is invalid ({$value}).";
-                        } else {
-                            $error_message = $validator_result;
-                        }
-
-                        $errors[$property] = [
-                            'code' => self::ERROR_VALUE_INVALID,
-                            'description' => $error_message,
-                        ];
-                        continue;
-                    }
-                }
-            }
-        }
-
-        return $errors;
     }
 }
