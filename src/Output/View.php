@@ -121,8 +121,7 @@ class View implements Output
         $this->content_type = 'text/html';
 
         foreach (self::$extensions_to_content_types as $ext => $content_type) {
-            $ext_length = strlen($ext);
-            $ends_with_extension = substr($pointer, -$ext_length, $ext_length) === $ext;
+            $ends_with_extension = str_ends_with($pointer, $ext);
             if ($ends_with_extension) {
                 $this->content_type = $content_type;
             }

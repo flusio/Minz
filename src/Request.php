@@ -251,10 +251,7 @@ class Request
         // from the beginning of the request path because routes are relative
         // to the url_options path.
         $url_options_path = Configuration::$url_options['path'];
-        if (
-            $url_options_path !== '/' &&
-            substr($path, 0, strlen($url_options_path)) === $url_options_path
-        ) {
+        if ($url_options_path !== '/' && str_starts_with($path, $url_options_path)) {
             $path = substr($path, strlen($url_options_path));
         }
 

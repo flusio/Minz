@@ -124,9 +124,9 @@ spl_autoload_register(
         $app_path = __DIR__;
         $lib_path = $app_path . '/lib';
 
-        if (strpos($class_name, 'Minz') === 0) {
+        if (str_starts_with($class_name, 'Minz')) {
             include $lib_path . '/Minz/autoload.php';
-        } elseif (strpos($class_name, $app_namespace) === 0) {
+        } elseif (str_starts_with($class_name, $app_namespace)) {
             $class_name = substr($class_name, strlen($app_namespace) + 1);
             $class_path = str_replace('\\', '/', $class_name) . '.php';
             include $app_path . '/src/' . $class_path;
