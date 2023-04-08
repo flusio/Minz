@@ -9,9 +9,9 @@ class EngineTest extends TestCase
     public function testRun(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#items');
+        $router->addRoute('GET', '/rabbits', 'rabbits#items');
         $engine = new \Minz\Engine($router);
-        $request = new \Minz\Request('get', '/rabbits');
+        $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
         $response = $engine->run($request);
@@ -27,9 +27,9 @@ class EngineTest extends TestCase
     public function testRunWithParamInRoute(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#show');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#show');
         $engine = new \Minz\Engine($router);
-        $request = new \Minz\Request('get', '/rabbits/42');
+        $request = new \Minz\Request('GET', '/rabbits/42');
 
         /** @var Response */
         $response = $engine->run($request);
@@ -41,9 +41,9 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfRouteNotFound(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#items');
+        $router->addRoute('GET', '/rabbits', 'rabbits#items');
         $engine = new \Minz\Engine($router);
-        $request = new \Minz\Request('get', '/not-found');
+        $request = new \Minz\Request('GET', '/not-found');
 
         /** @var Response */
         $response = $engine->run($request, [
@@ -59,9 +59,9 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfControllerFileIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'missing#items');
+        $router->addRoute('GET', '/rabbits', 'missing#items');
         $engine = new \Minz\Engine($router);
-        $request = new \Minz\Request('get', '/rabbits');
+        $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
         $response = $engine->run($request, [
@@ -77,9 +77,9 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfActionIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#missing');
+        $router->addRoute('GET', '/rabbits', 'rabbits#missing');
         $engine = new \Minz\Engine($router);
-        $request = new \Minz\Request('get', '/rabbits');
+        $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
         $response = $engine->run($request, [
@@ -95,9 +95,9 @@ class EngineTest extends TestCase
     public function testRunReturnsErrorIfViewFileIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#missingViewFile');
+        $router->addRoute('GET', '/rabbits', 'rabbits#missingViewFile');
         $engine = new \Minz\Engine($router);
-        $request = new \Minz\Request('get', '/rabbits');
+        $request = new \Minz\Request('GET', '/rabbits');
 
         /** @var Response */
         $response = $engine->run($request, [

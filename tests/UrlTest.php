@@ -30,7 +30,7 @@ class UrlTest extends TestCase
     public function testFor(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::for('rabbits#list');
@@ -41,7 +41,7 @@ class UrlTest extends TestCase
     public function testForWithName(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list', 'rabbits');
         Url::setRouter($router);
 
         $url = Url::for('rabbits');
@@ -67,7 +67,7 @@ class UrlTest extends TestCase
     public function testForWithParams(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::for('rabbits#list', ['id' => 42]);
@@ -78,7 +78,7 @@ class UrlTest extends TestCase
     public function testForWithAdditionalParams(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::for('rabbits#list', ['id' => 42]);
@@ -91,7 +91,7 @@ class UrlTest extends TestCase
         Configuration::$url_options['path'] = '/path';
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::for('rabbits#list');
@@ -130,7 +130,7 @@ class UrlTest extends TestCase
         $this->expectExceptionMessage('Required `id` parameter is missing.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#list');
         Url::setRouter($router);
 
         Url::for('rabbits#list');
@@ -141,7 +141,7 @@ class UrlTest extends TestCase
         Configuration::$url_options['host'] = 'my-domain.com';
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::absoluteFor('rabbits#list');
@@ -161,7 +161,7 @@ class UrlTest extends TestCase
         Configuration::$url_options['protocol'] = $protocol;
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::absoluteFor('rabbits#list');
@@ -175,7 +175,7 @@ class UrlTest extends TestCase
         Configuration::$url_options['port'] = 8080;
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::absoluteFor('rabbits#list');
@@ -189,7 +189,7 @@ class UrlTest extends TestCase
         Configuration::$url_options['path'] = '/path';
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         Url::setRouter($router);
 
         $url = Url::absoluteFor('rabbits#list');
@@ -203,12 +203,12 @@ class UrlTest extends TestCase
     public function methodProvider(): array
     {
         return [
-            ['get'],
-            ['post'],
-            ['patch'],
-            ['put'],
-            ['delete'],
-            ['cli'],
+            ['GET'],
+            ['POST'],
+            ['PATCH'],
+            ['PUT'],
+            ['DELETE'],
+            ['CLI'],
         ];
     }
 

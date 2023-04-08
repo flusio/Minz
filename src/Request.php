@@ -118,7 +118,7 @@ namespace Minz;
  */
 class Request
 {
-    public const VALID_METHODS = ['get', 'post', 'patch', 'put', 'delete', 'cli'];
+    public const VALID_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'CLI'];
 
     /** @var RequestMethod */
     private string $method;
@@ -177,21 +177,6 @@ class Request
      */
     public function __construct(string $method, string $uri, array $parameters = [], array $headers = [])
     {
-        // Note: $method is not always one of the valid methods, even if the
-        // declaration says so. Later, we'll ask for a valid method, then we’ll
-        // be able to delete the next few lines.
-        // @phpstan-ignore-next-line
-        if ($method) {
-            $method = strtolower($method);
-        }
-
-        if (!in_array($method, self::VALID_METHODS)) {
-            $methods_as_string = implode(', ', self::VALID_METHODS);
-            throw new Errors\RequestError(
-                "`{$method}` method is invalid (accepted methods: {$methods_as_string})."
-            );
-        }
-
         if (!$uri) {
             throw new Errors\RequestError('URI cannot be empty.');
         }

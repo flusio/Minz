@@ -8,26 +8,12 @@ class RequestTest extends TestCase
 {
     use Tests\FilesHelper;
 
-    /**
-     * @dataProvider invalidMethodProvider
-     */
-    public function testConstructorFailsIfInvalidMethod(?string $invalidMethod): void
-    {
-        $this->expectException(Errors\RequestError::class);
-        $this->expectExceptionMessage(
-            "`{$invalidMethod}` method is invalid (accepted methods: get, post, patch, put, delete, cli)."
-        );
-
-        // @phpstan-ignore-next-line
-        new Request($invalidMethod, '/');
-    }
-
     public function testConstructorFailsIfUriIsEmpty(): void
     {
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('URI cannot be empty.');
 
-        new Request('get', '');
+        new Request('GET', '');
     }
 
     public function testConstructorFailsIfUriIsInvalid(): void
@@ -36,7 +22,7 @@ class RequestTest extends TestCase
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage("{$invalid_uri} URI path cannot be parsed.");
 
-        new Request('get', $invalid_uri);
+        new Request('GET', $invalid_uri);
     }
 
     public function testConstructorFailsIfUriPathDoesntStartWithSlash(): void
@@ -44,16 +30,16 @@ class RequestTest extends TestCase
         $this->expectException(Errors\RequestError::class);
         $this->expectExceptionMessage('no_slash URI path must start with a slash.');
 
-        new Request('get', 'no_slash');
+        new Request('GET', 'no_slash');
     }
 
     public function testMethod(): void
     {
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
 
         $method = $request->method();
 
-        $this->assertSame('get', $method);
+        $this->assertSame('GET', $method);
     }
 
     /**
@@ -61,7 +47,7 @@ class RequestTest extends TestCase
      */
     public function testPath(string $requestUri, string $expectedPath): void
     {
-        $request = new Request('get', $requestUri);
+        $request = new Request('GET', $requestUri);
 
         $path = $request->path();
 
@@ -72,7 +58,7 @@ class RequestTest extends TestCase
     {
         $old_url_path = \Minz\Configuration::$url_options['path'];
         \Minz\Configuration::$url_options['path'] = '/minz';
-        $request = new Request('get', '/minz/rabbits');
+        $request = new Request('GET', '/minz/rabbits');
 
         $path = $request->path();
 
@@ -83,7 +69,7 @@ class RequestTest extends TestCase
 
     public function testParam(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => 'bar'
         ]);
 
@@ -94,7 +80,7 @@ class RequestTest extends TestCase
 
     public function testParamWithDefaultValue(): void
     {
-        $request = new Request('get', '/', []);
+        $request = new Request('GET', '/', []);
 
         $foo = $request->param('foo', 'bar');
 
@@ -103,7 +89,7 @@ class RequestTest extends TestCase
 
     public function testParamBoolean(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => 'true'
         ]);
 
@@ -114,7 +100,7 @@ class RequestTest extends TestCase
 
     public function testParamBooleanWithDefaultValue(): void
     {
-        $request = new Request('get', '/', []);
+        $request = new Request('GET', '/', []);
 
         $foo = $request->paramBoolean('foo', true);
 
@@ -123,7 +109,7 @@ class RequestTest extends TestCase
 
     public function testParamInteger(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => '42'
         ]);
 
@@ -134,7 +120,7 @@ class RequestTest extends TestCase
 
     public function testParamIntegerWithDefaultValue(): void
     {
-        $request = new Request('get', '/', []);
+        $request = new Request('GET', '/', []);
 
         $foo = $request->paramInteger('foo', 42);
 
@@ -143,7 +129,7 @@ class RequestTest extends TestCase
 
     public function testParamArray(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => ['bar' => 'baz'],
         ]);
 
@@ -156,7 +142,7 @@ class RequestTest extends TestCase
 
     public function testParamArrayWithDefaultValue(): void
     {
-        $request = new Request('get', '/', []);
+        $request = new Request('GET', '/', []);
 
         $foo = $request->paramArray('foo', ['spam' => 'egg']);
 
@@ -165,7 +151,7 @@ class RequestTest extends TestCase
 
     public function testParamArrayWithDefaultValueMergesValues(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => ['bar' => 'baz'],
         ]);
 
@@ -180,7 +166,7 @@ class RequestTest extends TestCase
     public function testParamWithNonArrayValue(): void
     {
         // here, we set foo as a simple string (i.e. bar)
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => 'bar',
         ]);
 
@@ -194,7 +180,7 @@ class RequestTest extends TestCase
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
         $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => [
                 'tmp_name' => $tmp_filepath,
                 'error' => UPLOAD_ERR_OK,
@@ -210,7 +196,7 @@ class RequestTest extends TestCase
 
     public function testParamFileReturnsNullIfFileInvalid(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => 'bar',
         ]);
 
@@ -221,7 +207,7 @@ class RequestTest extends TestCase
 
     public function testParamFileReturnsNullIfParamIsMissing(): void
     {
-        $request = new Request('get', '/', []);
+        $request = new Request('GET', '/', []);
 
         $foo = $request->paramFile('foo');
 
@@ -230,7 +216,7 @@ class RequestTest extends TestCase
 
     public function testSetParam(): void
     {
-        $request = new Request('get', '/', [
+        $request = new Request('GET', '/', [
             'foo' => 'bar'
         ]);
 
@@ -245,7 +231,7 @@ class RequestTest extends TestCase
      */
     public function testIsAccepting(string $header, string $media, bool $expected): void
     {
-        $request = new Request('get', '/', [], [
+        $request = new Request('GET', '/', [], [
             'HTTP_ACCEPT' => $header,
         ]);
 
@@ -257,7 +243,7 @@ class RequestTest extends TestCase
     public function testIsAcceptingWithNoAcceptHeader(): void
     {
         // Equivalent to */*
-        $request = new Request('get', '/', [], []);
+        $request = new Request('GET', '/', [], []);
 
         $is_accepting = $request->isAccepting('text/html');
 
@@ -266,7 +252,7 @@ class RequestTest extends TestCase
 
     public function testHeader(): void
     {
-        $request = new Request('get', '/', [], [
+        $request = new Request('GET', '/', [], [
             'SERVER_PROTOCOL' => 'HTTP/1.1',
         ]);
 
@@ -277,7 +263,7 @@ class RequestTest extends TestCase
 
     public function testHeaderWithDefaultValue(): void
     {
-        $request = new Request('get', '/', [], []);
+        $request = new Request('GET', '/', [], []);
 
         $protocol = $request->header('SERVER_PROTOCOL', 'foo');
 
@@ -286,7 +272,7 @@ class RequestTest extends TestCase
 
     public function testCookie(): void
     {
-        $request = new Request('get', '/', [], [
+        $request = new Request('GET', '/', [], [
             'COOKIE' => [
                 'foo' => 'bar',
             ],
@@ -299,7 +285,7 @@ class RequestTest extends TestCase
 
     public function testCookieWithDefaultValue(): void
     {
-        $request = new Request('get', '/', [], []);
+        $request = new Request('GET', '/', [], []);
 
         $foo = $request->cookie('foo', 'baz');
 
@@ -326,19 +312,6 @@ class RequestTest extends TestCase
             ['http://domain.com//rabbits', '//rabbits'],
             ['http://domain.com/rabbits?id=42', '/rabbits'],
             ['http://domain.com/rabbits#hash', '/rabbits'],
-        ];
-    }
-
-    /**
-     * @return array<array{?string}>
-     */
-    public function invalidMethodProvider(): array
-    {
-        return [
-            [''],
-            ['invalid'],
-            ['postpost'],
-            [' get'],
         ];
     }
 

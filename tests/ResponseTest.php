@@ -240,7 +240,7 @@ class ResponseTest extends TestCase
     public function testRedirect(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#items');
+        $router->addRoute('GET', '/rabbits', 'rabbits#items');
         Url::setRouter($router);
 
         $response = Response::redirect('rabbits#items');

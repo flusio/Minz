@@ -27,7 +27,7 @@ class ViewHelpersTest extends TestCase
     public function testUrl(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         \Minz\Url::setRouter($router);
 
         $url = ViewHelpers::url('rabbits#list', ['foo' => 'bar', 'spam' => 'egg']);
@@ -38,7 +38,7 @@ class ViewHelpersTest extends TestCase
     public function testUrlFull(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
         \Minz\Url::setRouter($router);
 
         $url = ViewHelpers::urlFull('rabbits#list', ['foo' => 'bar', 'spam' => 'egg']);

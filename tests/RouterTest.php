@@ -19,11 +19,11 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
         $routes = $router->routes();
         $this->assertSame([
-            'get' => [
+            'GET' => [
                 '/rabbits' => 'rabbits#list',
             ],
         ], $routes);
@@ -33,11 +33,11 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->addRoute('cli', '/rabbits', 'rabbits#list');
+        $router->addRoute('CLI', '/rabbits', 'rabbits#list');
 
         $routes = $router->routes();
         $this->assertSame([
-            'cli' => [
+            'CLI' => [
                 '/rabbits' => 'rabbits#list',
             ],
         ], $routes);
@@ -50,7 +50,7 @@ class RouterTest extends TestCase
 
         $router = new Router();
 
-        $router->addRoute('get', 'rabbits', 'rabbits#list');
+        $router->addRoute('GET', 'rabbits', 'rabbits#list');
     }
 
     public function testAddRouteFailsIfToDoesntContainHash(): void
@@ -60,7 +60,7 @@ class RouterTest extends TestCase
 
         $router = new Router();
 
-        $router->addRoute('get', '/rabbits', 'rabbits_list');
+        $router->addRoute('GET', '/rabbits', 'rabbits_list');
     }
 
     public function testAddRouteFailsIfToContainsMoreThanOneHash(): void
@@ -72,7 +72,7 @@ class RouterTest extends TestCase
 
         $router = new Router();
 
-        $router->addRoute('get', '/rabbits', 'rabbits#list#more');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list#more');
     }
 
     /**
@@ -82,7 +82,7 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalidMethod} method is invalid (get, post, patch, put, delete, cli)."
+            "{$invalidMethod} method is invalid (GET, POST, PATCH, PUT, DELETE, CLI)."
         );
 
         $router = new Router();
@@ -94,12 +94,12 @@ class RouterTest extends TestCase
     public function testMatch(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
         list(
             $action_pointer,
             $parameters
-        ) = $router->match('get', '/rabbits');
+        ) = $router->match('GET', '/rabbits');
 
         $this->assertSame('rabbits#list', $action_pointer);
         $this->assertSame([
@@ -110,12 +110,12 @@ class RouterTest extends TestCase
     public function testMatchWithTrailingSlashes(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
         list(
             $action_pointer,
             $parameters,
-        ) = $router->match('get', '/rabbits//');
+        ) = $router->match('GET', '/rabbits//');
 
         $this->assertSame('rabbits#list', $action_pointer);
         $this->assertSame([
@@ -126,12 +126,12 @@ class RouterTest extends TestCase
     public function testMatchWithParam(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#get');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#get');
 
         list(
             $action_pointer,
             $parameters
-        ) = $router->match('get', '/rabbits/42');
+        ) = $router->match('GET', '/rabbits/42');
 
         $this->assertSame('rabbits#get', $action_pointer);
         $this->assertSame([
@@ -143,12 +143,12 @@ class RouterTest extends TestCase
     public function testMatchWithWildcard(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/assets/*', 'assets#serve');
+        $router->addRoute('GET', '/assets/*', 'assets#serve');
 
         list(
             $action_pointer,
             $parameters
-        ) = $router->match('get', '/assets/path/to/an/asset.css');
+        ) = $router->match('GET', '/assets/path/to/an/asset.css');
 
         $this->assertSame('assets#serve', $action_pointer);
         $this->assertSame([
@@ -160,45 +160,45 @@ class RouterTest extends TestCase
     public function testMatchFailsIfPatternIsLongerThanPath(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
-        $this->expectExceptionMessage('Path "get /rabbits" doesn’t match any route.');
+        $this->expectExceptionMessage('Path "GET /rabbits" doesn’t match any route.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#show');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#show');
 
-        $router->match('get', '/rabbits');
+        $router->match('GET', '/rabbits');
     }
 
     public function testMatchFailsIfNotMatchingMethod(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
-        $this->expectExceptionMessage('Path "post /rabbits" doesn’t match any route.');
+        $this->expectExceptionMessage('Path "POST /rabbits" doesn’t match any route.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        $router->match('post', '/rabbits');
+        $router->match('POST', '/rabbits');
     }
 
     public function testMatchFailsIfIncorrectPath(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
-        $this->expectExceptionMessage('Path "get /no-rabbits" doesn’t match any route.');
+        $this->expectExceptionMessage('Path "GET /no-rabbits" doesn’t match any route.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        $router->match('get', '/no-rabbits');
+        $router->match('GET', '/no-rabbits');
     }
 
     public function testMatchWithParamFailsIfIncorrectPath(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
-        $this->expectExceptionMessage('Path "get /rabbits/42/details" doesn’t match any route.');
+        $this->expectExceptionMessage('Path "GET /rabbits/42/details" doesn’t match any route.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#get');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#get');
 
-        $router->match('get', '/rabbits/42/details');
+        $router->match('GET', '/rabbits/42/details');
     }
 
     /**
@@ -208,11 +208,11 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalidMethod} method is invalid (get, post, patch, put, delete, cli)."
+            "{$invalidMethod} method is invalid (GET, POST, PATCH, PUT, DELETE, CLI)."
         );
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
         // @phpstan-ignore-next-line
         $router->match($invalidMethod, '/rabbits');
@@ -221,9 +221,9 @@ class RouterTest extends TestCase
     public function testUriByPointer(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        $uri = $router->uriByPointer('get', 'rabbits#list');
+        $uri = $router->uriByPointer('GET', 'rabbits#list');
 
         $this->assertSame('/rabbits', $uri);
     }
@@ -231,9 +231,9 @@ class RouterTest extends TestCase
     public function testUriByPointerWithParams(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#details');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#details');
 
-        $uri = $router->uriByPointer('get', 'rabbits#details', ['id' => 42]);
+        $uri = $router->uriByPointer('GET', 'rabbits#details', ['id' => 42]);
 
         $this->assertSame('/rabbits/42', $uri);
     }
@@ -241,9 +241,9 @@ class RouterTest extends TestCase
     public function testUriWithAdditionalParameters(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#details');
+        $router->addRoute('GET', '/rabbits', 'rabbits#details');
 
-        $uri = $router->uriByPointer('get', 'rabbits#details', ['id' => 42]);
+        $uri = $router->uriByPointer('GET', 'rabbits#details', ['id' => 42]);
 
         $this->assertSame('/rabbits?id=42', $uri);
     }
@@ -254,21 +254,21 @@ class RouterTest extends TestCase
         $this->expectExceptionMessage('Required `id` parameter is missing.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#details');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#details');
 
-        $uri = $router->uriByPointer('get', 'rabbits#details');
+        $uri = $router->uriByPointer('GET', 'rabbits#details');
     }
 
     public function testUriByPointerFailsIfActionPointerNotRegistered(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
         $this->expectExceptionMessage(
-            'Action pointer "get rabbits#list" doesn’t match any route.'
+            'Action pointer "GET rabbits#list" doesn’t match any route.'
         );
 
         $router = new Router();
 
-        $router->uriByPointer('get', 'rabbits#list');
+        $router->uriByPointer('GET', 'rabbits#list');
     }
 
     /**
@@ -278,11 +278,11 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalid_method} method is invalid (get, post, patch, put, delete, cli)."
+            "{$invalid_method} method is invalid (GET, POST, PATCH, PUT, DELETE, CLI)."
         );
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
         // @phpstan-ignore-next-line
         $router->uriByPointer($invalid_method, 'rabbits#list');
@@ -291,7 +291,7 @@ class RouterTest extends TestCase
     public function testUriByName(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#list', 'rabbits');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list', 'rabbits');
 
         $uri = $router->uriByName('rabbits');
 
@@ -301,7 +301,7 @@ class RouterTest extends TestCase
     public function testUriByNameWithParams(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#details', 'rabbit');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#details', 'rabbit');
 
         $uri = $router->uriByName('rabbit', ['id' => 42]);
 
@@ -311,7 +311,7 @@ class RouterTest extends TestCase
     public function testUriByNameWithAdditionalParameters(): void
     {
         $router = new Router();
-        $router->addRoute('get', '/rabbits', 'rabbits#details', 'rabbit');
+        $router->addRoute('GET', '/rabbits', 'rabbits#details', 'rabbit');
 
         $uri = $router->uriByName('rabbit', ['id' => 42]);
 
@@ -324,7 +324,7 @@ class RouterTest extends TestCase
         $this->expectExceptionMessage('Required `id` parameter is missing.');
 
         $router = new Router();
-        $router->addRoute('get', '/rabbits/:id', 'rabbits#details', 'rabbit');
+        $router->addRoute('GET', '/rabbits/:id', 'rabbits#details', 'rabbit');
 
         $uri = $router->uriByName('rabbit');
     }
@@ -348,8 +348,8 @@ class RouterTest extends TestCase
     {
         return [
             ['invalid'],
-            ['postpost'],
-            [' get'],
+            ['POSTPOST'],
+            [' GET'],
         ];
     }
 }

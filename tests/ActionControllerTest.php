@@ -16,7 +16,7 @@ class ActionControllerTest extends TestCase
 
     public function testExecute(): void
     {
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('Rabbits#items');
 
         /** @var Response */
@@ -36,7 +36,7 @@ class ActionControllerTest extends TestCase
 
     public function testExecuteWithSubDirectory(): void
     {
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('admin/Rabbits#items');
 
         /** @var Response */
@@ -50,7 +50,7 @@ class ActionControllerTest extends TestCase
 
     public function testExecuteWithNamespace(): void
     {
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('Rabbits#items', '\\AppTest\\admin');
 
         /** @var Response */
@@ -67,7 +67,7 @@ class ActionControllerTest extends TestCase
         $this->expectException(Errors\ControllerError::class);
         $this->expectExceptionMessage('Missing controller class cannot be found.');
 
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('Missing#items');
 
         $action_controller->execute($request);
@@ -80,7 +80,7 @@ class ActionControllerTest extends TestCase
             'Controller_as_directory controller class cannot be found.'
         );
 
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('Controller_as_directory#items');
 
         $action_controller->execute($request);
@@ -93,7 +93,7 @@ class ActionControllerTest extends TestCase
             'uncallable action cannot be called on Rabbits controller.'
         );
 
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('Rabbits#uncallable');
 
         $action_controller->execute($request);
@@ -106,7 +106,7 @@ class ActionControllerTest extends TestCase
             'noResponse action in Rabbits controller does not return a Response.'
         );
 
-        $request = new Request('get', '/');
+        $request = new Request('GET', '/');
         $action_controller = new ActionController('Rabbits#noResponse');
 
         $action_controller->execute($request);

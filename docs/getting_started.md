@@ -195,7 +195,7 @@ environment initialization:
 
 // ...
 
-$http_method = strtolower($_SERVER['REQUEST_METHOD']); // e.g. 'get' or 'post'
+$http_method = strtoupper($_SERVER['REQUEST_METHOD']); // e.g. 'GET' or 'POST'
 $http_uri = $_SERVER['REQUEST_URI']; // e.g. '/test'
 $http_parameters = array_merge($_GET, $_POST);
 $http_headers = $_SERVER;
@@ -319,7 +319,7 @@ class Application
 
         // We create a new route to connect the URL `GET /` to our action.
         // The syntax is `controller#action`.
-        $this->router->addRoute('get', '/', 'Home#show');
+        $this->router->addRoute('GET', '/', 'Home#show');
     }
 
     public function run($request)
@@ -356,7 +356,7 @@ $response = $application->run($request);
 You can test that the application still work by opening again [localhost](http://localhost/)
 and [localhost/?name=Charlie](http://localhost/?name=Charlie). More important,
 if you open [localhost/test](http://localhost/test), you should get an error
-telling you that “Path "get /test" doesn’t match any route.” It’s because we
+telling you that “Path "GET /test" doesn’t match any route.” It’s because we
 didn’t create the corresponding route in the router. The error is ugly for
 now, but we’ll fix that later.
 
