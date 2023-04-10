@@ -36,10 +36,6 @@ Minz.** You’ll often have to interact with them.
 
 ## Models and database
 
-- **[`\Minz\Model`](/src/Model.php) represents resources of your application,** it
-  helps you to declare their properties and their constraints;
-- **[`\Minz\DatabaseModel`](/src/DatabaseModel.php) represents a resource in
-  database** and provides some helpful methods to access the database;
 - [`\Minz\Database`](/src/Database.php) abstracts the connection to the
   database, it acts as a wrapper around the PHP [\PDO class](https://www.php.net/manual/book.pdo.php);
 - [`\Minz\Migrator`](/src/Migrator.php) manages migrations of your data (not
@@ -79,9 +75,6 @@ Finally, Minz provides a bunch of helpers and assertions for [PHPUnit](https://p
   reinitializes the database, session and mailer before each tests;**
 - **[`\Minz\Tests\ResponseAsserts`](/src/Tests/ResponseAsserts.php) provides a
   bunch of assertions to test the response of your application;**
-- [`\Minz\Tests\DatabaseFactory`](/src/Tests/DatabaseFactory.php) creates fake
-  data during tests, via the [`\Minz\Tests\FactoriesHelper`](/src/Tests/FactoriesHelper.php)
-  helper;
 - [`\Minz\Tests\TimeHelper`](/src/Tests/TimeHelper.php) freezes the time, on
   the condition that you use the Time class;
 - [`\Minz\Tests\Mailer`](/src/Tests/Mailer.php) catches emails sent by the
