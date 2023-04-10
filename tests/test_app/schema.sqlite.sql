@@ -1,12 +1,16 @@
 CREATE TABLE friends (
-    id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name varchar(255) NOT NULL,
-    address varchar(255)
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255),
+    created_at TEXT,
+    updated_at TEXT,
+    is_kind BOOLEAN DEFAULT true,
+    options TEXT NOT NULL DEFAULT '[]'
 );
 
 CREATE TABLE rabbits (
-    rabbit_id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name varchar(255) NOT NULL,
-    friend_id integer NOT NULL,
+    id VARCHAR(16) NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    friend_id INTEGER NOT NULL,
     FOREIGN KEY (friend_id) REFERENCES friends(id)
 );
