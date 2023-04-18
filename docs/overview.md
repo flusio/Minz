@@ -36,12 +36,21 @@ Minz.** You’ll often have to interact with them.
 
 ## Models and database
 
-- [`\Minz\Database`](/src/Database.php) abstracts the connection to the
-  database, it acts as a wrapper around the PHP [\PDO class](https://www.php.net/manual/book.pdo.php);
-- [`\Minz\Migrator`](/src/Migrator.php) manages migrations of your data (not
-  only from the database!)
-- [`\Minz\Validable`](/src/Validable.php) a trait to validate the models
-  properties values. It is used alongside with `Check`s:
+- **[`\Minz\Database`](/src/Database.php) abstracts the connection to the
+  database,** it acts as a wrapper around the PHP [\PDO class](https://www.php.net/manual/book.pdo.php).
+- **[`\Minz\Database\Recordable`](/src/Database/Recordable.php) provides useful
+  methods to manipulate the models in the database.** It is usable together with
+  the following classes:
+    - [`\Minz\Database\Table`](/src/Database/Table.php) to define the database
+      table of the model;
+    - [`\Minz\Database\Column`](/src/Database/Column.php) to define the
+      database columns of the model;
+    - [`\Minz\Database\Factory`](/src/Database/Factory.php) to easily create
+      models with default values during the tests;
+    - [`\Minz\Database\Helper`](/src/Database/Helper.php) which provides useful
+      methods to the Recordable trait;
+- **[`\Minz\Validable`](/src/Validable.php) a trait to validate the models
+  properties values.** It is used alongside with `Check`s:
     - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
       extended by the other classes;
     - [`\Minz\Validable\Format`](/src/Validable/Format.php) allows to check the
@@ -50,6 +59,8 @@ Minz.** You’ll often have to interact with them.
       min and/or max length of a string;
     - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check
       that a property is present (not null nor an empty string).
+- [`\Minz\Migrator`](/src/Migrator.php) manages migrations of your data (not
+  only from the database!)
 
 ## Additional classes
 
