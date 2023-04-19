@@ -2,29 +2,32 @@
 
 namespace AppTest\models;
 
-class Friend extends \Minz\Model
+use Minz\Database;
+
+#[Database\Table(name: 'friends')]
+class Friend
 {
-    public const PROPERTIES = [
-        'id' => [
-            'type' => 'string',
-            'required' => true,
-        ],
-        'created_at' => [
-            'type' => 'datetime',
-            'required' => true,
-        ],
-        'name' => [
-            'type' => 'string',
-            'validator' => '\AppTest\models\Friend::validateName',
-        ],
-    ];
+    use Database\Recordable;
 
-    public ?string $id;
-    public ?\DateTime $created_at;
-    public ?string $name;
+    #[Database\Column]
+    public int $id;
 
-    public static function validateName(string $value): bool
-    {
-        return $value === 'Alice';
-    }
+    #[Database\Column]
+    public string $name;
+
+    #[Database\Column]
+    public ?string $address = null;
+
+    #[Database\Column]
+    public ?\DateTimeImmutable $created_at = null;
+
+    #[Database\Column]
+    public ?\DateTimeImmutable $updated_at = null;
+
+    #[Database\Column]
+    public bool $is_kind = true;
+
+    /** @var array<string, bool> */
+    #[Database\Column]
+    public array $options = [];
 }
