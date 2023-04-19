@@ -49,6 +49,8 @@ Minz.** You’ll often have to interact with them.
       models with default values during the tests;
     - [`\Minz\Database\Helper`](/src/Database/Helper.php) which provides useful
       methods to the Recordable trait;
+    - [`\Minz\Database\Lockable`](/src/Database/Lockable.php) provides some
+      methods to (un)lock a model;
 - **[`\Minz\Validable`](/src/Validable.php) a trait to validate the models
   properties values.** It is used alongside with `Check`s:
     - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
