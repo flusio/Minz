@@ -28,7 +28,7 @@ namespace Minz\Validable;
  * @author  Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
-class Check
+abstract class Check
 {
     public string $message = 'Invalid value';
 
@@ -41,10 +41,7 @@ class Check
         $this->message = $message;
     }
 
-    public function assert(): bool
-    {
-        throw new \BadMethodCallException("Method assert must be implemented");
-    }
+    abstract public function assert(): bool;
 
     public function getValue(): mixed
     {
