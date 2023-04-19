@@ -69,6 +69,7 @@ Minz.** You’ll often have to interact with them.
 - **[`\Minz\CSRF`](/src/CSRF.php) protects you from [Cross-Site Request
   Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);**
 - **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
+- **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs, it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php)**
 - [`\Minz\Random`](/src/Random.php) to generate random values;
 - [`\Minz\Time`](/src/Time.php) abstracts the time;
 - [`\Minz\Mailer`](/src/Mailer.php) is a wrapper around [PHPMailer](/lib/PHPMailer)
