@@ -290,7 +290,7 @@ trait Recordable
         $columns = [];
         $values_placeholders = [];
 
-        $values = Helper::convertValuesToDatabase(self::class, $values);
+        $values = Helper::convertValuesToDatabase(static::class, $values);
 
         foreach ($values as $parameter => $value) {
             $parameters[":{$parameter}"] = $value;
@@ -340,7 +340,7 @@ trait Recordable
         $parameters = [];
         $set_exprs = [];
 
-        $values = Helper::convertValuesToDatabase(self::class, $values);
+        $values = Helper::convertValuesToDatabase(static::class, $values);
 
         $parameters[":{$pk_column}"] = $pk_value;
         foreach ($values as $property => $value) {
@@ -523,7 +523,7 @@ trait Recordable
         $columns = self::databaseColumns(include_computed: false);
         $values = [];
         foreach ($columns as $property => $column) {
-            $propertyReflection = new \ReflectionProperty(self::class, $property);
+            $propertyReflection = new \ReflectionProperty(static::class, $property);
             if ($propertyReflection->isInitialized($this)) {
                 $values[$property] = $this->$property;
             }
@@ -541,7 +541,7 @@ trait Recordable
     public function toDbValues(): array
     {
         return Helper::convertValuesToDatabase(
-            self::class,
+            static::class,
             $this->toValues(),
         );
     }
@@ -553,9 +553,9 @@ trait Recordable
      */
     public static function fromDatabaseRow(array $row): self
     {
-        $model_values = Helper::convertValuesFromDatabase(self::class, $row);
+        $model_values = Helper::convertValuesFromDatabase(static::class, $row);
 
-        $class_reflection = new \ReflectionClass(self::class);
+        $class_reflection = new \ReflectionClass(static::class);
         $model = $class_reflection->newInstanceWithoutConstructor();
 
         foreach ($model_values as $property => $value) {
@@ -596,7 +596,7 @@ trait Recordable
      */
     public static function databaseColumns(bool $include_computed = true): array
     {
-        $class_reflection = new \ReflectionClass(self::class);
+        $class_reflection = new \ReflectionClass(static::class);
         $properties = $class_reflection->getProperties();
 
         $columns = [];
@@ -618,7 +618,7 @@ trait Recordable
             $property_type = $property->getType();
 
             if (!($property_type instanceof \ReflectionNamedType)) {
-                $class_name = self::class;
+                $class_name = static::class;
                 throw new Errors\DatabaseError("{$class_name} must define the {$property_name} property type");
             }
 
