@@ -73,8 +73,12 @@ class Time
     /**
      * Freeze the time at a given datetime
      */
-    public static function freeze(\DateTimeInterface $datetime): void
+    public static function freeze(?\DateTimeInterface $datetime = null): void
     {
+        if ($datetime === null) {
+            $datetime = self::now();
+        }
+
         self::$freezed_now = \DateTimeImmutable::createFromInterface($datetime);
     }
 
