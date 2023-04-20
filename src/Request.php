@@ -37,7 +37,7 @@ namespace Minz;
  * It will generate the following request:
  *
  * ```php
- * $request = new \Minz\Request('cli', '/some/command', [
+ * $request = new \Minz\Request('CLI', '/some/command', [
  *     'foo' => 'bar',
  *     'spam' => true,
  * ]);
