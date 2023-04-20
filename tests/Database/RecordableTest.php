@@ -489,6 +489,41 @@ class RecordableTest extends TestCase
         );
     }
 
+    public function testReloadLoadsTheModelFromDatabase(): void
+    {
+        $friend = new models\Friend();
+        $friend->name = 'Alix';
+        $friend->save();
+        $friend->name = 'Benedict';
+
+        $friend = $friend->reload();
+
+        $this->assertNotNull($friend);
+        $this->assertTrue($friend->isPersisted());
+        $this->assertSame('Alix', $friend->name);
+    }
+
+    public function testReloadReturnsNullIfTheModelIsNotPersisted(): void
+    {
+        $friend = new models\Friend();
+
+        $friend = $friend->reload();
+
+        $this->assertNull($friend);
+    }
+
+    public function testReloadReturnsNullIfTheModelHasBeenDeleted(): void
+    {
+        $friend = new models\Friend();
+        $friend->name = 'Alix';
+        $friend->save();
+        models\Friend::delete($friend->id);
+
+        $friend = $friend->reload();
+
+        $this->assertNull($friend);
+    }
+
     public function testRemoveDeletesTheModel(): void
     {
         /** @var int $id */
@@ -501,8 +536,20 @@ class RecordableTest extends TestCase
         $this->assertSame(1, models\Friend::count());
         $this->assertTrue($friend->isPersisted());
 
-        $friend->remove();
+        $result = $friend->remove();
 
+        $this->assertTrue($result);
+        $this->assertSame(0, models\Friend::count());
+        $this->assertFalse($friend->isPersisted());
+    }
+
+    public function testRemoveDoesNothingIfTheModelIsNotPersisted(): void
+    {
+        $friend = new models\Friend();
+
+        $result = $friend->remove();
+
+        $this->assertTrue($result);
         $this->assertSame(0, models\Friend::count());
         $this->assertFalse($friend->isPersisted());
     }

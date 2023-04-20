@@ -455,11 +455,35 @@ trait Recordable
     }
 
     /**
+     * Reload the current model from the database.
+     *
+     * It returns null if the model is not persisted.
+     */
+    public function reload(): ?self
+    {
+        $pk_column = self::primaryKeyColumn();
+
+        if (!$this->is_persisted) {
+            return null;
+        }
+
+        $pk_value = $this->$pk_column;
+        return self::find($pk_value);
+    }
+
+    /**
      * Remove the current model from the database.
+     *
+     * It returns true if the model is not persisted.
      */
     public function remove(): bool
     {
         $pk_column = self::primaryKeyColumn();
+
+        if (!$this->is_persisted) {
+            return true;
+        }
+
         $pk_value = $this->$pk_column;
         $result = self::delete($pk_value);
 
