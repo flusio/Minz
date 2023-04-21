@@ -70,6 +70,7 @@ Minz.** You’ll often have to interact with them.
   Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);**
 - **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
 - **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs, it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php)**
+- [`\Minz\Flash`](/src/Flash.php) to pass messages from a page to another through redirections;
 - [`\Minz\Random`](/src/Random.php) to generate random values;
 - [`\Minz\Time`](/src/Time.php) abstracts the time;
 - [`\Minz\Mailer`](/src/Mailer.php) is a wrapper around [PHPMailer](/lib/PHPMailer)
