@@ -49,6 +49,8 @@ Minz.** You’ll often have to interact with them.
       models with default values during the tests;
     - [`\Minz\Database\Helper`](/src/Database/Helper.php) which provides useful
       methods to the Recordable trait;
+    - [`\Minz\Database\Lockable`](/src/Database/Lockable.php) provides some
+      methods to (un)lock a model;
 - **[`\Minz\Validable`](/src/Validable.php) a trait to validate the models
   properties values.** It is used alongside with `Check`s:
     - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
@@ -67,6 +69,7 @@ Minz.** You’ll often have to interact with them.
 - **[`\Minz\CSRF`](/src/CSRF.php) protects you from [Cross-Site Request
   Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);**
 - **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
+- **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs, it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php)**
 - [`\Minz\Random`](/src/Random.php) to generate random values;
 - [`\Minz\Time`](/src/Time.php) abstracts the time;
 - [`\Minz\Mailer`](/src/Mailer.php) is a wrapper around [PHPMailer](/lib/PHPMailer)
