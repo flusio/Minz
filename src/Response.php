@@ -61,7 +61,7 @@ use Minz\Output;
  * corresponding headers, cookies and content. For instance, in `public/index.php`:
  *
  * ```php
- * $application = new \myapp\Application();
+ * $application = new \App\Application();
  * $response = $application->run($request);
  *
  * http_response_code($response->code());
@@ -77,14 +77,14 @@ use Minz\Output;
  * echo $response->render();
  *
  * // Can be shortened in
- * $response->sendByHttp();
+ * \Minz\Response::sendByHttp($response);
  * ```
  *
  * In a CLI script, it is quite different since cookies and headers aren't
  * relevant:
  *
  * ```php
- * $application = new \myapp\cli\Application();
+ * $application = new \App\Application();
  * $response = $application->run($request);
  *
  * echo $response->render() . "\n";
@@ -97,7 +97,7 @@ use Minz\Output;
  * }
  *
  * // Can be shortened in
- * $response->sendToCli();
+ * \Minz\Response::sendToCli($response);
  * ```
  *
  * @phpstan-import-type UrlPointer from Url
@@ -622,35 +622,98 @@ class Response
         }
     }
 
-    public function sendByHttp(bool $echo_output = true): void
+    /**
+     * Send a Response with HTTP headers and cookies.
+     *
+     * If the given argument is a Generator, only the first Response headers
+     * are sent, but all the outputs are echoed in a loop until the Generator
+     * returns no Response.
+     *
+     * You can pass a second argument to not output the response. This is
+     * useful for HEAD requests. For instance:
+     *
+     *     $is_head = strtoupper($_SERVER['REQUEST_METHOD']) === 'HEAD';
+     *     \Minz\Response::sendByHttp($response, echo_output: !$is_head);
+     *
+     * @param Response|\Generator $response
+     */
+    public static function sendByHttp(mixed $response, bool $echo_output = true): void
     {
-        http_response_code($this->code());
+        if ($response instanceof \Generator) {
+            $response_generator = $response;
+            /** @var Response */
+            $response = $response_generator->current();
+        }
 
-        foreach ($this->cookies() as $cookie) {
+        http_response_code($response->code());
+
+        foreach ($response->cookies() as $cookie) {
             setcookie($cookie['name'], $cookie['value'], $cookie['options']);
         }
 
         /** @var string[] */
-        $headers = $this->headers();
+        $headers = $response->headers();
         foreach ($headers as $header) {
             header($header);
         }
 
-        if ($echo_output) {
-            echo $this->render();
+        if (!$echo_output) {
+            return;
+        }
+
+        if (isset($response_generator)) {
+            foreach ($response_generator as $response_part) {
+                /** @var Response */
+                $response_part = $response_part;
+                echo $response_part->render();
+            }
+        } else {
+            echo $response->render();
         }
     }
 
-    public function sendToCli(): void
+    /**
+     * Echo a Response to standard output and exit with an error code.
+     *
+     * If the Response code is 2xx, the program will exit with code 0.
+     * Otherwise, it will exit with the corresponding code.
+     *
+     * If the given argument is a Generator, only the first Response code is
+     * considered, but all the outputs are echoed in a loop until the Generator
+     * returns no Response.
+     *
+     * @param self|\Generator $response
+     */
+    public static function sendToCli(mixed $response): void
     {
-        $output = $this->render();
-        if ($output && $output[-1] === "\n") {
-            echo $output;
-        } elseif ($output) {
-            echo $output . "\n";
+        if ($response instanceof \Generator) {
+            $response_generator = $response;
+            /** @var Response */
+            $response = $response_generator->current();
         }
 
-        $code = $this->code();
+        $code = $response->code();
+
+        if (isset($response_generator)) {
+            foreach ($response_generator as $response_part) {
+                /** @var Response */
+                $response_part = $response_part;
+                $output = $response_part->render();
+                if ($output && $output[-1] === "\n") {
+                    echo $output;
+                } elseif ($output) {
+                    echo $output . "\n";
+                }
+            }
+        } else {
+            $output = $response->render();
+            if ($output && $output[-1] === "\n") {
+                echo $output;
+            } elseif ($output) {
+                echo $output . "\n";
+            }
+        }
+
         if ($code >= 200 && $code < 300) {
             exit(0);
         } else {

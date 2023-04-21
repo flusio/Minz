@@ -273,7 +273,7 @@ $name = $request->param('name', 'World');
 
 $response = \Minz\Response::text(200, "Hello {$name}!");
 
-$response->sendByHttp();
+\Minz\Response::sendByHttp($response);
 ```
 
 **To learn more, [explore the `\Minz\Response` class](/src/Response.php).**
@@ -373,7 +373,7 @@ $request = \Minz\Request::initFromGlobals();
 $application = new \App\Application();
 $response = $application->run($request);
 
-$response->sendByHttp();
+\Minz\Response::sendByHttp($response);
 ```
 
 You can test that the application still work by opening again [localhost](http://localhost/)

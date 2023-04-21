@@ -226,9 +226,6 @@ class Engine
 
         $response = $controller->$action_name($request);
 
-        // Response can be yield, but in this case, its up to the developer to
-        // check what is yield. I would not recommend to use that (it's not
-        // even tested!), but eh, it can be convenient :)
         if (!($response instanceof Response) && !($response instanceof \Generator)) {
             throw new Errors\ActionError(
                 "{$action_name} action in {$namespaced_controller} controller does not return a Response."
