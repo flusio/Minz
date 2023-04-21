@@ -61,15 +61,14 @@ Minz.** You’ll often have to interact with them.
       min and/or max length of a string;
     - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check
       that a property is present (not null nor an empty string).
-- [`\Minz\Migrator`](/src/Migrator.php) manages migrations of your data (not
-  only from the database!)
 
 ## Additional classes
 
 - **[`\Minz\CSRF`](/src/CSRF.php) protects you from [Cross-Site Request
   Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);**
 - **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
-- **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs, it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php)**
+- **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs,** it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php);
+- **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
 - [`\Minz\Flash`](/src/Flash.php) to pass messages from a page to another through redirections;
 - [`\Minz\Random`](/src/Random.php) to generate random values;
 - [`\Minz\Time`](/src/Time.php) abstracts the time;

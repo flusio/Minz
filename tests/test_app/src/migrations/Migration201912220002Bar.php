@@ -2,8 +2,7 @@
 
 namespace AppTest\migrations;
 
-// phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
-class Migration_20191222_225428_Bar
+class Migration201912220002Bar
 {
     /**
      * @return boolean true if the migration was successful, false otherwise

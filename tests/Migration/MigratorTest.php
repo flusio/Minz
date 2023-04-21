@@ -1,7 +1,8 @@
 <?php
 
-namespace Minz;
+namespace Minz\Migration;
 
+use Minz\Errors;
 use PHPUnit\Framework\TestCase;
 
 class MigratorTest extends TestCase
@@ -458,9 +459,9 @@ class MigratorTest extends TestCase
 
     public function testConstructorLoadsDirectory(): void
     {
-        $migrations_path = Configuration::$app_path . '/src/migrations';
+        $migrations_path = \Minz\Configuration::$app_path . '/src/migrations';
         $migrator = new Migrator($migrations_path);
-        $expected_names = ['Migration_20191222_225420_Foo', 'Migration_20191222_225428_Bar'];
+        $expected_names = ['Migration201912220001Foo', 'Migration201912220002Bar'];
 
         $migrations = $migrator->migrations();
 

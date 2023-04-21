@@ -1,10 +1,27 @@
 <?php
 
-namespace Minz;
+namespace Minz\Migration;
+
+use Minz\Errors;
 
 /**
  * The Migrator helps to migrate data (in a database or not) or the
  * architecture of a Minz application.
+ *
+ * It is usually used with \Minz\Migrator\Controller to manage easily the
+ * migrations.
+ *
+ * A migration is just a class defining a "migrate" method, and optionnally a
+ * "rollback" method. It is usually used to transform the database structure
+ * for instance. A migration is applied only once by the administrator of the
+ * server.
+ *
+ * It is good practice to declare a "rollback" method in the migrations classes
+ * to allow administrators to reverse the changes and to return to a previous
+ * version of the application.
+ *
+ * The job of the Migrator is to manage the versions numbers of the migrations
+ * and to apply/reverse the migrations in order.
  *
  * @phpstan-type Migration array{
  *     'migration': MigrationCallable,
@@ -32,20 +49,19 @@ class Migrator
      * Create a Migrator instance. If directory is given, it'll load the
      * migrations from it.
      *
-     * The migrations in the directory must declare a namespaced class named
-     * \<app_name>\migrations\<filename>, where:
+     * By default, the Migrator will load migrations with the following
+     * namespace: <app_name>\migrations (where <app_name> is the name declared
+     * in the configuration, "App" by default). You can pass a namespace as a
+     * second parameter to the constructor to override this value.
      *
-     * - <app_name> is the application name declared in the configuration file
-     * - <filename> is the migration file name, without the `.php` extension
-     *
-     * This class must declare a `migrate` method and can declare a `rollback`
-     * method.
+     * These classes must declare a `migrate` method and can declare a
+     * `rollback` method.
      *
      * @throws \Minz\Errors\MigrationError if a file doesn't contain a valid class
      * @throws \Minz\Errors\MigrationError if a migrate method is not callable
      *                                     on a migration
      */
-    public function __construct(?string $directory = null)
+    public function __construct(?string $directory = null, ?string $namespace = null)
     {
         if (!$directory) {
             return;
@@ -55,10 +71,14 @@ class Migrator
             throw new Errors\MigrationError("The directory {$directory} cannot be read.");
         }
 
-        $app_name = Configuration::$app_name;
         $filenames = scandir($directory);
         if (!$filenames) {
             throw new Errors\MigrationError("The directory {$directory} cannot be read.");
+        }
+
+        if ($namespace === null) {
+            $app_name = \Minz\Configuration::$app_name;
+            $namespace = "{$app_name}\\migrations";
         }
 
         foreach ($filenames as $filename) {
@@ -67,7 +87,7 @@ class Migrator
             }
 
             $migration_version = basename($filename, '.php');
-            $migration_classname = "\\{$app_name}\\migrations\\{$migration_version}";
+            $migration_classname = "\\{$namespace}\\{$migration_version}";
 
             try {
                 $migration = new $migration_classname();
