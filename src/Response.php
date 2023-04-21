@@ -138,6 +138,10 @@ use Minz\Output;
  *     'domain'?: string,
  * }
  *
+ * @phpstan-type ResponseGenerator \Generator<int, Response, void, void>
+ *
+ * @phpstan-type ResponseReturnable Response|ResponseGenerator
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -635,7 +639,7 @@ class Response
      *     $is_head = strtoupper($_SERVER['REQUEST_METHOD']) === 'HEAD';
      *     \Minz\Response::sendByHttp($response, echo_output: !$is_head);
      *
-     * @param Response|\Generator $response
+     * @param ResponseReturnable $response
      */
     public static function sendByHttp(mixed $response, bool $echo_output = true): void
     {
@@ -682,7 +686,7 @@ class Response
      * considered, but all the outputs are echoed in a loop until the Generator
      * returns no Response.
      *
-     * @param self|\Generator $response
+     * @param ResponseReturnable $response
      */
     public static function sendToCli(mixed $response): void
     {

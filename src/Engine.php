@@ -11,6 +11,8 @@ namespace Minz;
  *
  * @phpstan-import-type ViewPointer from Output\View
  *
+ * @phpstan-import-type ResponseReturnable from Response
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -163,7 +165,7 @@ class Engine
      * options. You should make sure the view pointers you pass exist. By
      * default, the errors are returned as text.
      *
-     * @return \Generator|Response
+     * @return ResponseReturnable
      */
     public static function run(Request $request): mixed
     {
@@ -194,7 +196,7 @@ class Engine
     }
 
     /**
-     * @return \Generator|Response
+     * @return ResponseReturnable
      */
     private static function executeRoutePointer(string $route_pointer, Request $request): mixed
     {

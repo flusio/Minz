@@ -48,6 +48,8 @@ use Minz\Response;
  *
  *     \Minz\Response::sendToCli($response);
  *
+ * @phpstan-import-type ResponseGenerator from Response
+ *
  * @author  Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -75,6 +77,8 @@ class Controller
      *
      * @response 500 If an error happens when executing a job
      * @response 200
+     *
+     * @return ResponseGenerator
      */
     public function watch(Request $request): \Generator
     {
