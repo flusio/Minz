@@ -117,7 +117,12 @@ class Request
         $http_method = $http_method;
 
         $http_uri = $_SERVER['REQUEST_URI'];
-        $http_parameters = array_merge($_GET, $_POST, $_FILES);
+        $http_parameters = array_merge(
+            $_GET,
+            $_POST,
+            $_FILES,
+            ['@input' => @file_get_contents('php://input')],
+        );
         $http_headers = array_merge($_SERVER, [
             'COOKIE' => $_COOKIE,
         ]);
