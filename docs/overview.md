@@ -55,8 +55,14 @@ Minz.** You’ll often have to interact with them.
   properties values.** It is used alongside with `Check`s:
     - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
       extended by the other classes;
+    - [`\Minz\Validable\Comparison`](/src/Validable/Comparison.php) allows to
+      compare the values;
+    - [`\Minz\Validable\Email`](/src/Validable/Email.php) allows to check email
+      addresses;
     - [`\Minz\Validable\Format`](/src/Validable/Format.php) allows to check the
       format of a string;
+    - [`\Minz\Validable\Inclusion`](/src/Validable/Inclusion.php) allows to
+      check that a value is included in a given set;
     - [`\Minz\Validable\Length`](/src/Validable/Length.php) allows to check the
       min and/or max length of a string;
     - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check

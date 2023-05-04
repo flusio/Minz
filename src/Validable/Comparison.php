@@ -1,0 +1,129 @@
+<?php
+
+namespace Minz\Validable;
+
+/**
+ * Check that a property value matches the given comparisons.
+ *
+ * The value can be compared with the given options:
+ *
+ * - greater: the value must be greater than the given value
+ * - greater_or_equal: the value must be greater or equal than the given value
+ * - equal: the value must be equal to the given value
+ * - less: the value must be less than the given value
+ * - less_or_equal: the value must be less or equal than the given value
+ * - other: the value must be different than the given value
+ *
+ * The message accepts the {value}, {greater}, {greater_or_equal}, {equal},
+ * {less}, {less_or_equal} and {other} placeholders. They will be replaced by
+ * their real values in the final message.
+ *
+ *     use Minz\Validable;
+ *
+ *     class Payment
+ *     {
+ *         use Validable;
+ *
+ *         #[Validable\Comparison(
+ *             greater_or_equal: 10,
+ *             message: 'The price must be greater than or equal to {greater_or_equal} €.'
+ *         )
+ *         public string $price;
+ *     }
+ *
+ * Note that the "null" value is considered as valid in order to accept
+ * optional values.
+ *
+ * @author  Marien Fressinaud <dev@marienfressinaud.fr>
+ * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
+ */
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
+class Comparison extends Check
+{
+    public mixed $greater;
+    public mixed $greater_or_equal;
+    public mixed $equal;
+    public mixed $less;
+    public mixed $less_or_equal;
+    public mixed $other;
+
+    public function __construct(
+        string $message,
+        mixed $greater = null,
+        mixed $greater_or_equal = null,
+        mixed $equal = null,
+        mixed $less = null,
+        mixed $less_or_equal = null,
+        mixed $other = null,
+    ) {
+        parent::__construct($message);
+        $this->greater = $greater;
+        $this->greater_or_equal = $greater_or_equal;
+        $this->equal = $equal;
+        $this->less = $less;
+        $this->less_or_equal = $less_or_equal;
+        $this->other = $other;
+    }
+
+    public function assert(): bool
+    {
+        $value = $this->getValue();
+
+        if ($value === null) {
+            return true;
+        }
+
+        if ($this->greater !== null && $value <= $this->greater) {
+            return false;
+        }
+
+        if ($this->greater_or_equal !== null && $value < $this->greater_or_equal) {
+            return false;
+        }
+
+        if ($this->equal !== null && $value !== $this->equal) {
+            return false;
+        }
+
+        if ($this->less !== null && $value >= $this->less) {
+            return false;
+        }
+
+        if ($this->less_or_equal !== null && $value > $this->less_or_equal) {
+            return false;
+        }
+
+        if ($this->other !== null && $value === $this->other) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getMessage(): string
+    {
+        $value = $this->getValue();
+
+        return str_replace(
+            [
+                '{value}',
+                '{greater}',
+                '{greater_or_equal}',
+                '{equal}',
+                '{less}',
+                '{less_or_equal}',
+                '{other}',
+            ],
+            [
+                $value,
+                $this->greater,
+                $this->greater_or_equal,
+                $this->equal,
+                $this->less,
+                $this->less_or_equal,
+                $this->other,
+            ],
+            $this->message,
+        );
+    }
+}

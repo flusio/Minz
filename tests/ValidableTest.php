@@ -50,7 +50,21 @@ class ValidableTest extends TestCase
 
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Length', 'Choose a nickname of less than 42 characters.'],
+                ['Minz\\Validable\\Length', 'Choose a nickname between 2 and 42 characters.'],
+            ]
+        ], $errors);
+    }
+
+    public function testValidateFailsIfTooShort(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'A';
+
+        $errors = $model->validate(format: false);
+
+        $this->assertEquals([
+            'nickname' => [
+                ['Minz\\Validable\\Length', 'Choose a nickname between 2 and 42 characters.'],
             ]
         ], $errors);
     }
@@ -69,6 +83,126 @@ class ValidableTest extends TestCase
         ], $errors);
     }
 
+    public function testValidateFailsWithInvalidEmail(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->email = 'not an email';
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'email' => [
+                ['Minz\\Validable\\Email', 'Choose a valid email.'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidInclusion(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->role = 'not a role';
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'role' => [
+                ['Minz\\Validable\\Inclusion', 'Choose a valid role.'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidGreaterComparison(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->greater = 42;
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'greater' => [
+                ['Minz\\Validable\\Comparison', 'Must be greater than 42'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidGreaterOrEqualComparison(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->greater_or_equal = 41;
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'greater_or_equal' => [
+                ['Minz\\Validable\\Comparison', 'Must be greater than or equal to 42'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidEqualComparison(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->equal = 41;
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'equal' => [
+                ['Minz\\Validable\\Comparison', 'Must be equal to 42'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidLessComparison(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->less = 42;
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'less' => [
+                ['Minz\\Validable\\Comparison', 'Must be less than 42'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidLessOrEqualComparison(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->less_or_equal = 43;
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'less_or_equal' => [
+                ['Minz\\Validable\\Comparison', 'Must be less than or equal to 42'],
+            ],
+        ], $errors);
+    }
+
+    public function testValidateFailsWithInvalidOtherComparison(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->other = 42;
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'other' => [
+                ['Minz\\Validable\\Comparison', 'Must be other than 42'],
+            ],
+        ], $errors);
+    }
+
     public function testValidateFailsWithMultipleErrors(): void
     {
         $model = new models\ValidableModel();
@@ -78,7 +212,7 @@ class ValidableTest extends TestCase
 
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Length', 'Choose a nickname of less than 42 characters.'],
+                ['Minz\\Validable\\Length', 'Choose a nickname between 2 and 42 characters.'],
                 ['Minz\\Validable\\Format', 'Choose a nickname that only contains letters.'],
             ]
         ], $errors);
@@ -93,7 +227,7 @@ class ValidableTest extends TestCase
 
         $this->assertEquals([
             'nickname' => (
-                'Choose a nickname of less than 42 characters. ' .
+                'Choose a nickname between 2 and 42 characters. ' .
                 'Choose a nickname that only contains letters.'
             )
         ], $errors);
