@@ -324,7 +324,20 @@ class Controller
      */
     public function index(Request $request): Response
     {
-        $migrator = new Migrator(static::migrationsPath(), static::migrationsNamespace());
+        $migrations_path = static::migrationsPath();
+        $migrations_version_path = static::migrationsVersionPath();
+
+        $migration_version = @file_get_contents($migrations_version_path);
+
+        $migrator = new Migrator($migrations_path, static::migrationsNamespace());
+
+        if ($migration_version !== false) {
+            $migration_version = trim($migration_version);
+        }
+
+        if ($migration_version) {
+            $migrator->setVersion($migration_version);
+        }
 
         $versions = array_keys($migrator->migrations());
         $current_version = $migrator->version();
