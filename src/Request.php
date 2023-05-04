@@ -63,6 +63,7 @@ namespace Minz;
  * $boolean = $request->paramBoolean('boolean-param');
  * $integer = $request->paramInteger('integer-param');
  * $array = $request->paramArray('array-param');
+ * $json = $request->paramJson('json-param');
  * $file = $request->paramFile('file-param');
  * ```
  *
@@ -340,6 +341,43 @@ class Request
         } else {
             return $default;
         }
+    }
+
+    /**
+     * Return a parameter value as a Json array.
+     *
+     * If the value is equal to true, false or null, it returns the value in
+     * an array.
+     *
+     * If the parameter cannot be parsed as Json, default value is returned.
+     *
+     * @param mixed[]|null $default
+     *
+     * @return mixed[]|null
+     */
+    public function paramJson(string $name, mixed $default = null): ?array
+    {
+        if (!isset($this->parameters[$name])) {
+            return $default;
+        }
+
+        $value = $this->parameters[$name];
+
+        if (!is_string($value)) {
+            return $default;
+        }
+
+        $json_value = json_decode($value, true);
+
+        if ($json_value === null && $value !== 'null') {
+            return $default;
+        }
+
+        if (!is_array($json_value)) {
+            $json_value = [$json_value];
+        }
+
+        return $json_value;
     }
 
     /**

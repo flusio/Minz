@@ -231,7 +231,7 @@ class RequestTest extends TestCase
         ], $foo);
     }
 
-    public function testParamWithNonArrayValue(): void
+    public function testParamArrayWithNonArrayValue(): void
     {
         // here, we set foo as a simple string (i.e. bar)
         $request = new Request('GET', '/', [
@@ -242,6 +242,63 @@ class RequestTest extends TestCase
 
         // but paramArray is always returning an array
         $this->assertSame(['bar'], $foo);
+    }
+
+    public function testParamJson(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => '{"bar": "baz"}',
+        ]);
+
+        $foo = $request->paramJson('foo');
+
+        $this->assertSame([
+            'bar' => 'baz',
+        ], $foo);
+    }
+
+    public function testParamJsonWithDefaultValue(): void
+    {
+        $request = new Request('GET', '/', []);
+
+        $foo = $request->paramJson('foo', ['bar' => 'baz']);
+
+        $this->assertSame([
+            'bar' => 'baz',
+        ], $foo);
+    }
+
+    public function testParamJsonWithNonArrayJson(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => 'null',
+        ]);
+
+        $foo = $request->paramJson('foo');
+
+        $this->assertSame([null], $foo);
+    }
+
+    public function testParamJsonNonStringValue(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => 42,
+        ]);
+
+        $foo = $request->paramJson('foo');
+
+        $this->assertNull($foo);
+    }
+
+    public function testParamJsonWithInvalidJson(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => 'bar',
+        ]);
+
+        $foo = $request->paramJson('foo');
+
+        $this->assertNull($foo);
     }
 
     public function testParamFile(): void
