@@ -21,7 +21,7 @@ trait TimeHelper
         \Minz\Time::unfreeze();
     }
 
-    public function freeze(\DateTimeInterface $datetime): void
+    public function freeze(?\DateTimeInterface $datetime = null): void
     {
         \Minz\Time::freeze($datetime);
     }
