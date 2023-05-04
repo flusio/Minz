@@ -17,6 +17,16 @@ class ValidableTest extends TestCase
         $this->assertSame([], $errors);
     }
 
+    public function testValidateDoesNotFailIfEmptyAndOptional(): void
+    {
+        $model = new models\ValidableOptionalModel();
+        $model->nickname = '';
+
+        $errors = $model->validate(format: false);
+
+        $this->assertEquals([], $errors);
+    }
+
     public function testValidateFailsIfEmpty(): void
     {
         $model = new models\ValidableModel();

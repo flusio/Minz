@@ -24,6 +24,9 @@ namespace Minz\Validable;
  * string representation will be used. For instance the length of the number 42
  * is 2.
  *
+ * Note that the "null" and empty values are considered as valid in order to
+ * accept optional values.
+ *
  * @author  Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -43,6 +46,12 @@ class Length extends Check
 
     public function assert(): bool
     {
+        $value = $this->getValue();
+
+        if ($value === null || $value === '') {
+            return true;
+        }
+
         $length = $this->getLength();
 
         if ($this->min !== null && $length < $this->min) {

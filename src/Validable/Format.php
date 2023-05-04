@@ -20,6 +20,9 @@ namespace Minz\Validable;
  *         public string $nickname;
  *     }
  *
+ * Note that the "null" and empty values are considered as valid in order to
+ * accept optional values.
+ *
  * @see https://www.php.net/manual/function.preg-match.php
  *
  * @author  Marien Fressinaud <dev@marienfressinaud.fr>
@@ -39,6 +42,10 @@ class Format extends Check
     public function assert(): bool
     {
         $value = $this->getValue();
+
+        if ($value === null || $value === '') {
+            return true;
+        }
 
         if (!is_string($value)) {
             return false;
