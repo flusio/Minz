@@ -29,11 +29,10 @@ namespace Minz;
  *     $errors = $user->validate();
  *
  * The errors array is indexed by the concerned properties. Multiple errors can
- * concern one property. Each error is represented by a code (i.e. the check
- * class name) and the message given in parameter.
+ * concern one property. All the errors are concatenated in a single string.
  *
- * You can pass `true` to `validate()` so the errors messages are concatenated
- * in a single string.
+ * If you need to get individual errors with their code (i.e. the check
+ * class name), you can pass `false` to `validate()`
  *
  * If there are no errors, validate returns an empty array.
  *
@@ -47,7 +46,7 @@ trait Validable
     /**
      * @return array<string, ValidableError[]|string>
      */
-    public function validate(bool $format = false): array
+    public function validate(bool $format = true): array
     {
         // Create a ReflectionClass to find all the checkable properties.
         $classReflection = new \ReflectionClass(self::class);

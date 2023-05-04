@@ -12,7 +12,7 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'Alix';
 
-        $errors = $model->validate();
+        $errors = $model->validate(format: false);
 
         $this->assertSame([], $errors);
     }
@@ -22,7 +22,7 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = '';
 
-        $errors = $model->validate();
+        $errors = $model->validate(format: false);
 
         $this->assertEquals([
             'nickname' => [
@@ -36,7 +36,7 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = str_repeat('a', 50);
 
-        $errors = $model->validate();
+        $errors = $model->validate(format: false);
 
         $this->assertEquals([
             'nickname' => [
@@ -50,7 +50,7 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'Alix Hambourg';
 
-        $errors = $model->validate();
+        $errors = $model->validate(format: false);
 
         $this->assertEquals([
             'nickname' => [
@@ -64,7 +64,7 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'Alix Hambourg' . str_repeat('a', 50);
 
-        $errors = $model->validate();
+        $errors = $model->validate(format: false);
 
         $this->assertEquals([
             'nickname' => [
@@ -74,12 +74,12 @@ class ValidableTest extends TestCase
         ], $errors);
     }
 
-    public function testValidateCanFormatErrors(): void
+    public function testValidateFormatErrorsByDefault(): void
     {
         $model = new models\ValidableModel();
         $model->nickname = 'Alix Hambourg' . str_repeat('a', 50);
 
-        $errors = $model->validate(format: true);
+        $errors = $model->validate();
 
         $this->assertEquals([
             'nickname' => (
