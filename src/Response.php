@@ -112,7 +112,7 @@ use Minz\Output;
  *
  * @phpstan-type ResponseHeaders array<string, ResponseHeader>
  *
- * @phpstan-type ResponseHeader string|string[]
+ * @phpstan-type ResponseHeader string|array<string, string>
  *
  * @phpstan-type ResponseCookies array<string, ResponseCookie>
  *
