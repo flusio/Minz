@@ -336,7 +336,7 @@ namespace App;
 
 class Application
 {
-    public function __construct()
+    public function run($request)
     {
         // This is where we’ll declare our routes
         $router = new \Minz\Router();
@@ -346,10 +346,7 @@ class Application
         $router->addRoute('GET', '/', 'Home#show');
 
         \Minz\Engine::init($router);
-    }
 
-    public function run($request)
-    {
         return \Minz\Engine::run($request);
     }
 }
