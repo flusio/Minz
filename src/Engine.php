@@ -136,6 +136,10 @@ class Engine
      */
     public static function startSession(string $samesite = 'Lax'): void
     {
+        if (session_status() !== PHP_SESSION_NONE) {
+            return;
+        }
+
         $url_options = Configuration::$url_options;
         session_name(Configuration::$app_name);
 
@@ -156,6 +160,7 @@ class Engine
         session_set_cookie_params($cookie_params);
         session_start();
     }
+
     /**
      * This method tries to always return a response to the user. If an error
      * happens in the logic of the application, a response with the adequate
