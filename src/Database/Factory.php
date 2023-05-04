@@ -20,11 +20,12 @@ namespace Minz\Database;
  *
  *     class RabbitFactory extends Factory
  *     {
- *         public static function model() {
+ *         public static function model(): string
+ *         {
  *             return \App\models\Rabbit::class;
  *         }
  *
- *         public static function values()
+ *         public static function values(): array
  *         {
  *             return [
  *                 'name' => 'Bugs',
@@ -62,11 +63,12 @@ namespace Minz\Database;
  *
  *     class FriendFactory extends Factory
  *     {
- *         public static function model() {
+ *         public static function model(): string
+ *         {
  *             return \App\models\Friend::class;
  *         }
  *
- *         public static function values()
+ *         public static function values(): array
  *         {
  *             return [
  *                 'name' => 'Martin',
@@ -82,11 +84,12 @@ namespace Minz\Database;
  *
  *     class SequenceFactory extends Factory
  *     {
- *         public static function model() {
+ *         public static function model(): string
+ *         {
  *             return \App\models\SomeModel::class;
  *         }
  *
- *         public static function values()
+ *         public static function values(): array
  *         {
  *             return [
  *                 'int_sequence' => Factory::sequence(),
