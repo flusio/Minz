@@ -51,6 +51,7 @@ class RequestTest extends TestCase
             'users',
             'create',
             '--foo=bar',
+            '--foo-baz=qux',
             '--spam',
         ];
 
@@ -60,6 +61,7 @@ class RequestTest extends TestCase
         $this->assertSame('/users/create', $request->path());
         $this->assertSame('./cli', $request->param('bin'));
         $this->assertSame('bar', $request->param('foo'));
+        $this->assertSame('qux', $request->param('foo-baz'));
         $this->assertTrue($request->param('spam'));
     }
 

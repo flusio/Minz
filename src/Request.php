@@ -145,7 +145,7 @@ class Request
         // We need to skip the first argument which is the name of the script
         $arguments = array_slice($argv, 1);
         foreach ($arguments as $argument) {
-            $result = preg_match('/^--(?P<option>\w+)(=(?P<argument>.+))?$/sm', $argument, $matches);
+            $result = preg_match('/^--(?P<option>[\w\-]+)(=(?P<argument>.+))?$/sm', $argument, $matches);
             if ($result) {
                 $parameters[$matches['option']] = $matches['argument'] ?? true;
             } else {
