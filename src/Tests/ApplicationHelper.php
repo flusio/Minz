@@ -11,6 +11,7 @@ use Minz\Response;
  * @phpstan-import-type RequestMethod from Request
  * @phpstan-import-type RequestParameters from Request
  * @phpstan-import-type RequestHeaders from Request
+ * @phpstan-import-type ResponseReturnable from Response
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
@@ -57,8 +58,10 @@ trait ApplicationHelper
      * @param RequestMethod $method
      * @param RequestParameters $parameters
      * @param RequestHeaders $headers
+     *
+     * @return ResponseReturnable
      */
-    public function appRun(string $method, string $uri, array $parameters = [], array $headers = []): Response
+    public function appRun(string $method, string $uri, array $parameters = [], array $headers = []): mixed
     {
         if (!self::$application) {
             $app_name = \Minz\Configuration::$app_name;

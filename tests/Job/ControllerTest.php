@@ -355,22 +355,16 @@ class ControllerTest extends TestCase
             'stop-after' => 1,
         ]);
         $controller = new Controller();
-        $response_generator = $controller->watch($request);
+        $response = $controller->watch($request);
 
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, '[Job worker (all) started]');
 
-        $response_generator->next();
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
+        $response->next();
         $this->assertResponseCode($response, 200);
         $this->assertResponseContains($response, 'job#1 (AppTest\jobs\DummyJob): done');
 
-        $response_generator->next();
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
+        $response->next();
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, '[Job worker (all) stopped]');
     }
@@ -393,22 +387,16 @@ class ControllerTest extends TestCase
             'stop-after' => 1,
         ]);
         $controller = new Controller();
-        $response_generator = $controller->watch($request);
+        $response = $controller->watch($request);
 
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, '[Job worker (foo) started]');
 
-        $response_generator->next();
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
+        $response->next();
         $this->assertResponseCode($response, 200);
         $this->assertResponseContains($response, 'job#1 (AppTest\jobs\DummyJob): done');
 
-        $response_generator->next();
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
+        $response->next();
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, '[Job worker (foo) stopped]');
     }
@@ -429,22 +417,16 @@ class ControllerTest extends TestCase
             'stop-after' => 1,
         ]);
         $controller = new Controller();
-        $response_generator = $controller->watch($request);
+        $response = $controller->watch($request);
 
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, '[Job worker (foo) started]');
 
-        $response_generator->next();
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
+        $response->next();
         $this->assertResponseCode($response, 200);
         $this->assertResponseContains($response, 'job#1 (AppTest\jobs\DummyJob): done');
 
-        $response_generator->next();
-        /** @var \Minz\Response */
-        $response = $response_generator->current();
+        $response->next();
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, '[Job worker (foo) stopped]');
     }

@@ -34,9 +34,8 @@ class ControllerTest extends TestCase
         $this->assertFalse(file_exists($migrations_version_path));
 
         $request = new Request('CLI', '/');
-        $response_generator = self::$controller->setup($request);
+        $response = self::$controller->setup($request);
 
-        $response = $response_generator->current();
         $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'The system has been initialized.');
@@ -46,11 +45,10 @@ class ControllerTest extends TestCase
     public function testSetupWhenCallingTwice(): void
     {
         $request = new Request('CLI', '/');
-        $response_generator = self::$controller->setup($request);
-        $response_generator->current(); // action is not called if generator is not executed
+        $response = self::$controller->setup($request);
+        $response->current(); // action is not called if generator is not executed
 
-        $response_generator = self::$controller->setup($request);
-        $response = $response_generator->current();
+        $response = self::$controller->setup($request);
 
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'Your system is already up to date.');
@@ -63,8 +61,7 @@ class ControllerTest extends TestCase
         \Minz\Database::create();
 
         $request = new Request('CLI', '/');
-        $response_generator = self::$controller->setup($request);
-        $response = $response_generator->current();
+        $response = self::$controller->setup($request);
 
         $this->assertResponseCode($response, 200);
     }
@@ -76,16 +73,14 @@ class ControllerTest extends TestCase
         $request = new Request('CLI', '/', [
             'seed' => true,
         ]);
-        $response_generator = self::$controller->setup($request);
+        $response = self::$controller->setup($request);
 
-        $response = $response_generator->current();
         $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'The system has been initialized.');
         $this->assertTrue(file_exists($migrations_version_path));
 
-        $response_generator->next();
-        $response = $response_generator->current();
+        $response->next();
         $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'Seeds loaded.');
@@ -95,8 +90,8 @@ class ControllerTest extends TestCase
     {
         // Setup the application first.
         $request = new Request('CLI', '/');
-        $response_generator = self::$controller->setup($request);
-        $response_generator->current();
+        $response = self::$controller->setup($request);
+        $response->current(); // action is not called if generator is not executed
 
         $request = new Request('CLI', '/');
         $response = self::$controller->rollback($request);

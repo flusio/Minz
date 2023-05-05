@@ -645,7 +645,6 @@ class Response
     {
         if ($response instanceof \Generator) {
             $response_generator = $response;
-            /** @var Response */
             $response = $response_generator->current();
         }
 
@@ -692,7 +691,6 @@ class Response
     {
         if ($response instanceof \Generator) {
             $response_generator = $response;
-            /** @var Response */
             $response = $response_generator->current();
         }
 
