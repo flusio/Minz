@@ -83,8 +83,9 @@ class Controller
     public function watch(Request $request): \Generator
     {
         \pcntl_async_signals(true);
-        \pcntl_signal(SIGTERM, [$this, 'stopWatch']);
         \pcntl_signal(SIGINT, [$this, 'stopWatch']);
+        \pcntl_signal(SIGQUIT, [$this, 'stopWatch']);
+        \pcntl_signal(SIGTERM, [$this, 'stopWatch']);
 
         $this->is_watching = true;
 
