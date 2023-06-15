@@ -543,6 +543,10 @@ class Configuration
             );
         }
 
+        if (!isset($mailer['type'])) {
+            $mailer['type'] = 'mail';
+        }
+
         if (!in_array($mailer['type'], self::VALID_MAILER_TYPES)) {
             throw new Errors\ConfigurationError(
                 "{$mailer['type']} is not a valid mailer type."
@@ -550,7 +554,7 @@ class Configuration
         }
 
         $clean_mailer = [
-            'type' => $mailer['type'] ?? 'mail',
+            'type' => $mailer['type'],
             'from' => $mailer['from'] ?? 'root@localhost',
             'debug' => $environment === 'development' ? 2 : 0,
         ];
