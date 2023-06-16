@@ -163,17 +163,17 @@ class Helper
             if (
                 $column['type'] === 'DateTimeImmutable' &&
                 isset($column['format']) &&
-                is_string($value)
+                (is_string($value) || is_int($value))
             ) {
                 $date = \DateTimeImmutable::createFromFormat(
                     $column['format'],
-                    $value
+                    (string) $value
                 );
                 $converted_values[$property] = $date;
-            } elseif ($column['type'] === 'int') {
+            } elseif ($column['type'] === 'int' && $value !== null) {
                 $integer = filter_var($value, FILTER_VALIDATE_INT);
                 $converted_values[$property] = $integer;
-            } elseif ($column['type'] === 'bool') {
+            } elseif ($column['type'] === 'bool' && $value !== null) {
                 $boolean = filter_var($value, FILTER_VALIDATE_BOOLEAN);
                 $converted_values[$property] = $boolean;
             } elseif ($column['type'] === 'json' && is_string($value)) {
