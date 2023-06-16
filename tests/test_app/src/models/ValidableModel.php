@@ -16,6 +16,9 @@ class ValidableModel
     #[Validable\Email(message: 'Choose a valid email.')]
     public ?string $email = null;
 
+    #[Validable\Url(message: 'Choose a valid URL.')]
+    public ?string $website = null;
+
     #[Validable\Inclusion(in: ['admin', 'user'], message: 'Choose a valid role.')]
     public ?string $role = null;
 

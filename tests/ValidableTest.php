@@ -98,6 +98,21 @@ class ValidableTest extends TestCase
         ], $errors);
     }
 
+    public function testValidateFailsWithInvalidUrl(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix';
+        $model->website = 'not an URL';
+
+        $errors = $model->validate(format: false);
+
+        $this->assertSame([
+            'website' => [
+                ['Minz\\Validable\\Url', 'Choose a valid URL.'],
+            ],
+        ], $errors);
+    }
+
     public function testValidateFailsWithInvalidInclusion(): void
     {
         $model = new models\ValidableModel();
