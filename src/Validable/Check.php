@@ -50,6 +50,12 @@ abstract class Check
 
     public function getMessage(): string
     {
-        return $this->message;
+        $value = $this->getValue();
+
+        return str_replace(
+            ['{value}'],
+            [$value],
+            $this->message,
+        );
     }
 }

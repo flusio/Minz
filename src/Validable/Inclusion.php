@@ -65,15 +65,4 @@ class Inclusion extends Check
 
         return in_array($value, $accepted_values);
     }
-
-    public function getMessage(): string
-    {
-        $value = $this->getValue();
-
-        return str_replace(
-            ['{value}'],
-            [$value],
-            $this->message,
-        );
-    }
 }
