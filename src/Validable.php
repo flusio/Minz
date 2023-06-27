@@ -36,6 +36,10 @@ namespace Minz;
  *
  * If there are no errors, validate returns an empty array.
  *
+ * You can mark and translate the messages with gettext with the Translatable
+ *
+ * @see \Minz\Translatable
+ *
  * @phpstan-type ValidableError array{string, string}
  *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>

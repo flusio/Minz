@@ -66,7 +66,9 @@ Minz.** You’ll often have to interact with them.
     - [`\Minz\Validable\Length`](/src/Validable/Length.php) allows to check the
       min and/or max length of a string;
     - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check
-      that a property is present (not null nor an empty string).
+      that a property is present (not null nor an empty string);
+    - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL
+      addresses.
 
 ## Additional classes
 
@@ -82,6 +84,8 @@ Minz.** You’ll often have to interact with them.
 - [`\Minz\Mailer`](/src/Mailer.php) is a wrapper around [PHPMailer](/lib/PHPMailer)
   to send emails;
 - [`\Minz\File`](/src/File.php) abstracts uploaded files;
+- [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message
+  to be translated.
 
 The three last classes are very useful during tests!
 
