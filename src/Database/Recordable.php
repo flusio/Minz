@@ -312,7 +312,10 @@ trait Recordable
 
         $pk_column = self::primaryKeyColumn();
         $inserted_pk_value = $values[$pk_column] ?? null;
-        $database_pk_value = $database->lastInsertId();
+        $database_pk_value = null;
+        if ($inserted_pk_value === null) {
+            $database_pk_value = $database->lastInsertId();
+        }
 
         if (is_string($inserted_pk_value) || is_int($inserted_pk_value)) {
             return $inserted_pk_value;
