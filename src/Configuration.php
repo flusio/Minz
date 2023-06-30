@@ -91,6 +91,8 @@ namespace Minz;
  *     'path': string,
  * }
  *
+ * @phpstan-type ConfigurationJobsAdapter value-of<self::VALID_JOBS_ADAPTERS>
+ *
  * @author Marien Fressinaud <dev@marienfressinaud.fr>
  * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
@@ -101,6 +103,8 @@ class Configuration
     private const VALID_DATABASE_TYPES = ['sqlite', 'pgsql'];
 
     private const VALID_MAILER_TYPES = ['mail', 'smtp', 'test'];
+
+    private const VALID_JOBS_ADAPTERS = ['database', 'test'];
 
     /**
      * AUTOMATIC VARIABLES
@@ -238,6 +242,16 @@ class Configuration
     public static array $mailer;
 
     /**
+     * Specify the adapter of the jobs mechanism.
+     *
+     * If set to `database`, the jobs are stored in database.
+     * If set to `test`, the jobs are immediately executed.
+     *
+     * @var ConfigurationJobsAdapter
+     */
+    public static string $jobs_adapter;
+
+    /**
      * Specify if syslog must output \Minz\Log calls to the console (default is `false`)
      */
     public static bool $no_syslog_output;
@@ -326,6 +340,11 @@ class Configuration
         self::$tmp_path = $raw_configuration['tmp_path'] ?? $default_tmp_path;
         self::$database = self::getDatabase($raw_configuration);
         self::$mailer = self::getMailer($raw_configuration, $environment);
+        $jobs_adapter = $raw_configuration['jobs_adapter'] ?? 'database';
+        if (!in_array($jobs_adapter, self::VALID_JOBS_ADAPTERS)) {
+            $jobs_adapter = 'database';
+        }
+        self::$jobs_adapter = $jobs_adapter;
         self::$no_syslog_output = $raw_configuration['no_syslog_output'] ?? false;
     }
 

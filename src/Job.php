@@ -36,6 +36,17 @@ namespace Minz;
  *     $perform_at = \Minz\Time::fromNow(1, 'hour');
  *     $my_job->performLater($perform_at, 'foo');
  *
+ * During tests, set the \Minz\Configuration::$jobs_adapter value to 'test' in
+ * order to always execute the jobs:
+ *
+ *     $my_job = new MyJob();
+ *
+ *     \Minz\Configuration::$jobs_adapter = 'test';
+ *
+ *     // the job is executed immediately
+ *     $perform_at = \Minz\Time::fromNow(1, 'hour');
+ *     $my_job->performLater($perform_at, 'foo');
+ *
  * You can create a job that will repeat over time (similarly to a cron job).
  * For that, you need to specify a frequency:
  *
@@ -174,6 +185,16 @@ class Job
      */
     public function performLater(\DateTimeImmutable $perform_at, mixed ...$args): void
     {
+        $jobs_adapter = \Minz\Configuration::$jobs_adapter;
+        if ($jobs_adapter === 'test') {
+            if (!is_callable([$this, 'perform'])) {
+                throw new \Exception("{$this->name} class does not declare any perform() method.");
+            }
+
+            $this->perform(...$args);
+            return;
+        }
+
         $this->perform_at = $perform_at;
         $this->args = $args;
         $this->save();
