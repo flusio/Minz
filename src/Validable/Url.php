@@ -50,6 +50,10 @@ class Url extends Check
             return false;
         }
 
+        if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+
         $url_components = parse_url($value);
 
         if (
