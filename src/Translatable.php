@@ -7,6 +7,7 @@ namespace Minz;
  *
  * This class is only useful in PHP Attributes to allow gettext to know that a
  * message is translatable.
+ * Note this is only usable with PHP 8.1+!
  *
  * For instance, in a model with a "Validable" email, you may want to translate
  * the message of the verification. This is not directly possible with the
