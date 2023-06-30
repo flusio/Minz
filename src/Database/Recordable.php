@@ -327,6 +327,36 @@ trait Recordable
     }
 
     /**
+     * Return a model by criteria, or create it if it doesn't exist.
+     *
+     * If several models match the criteria, only the first is returned.
+     *
+     * @param DatabaseCriteria $criteria
+     * @param ModelValues $values_for_create
+     */
+    public static function findOrCreateBy(array $criteria, array $values_for_create = []): self
+    {
+        $model = self::findBy($criteria);
+
+        if ($model) {
+            return $model;
+        }
+
+        $values = array_merge($criteria, $values_for_create);
+
+        $class_reflection = new \ReflectionClass(static::class);
+        $model = $class_reflection->newInstanceWithoutConstructor();
+
+        foreach ($values as $property => $value) {
+            $model->$property = $value;
+        }
+
+        $model->save();
+
+        return $model;
+    }
+
+    /**
      * Update a model in database using the given values.
      *
      * It returns true if the update worked.

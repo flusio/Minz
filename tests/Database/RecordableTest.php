@@ -255,6 +255,39 @@ class RecordableTest extends TestCase
         $this->assertNull($friend);
     }
 
+    public function testFindOrCreateBy(): void
+    {
+        $this->assertSame(0, models\Friend::count());
+
+        $friend = models\Friend::findOrCreateBy([
+            'name' => 'Alix',
+        ], [
+            'address' => '42 rue du Terrier',
+        ]);
+
+        $this->assertSame(1, models\Friend::count());
+        $this->assertSame('Alix', $friend->name);
+        $this->assertSame('42 rue du Terrier', $friend->address);
+    }
+
+    public function testFindOrCreateByWithExistingModel(): void
+    {
+        models\Friend::create([
+            'name' => 'Alix',
+            'address' => '24 rue du Clapier',
+        ]);
+
+        $friend = models\Friend::findOrCreateBy([
+            'name' => 'Alix',
+        ], [
+            'address' => '42 rue du Terrier',
+        ]);
+
+        $this->assertSame(1, models\Friend::count());
+        $this->assertSame('Alix', $friend->name);
+        $this->assertSame('24 rue du Clapier', $friend->address);
+    }
+
     public function testTake(): void
     {
         /** @var int $id */
