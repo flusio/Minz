@@ -434,6 +434,21 @@ trait Recordable
     }
 
     /**
+     * Delete all the models and return the number of deleted models.
+     */
+    public static function deleteAll(): int
+    {
+        $table_name = self::tableName();
+
+        $sql = <<<SQL
+            DELETE FROM {$table_name}
+        SQL;
+
+        $database = \Minz\Database::get();
+        return $database->exec($sql);
+    }
+
+    /**
      * Save the current model in database.
      *
      * If the model is not persisted yet, it will be created. Otherwise, it

@@ -463,6 +463,21 @@ class RecordableTest extends TestCase
         $this->assertSame(2, models\Friend::count());
     }
 
+    public function testDeleteAll(): void
+    {
+        models\Friend::create([
+            'name' => 'Alix',
+        ]);
+        models\Friend::create([
+            'name' => 'Benedict',
+        ]);
+
+        $result = models\Friend::deleteAll();
+
+        $this->assertSame(2, $result);
+        $this->assertSame(0, models\Friend::count());
+    }
+
     public function testSaveCreatesNewModel(): void
     {
         $datetime = new \DateTimeImmutable('2023-04-18');
