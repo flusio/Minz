@@ -551,25 +551,27 @@ class RecordableTest extends TestCase
         $this->assertSame('Alix', $friend->name);
     }
 
-    public function testReloadReturnsNullIfTheModelIsNotPersisted(): void
+    public function testReloadFailsIfTheModelIsNotPersisted(): void
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("AppTest\\models\\Friend model is not persisted");
+
         $friend = new models\Friend();
 
-        $friend = $friend->reload();
-
-        $this->assertNull($friend);
+        $friend->reload();
     }
 
-    public function testReloadReturnsNullIfTheModelHasBeenDeleted(): void
+    public function testReloadFailsIfTheModelHasBeenDeleted(): void
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("AppTest\\models\\Friend model #1 no longer exists");
+
         $friend = new models\Friend();
         $friend->name = 'Alix';
         $friend->save();
         models\Friend::delete($friend->id);
 
-        $friend = $friend->reload();
-
-        $this->assertNull($friend);
+        $friend->reload();
     }
 
     public function testRemoveDeletesTheModel(): void

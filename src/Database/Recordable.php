@@ -505,18 +505,27 @@ trait Recordable
     /**
      * Reload the current model from the database.
      *
-     * It returns null if the model is not persisted.
+     * @throws \Exception
+     *     If the model is not persisted or no longer exists.
      */
-    public function reload(): ?self
+    public function reload(): self
     {
         $pk_column = self::primaryKeyColumn();
 
         if (!$this->is_persisted) {
-            return null;
+            $class = self::class;
+            throw new \Exception("{$class} model is not persisted");
         }
 
         $pk_value = $this->$pk_column;
-        return self::find($pk_value);
+        $model = self::find($pk_value);
+
+        if ($model === null) {
+            $class = self::class;
+            throw new \Exception("{$class} model #{$pk_value} no longer exists");
+        }
+
+        return $model;
     }
 
     /**
