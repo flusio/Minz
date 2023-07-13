@@ -56,7 +56,7 @@ class File
     /**
      * Return the content of the file, or false if there is an error.
      *
-     * @return string|boolean
+     * @return string|false
      */
     public function content(): mixed
     {

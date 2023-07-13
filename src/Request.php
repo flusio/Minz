@@ -285,6 +285,13 @@ class Request
         $this->parameters[$name] = $value;
     }
 
+    /**
+     * @template T of mixed
+     *
+     * @param T $default
+     *
+     * @return string|T
+     */
     public function param(string $name, mixed $default = null): mixed
     {
         if (isset($this->parameters[$name])) {
