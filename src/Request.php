@@ -315,6 +315,12 @@ class Request
 
     /**
      * Return a parameter value as an integer.
+     *
+     * @template T of ?int
+     *
+     * @param T $default
+     *
+     * @return int|T
      */
     public function paramInteger(string $name, ?int $default = null): ?int
     {
@@ -358,9 +364,11 @@ class Request
      *
      * If the parameter cannot be parsed as Json, default value is returned.
      *
-     * @param mixed[]|null $default
+     * @template T of mixed[]|null
      *
-     * @return mixed[]|null
+     * @param T $default
+     *
+     * @return mixed[]|T
      */
     public function paramJson(string $name, mixed $default = null): ?array
     {
