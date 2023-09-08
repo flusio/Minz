@@ -129,6 +129,22 @@ class RecordableTest extends TestCase
         $this->assertTrue($friends[1]->isPersisted());
     }
 
+    public function testListAllWithOrderBy(): void
+    {
+        models\Friend::create([
+            'name' => 'Benedict',
+        ]);
+        models\Friend::create([
+            'name' => 'Alix',
+        ]);
+
+        $friends = models\Friend::listAll('name ASC');
+
+        $this->assertSame(2, count($friends));
+        $this->assertSame('Alix', $friends[0]->name);
+        $this->assertSame('Benedict', $friends[1]->name);
+    }
+
     public function testListBy(): void
     {
         models\Friend::create([

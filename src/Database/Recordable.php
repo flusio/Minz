@@ -97,9 +97,9 @@ trait Recordable
      *
      * @return self[]
      */
-    public static function listAll(): array
+    public static function listAll(?string $order_by = null): array
     {
-        return self::listBy([]);
+        return self::listBy([], $order_by);
     }
 
     /**
@@ -109,7 +109,7 @@ trait Recordable
      *
      * @return self[]
      */
-    public static function listBy(array $criteria): array
+    public static function listBy(array $criteria, ?string $order_by = null): array
     {
         $table_name = self::tableName();
         list($where_statement, $parameters) = Helper::buildWhere($criteria);
@@ -118,9 +118,15 @@ trait Recordable
             $where_statement = "WHERE {$where_statement}";
         }
 
+        $order_by_statement = '';
+        if ($order_by) {
+            $order_by_statement = "ORDER BY {$order_by}";
+        }
+
         $sql = <<<SQL
             SELECT * FROM {$table_name}
             {$where_statement}
+            {$order_by_statement}
         SQL;
 
         $database = \Minz\Database::get();
