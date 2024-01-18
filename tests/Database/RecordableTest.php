@@ -206,6 +206,26 @@ class RecordableTest extends TestCase
         $this->assertTrue($friends[0]->isPersisted());
     }
 
+    public function testListByWithFalse(): void
+    {
+        models\Friend::create([
+            'name' => 'Alix',
+            'is_kind' => true,
+        ]);
+        models\Friend::create([
+            'name' => 'Benedict',
+            'is_kind' => false,
+        ]);
+
+        $friends = models\Friend::listBy([
+            'is_kind' => false,
+        ]);
+
+        $this->assertSame(1, count($friends));
+        $this->assertSame('Benedict', $friends[0]->name);
+        $this->assertTrue($friends[0]->isPersisted());
+    }
+
     public function testFind(): void
     {
         /** @var int $id */

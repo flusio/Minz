@@ -53,6 +53,11 @@ class Helper
                 $count_parameters = count($parameters);
                 /** @var literal-string */
                 $parameter_key = "param{$count_parameters}";
+
+                if (is_bool($condition)) {
+                    $condition = (int)$condition;
+                }
+
                 $parameters[$parameter_key] = $condition;
 
                 $where_exprs[] = "{$property} = :{$parameter_key}";
