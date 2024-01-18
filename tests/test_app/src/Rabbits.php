@@ -2,6 +2,7 @@
 
 namespace AppTest;
 
+use Minz\Controller;
 use Minz\Request;
 use Minz\Response;
 
@@ -36,5 +37,16 @@ class Rabbits
     public function noResponse(Request $request): string
     {
         return 'It’s a string, not a Response!';
+    }
+
+    public function handledError(Request $request): Response
+    {
+        throw new RabbitNotFoundError();
+    }
+
+    #[Controller\ErrorHandler(\Exception::class, only: ['handledError'])]
+    public function returnNotFound(): Response
+    {
+        return Response::text(404, 'Rabbit not found.');
     }
 }

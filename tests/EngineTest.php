@@ -38,6 +38,21 @@ class EngineTest extends TestCase
         $this->assertSame('42', $request->param('id'));
     }
 
+    public function testRunWithErrorHandler(): void
+    {
+        $router = new \Minz\Router();
+        $router->addRoute('GET', '/rabbits/with-error', 'Rabbits#handledError');
+        \Minz\Engine::init($router);
+        $request = new \Minz\Request('GET', '/rabbits/with-error');
+
+        /** @var Response */
+        $response = \Minz\Engine::run($request);
+
+        $output = $response->render();
+        $this->assertSame(404, $response->code());
+        $this->assertSame('Rabbit not found.', $output);
+    }
+
     public function testRunReturnsErrorIfRouteNotFound(): void
     {
         $router = new \Minz\Router();
