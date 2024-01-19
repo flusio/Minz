@@ -497,7 +497,7 @@ class Response
         }
 
         $previous_sources = $this->headers['Content-Security-Policy'][$directive] ?? '';
-        $sources = $previous_sources . ' ' . $sources;
+        $sources = trim($previous_sources . ' ' . $sources);
         $this->setContentSecurityPolicy($directive, $sources);
     }
 
