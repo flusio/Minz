@@ -468,7 +468,7 @@ class Response
     }
 
     /**
-     * Change a Content-Security-Policy directive.
+     * Change sources of a Content-Security-Policy directive.
      *
      * `Content-Security-Policy` header allows to control resources a client is
      * allowed to load.
@@ -482,6 +482,23 @@ class Response
         }
 
         $this->headers['Content-Security-Policy'][$directive] = $sources;
+    }
+
+    /**
+     * Add sources to a Content-Security-Policy directive.
+     *
+     * Contrary to the setContentSecurityPolicy, it doesn't override the
+     * previous directive.
+     */
+    public function addContentSecurityPolicy(string $directive, string $sources): void
+    {
+        if (!is_array($this->headers['Content-Security-Policy'])) {
+            $this->headers['Content-Security-Policy'] = [];
+        }
+
+        $previous_sources = $this->headers['Content-Security-Policy'][$directive] ?? '';
+        $sources = $previous_sources . ' ' . $sources;
+        $this->setContentSecurityPolicy($directive, $sources);
     }
 
     /**
