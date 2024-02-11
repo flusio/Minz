@@ -1,6 +1,6 @@
 # Minz
 
-Minz is yet another PHP 8.0+ framework. **It has no big ambitions and it is
+Minz is yet another PHP 8.1+ framework. **It has no big ambitions and it is
 designed with my personal needs in mind.**
 
 What I like in Minz is:

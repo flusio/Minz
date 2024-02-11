@@ -6,7 +6,7 @@ in the end, Minz should be very helpful.
 
 In this guide, I’ll assume that you use Linux, that you understand basic
 command line instructions and that you’ve already setup your Web development
-environment with PHP 8.0+. Are we good?
+environment with PHP 8.1+. Are we good?
 
 In this chapter, we’ll simply learn how to display (and test!) “Hello World!”
 when opening the home page.
