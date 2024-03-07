@@ -21,7 +21,7 @@ namespace Minz;
  * Finally, check the value of the CSRF token in your controller:
  *
  *     $csrf = $request->param('csrf');
- *     if (!\Minz\Csrf::valide($csrf)) {
+ *     if (!\Minz\Csrf::validate($csrf)) {
  *         return \Minz\Response::badRequest();
  *     }
  *
