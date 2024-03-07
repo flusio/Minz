@@ -62,6 +62,7 @@ namespace Minz;
  * ```php
  * $boolean = $request->paramBoolean('boolean-param');
  * $integer = $request->paramInteger('integer-param');
+ * $datetime = $request->paramDatetime('datetime-param');
  * $array = $request->paramArray('array-param');
  * $json = $request->paramJson('json-param');
  * $file = $request->paramFile('file-param');
@@ -285,6 +286,11 @@ class Request
         $this->parameters[$name] = $value;
     }
 
+    public function hasParam(string $name): bool
+    {
+        return isset($this->parameters[$name]);
+    }
+
     /**
      * @template T of mixed
      *
@@ -326,6 +332,34 @@ class Request
     {
         if (isset($this->parameters[$name])) {
             return intval($this->parameters[$name]);
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Return a parameter value as a DateTimeImmutable.
+     *
+     * @template T of ?\DateTimeImmutable
+     *
+     * @param T $default
+     *
+     * @return \DateTimeImmutable|T
+     */
+    public function paramDatetime(
+        string $name,
+        ?\DateTimeImmutable $default = null,
+        string $format = 'Y-m-d\\TH:i'
+    ): ?\DateTimeImmutable {
+        if (isset($this->parameters[$name])) {
+            $value = strval($this->parameters[$name]);
+            $datetime = \DateTimeImmutable::createFromFormat($format, $value);
+
+            if ($datetime === false) {
+                return $default;
+            }
+
+            return $datetime;
         } else {
             return $default;
         }

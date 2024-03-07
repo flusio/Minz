@@ -137,6 +137,27 @@ class RequestTest extends TestCase
         $this->assertSame('/rabbits', $path);
     }
 
+    public function testHasParamWithExistingParam(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => 'bar'
+        ]);
+
+        $result = $request->hasParam('foo');
+
+        $this->assertTrue($result);
+    }
+
+    public function testHasParamWithMissingParam(): void
+    {
+        $request = new Request('GET', '/', [
+        ]);
+
+        $result = $request->hasParam('foo');
+
+        $this->assertFalse($result);
+    }
+
     public function testParam(): void
     {
         $request = new Request('GET', '/', [
@@ -195,6 +216,42 @@ class RequestTest extends TestCase
         $foo = $request->paramInteger('foo', 42);
 
         $this->assertSame(42, $foo);
+    }
+
+    public function testParamDatetime(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => '2024-03-07T16:00'
+        ]);
+
+        $foo = $request->paramDatetime('foo');
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $foo);
+        $this->assertSame('1709827200', $foo->format('U'));
+    }
+
+    public function testParamDatetimeWithCustomFormat(): void
+    {
+        $request = new Request('GET', '/', [
+            'foo' => '2024-03-07'
+        ]);
+
+        $foo = $request->paramDatetime('foo', format: 'Y-m-d');
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $foo);
+        $this->assertSame('2024-03-07', $foo->format('Y-m-d'));
+    }
+
+    public function testParamDatetimeWithDefaultValue(): void
+    {
+        $request = new Request('GET', '/', [
+        ]);
+        $default_value = new \DateTimeImmutable('2024-03-07');
+
+        $foo = $request->paramDatetime('foo', default: $default_value);
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $foo);
+        $this->assertSame('2024-03-07', $foo->format('Y-m-d'));
     }
 
     public function testParamArray(): void
