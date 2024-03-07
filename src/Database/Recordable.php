@@ -13,7 +13,7 @@ use Minz\Errors;
  *
  * Recordable uses the \Minz\Database class to execute the SQL requests.
  *
- * It is usually used with Recordable and Column.
+ * It is usually used with the Table and Column attributes.
  *
  *     use Minz\Database;
  *
