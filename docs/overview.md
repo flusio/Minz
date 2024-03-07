@@ -72,12 +72,15 @@ Minz.** You’ll often have to interact with them.
 
 ## Additional classes
 
-- **[`\Minz\Csrf`](/src/Csrf.php) protects you from [Cross-Site Request
-  Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);**
+- **[`\Minz\Form`](/src/Form.php) provides an easy way to handle forms.** It is used alongside with:
+    - **[`\Minz\Form\Field`](/src/Form/Field.php) to declare fields in the forms;**
+    - **[`\Minz\Form\Csrf`](/src/Form/Csrf.php) to protect against CSRF attacks in the forms;**
+    - [`\Minz\Form\Check`](/src/Form/Check.php) to declare custom checks in the forms;
 - **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
 - **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs,** it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php);
 - **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
 - **[`\Minz\Controller\ErrorHandler`](/src/Controller/ErrorHandler.php) allows to execute code on errors triggered in controllers;**
+- [`\Minz\Csrf`](/src/Csrf.php) protects you from [Cross-Site Request Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);
 - [`\Minz\Email`](/src/Email.php) is an utility class to sanitize and validate emails;
 - [`\Minz\Flash`](/src/Flash.php) to pass messages from a page to another through redirections;
 - [`\Minz\Random`](/src/Random.php) to generate random values;
