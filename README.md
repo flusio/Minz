@@ -74,14 +74,10 @@ It's still fun to develop a framework from scratch… and it takes some time too
 
 Today, I use Minz in several projects:
 
-- [flusio](https://github.com/flusio/flusio): a feed aggregator and social
-  bookmarking tool;
-- [flus.fr](https://github.com/flusio/flus.fr): the website of the Web service
-  I provide for flusio;
-- [taust](https://github.com/flusio/taust): a monitoring system easy to setup
-  (provided as a proof of concept);
-- [Webubbub](https://github.com/flusio/Webubbub): a simple [WebSub](https://www.w3.org/TR/websub/)
-  hub.
+- [Flus](https://github.com/flusio/Flus): a feed aggregator and social bookmarking tool;
+- [flus.fr](https://github.com/flusio/flus.fr): the website of the Web service I provide for Flus;
+- [taust](https://github.com/flusio/taust): a monitoring system easy to setup (provided as a proof of concept);
+- [Webubbub](https://github.com/flusio/Webubbub): a simple [WebSub](https://www.w3.org/TR/websub/) hub.
 
 ## License
 
