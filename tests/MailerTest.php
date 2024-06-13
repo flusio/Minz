@@ -9,9 +9,7 @@ class MailerTest extends TestCase
 {
     use Tests\MailerAsserts;
 
-    /**
-     * @before
-     */
+    #[\PHPUnit\Framework\Attributes\Before]
     public function resetTestMailer(): void
     {
         Tests\Mailer::clear();

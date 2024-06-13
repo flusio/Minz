@@ -75,9 +75,7 @@ class RouterTest extends TestCase
         $router->addRoute('GET', '/rabbits', 'rabbits#list#more');
     }
 
-    /**
-     * @dataProvider invalidMethodProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidMethodProvider')]
     public function testAddRouteFailsIfMethodIsInvalid(string $invalidMethod): void
     {
         $this->expectException(Errors\RoutingError::class);
@@ -201,9 +199,7 @@ class RouterTest extends TestCase
         $router->match('GET', '/rabbits/42/details');
     }
 
-    /**
-     * @dataProvider invalidMethodProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidMethodProvider')]
     public function testMatchFailsIfMethodIsInvalid(string $invalidMethod): void
     {
         $this->expectException(Errors\RoutingError::class);
@@ -271,9 +267,7 @@ class RouterTest extends TestCase
         $router->uriByPointer('GET', 'rabbits#list');
     }
 
-    /**
-     * @dataProvider invalidMethodProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidMethodProvider')]
     public function testUriByPointerFailsIfMethodIsInvalid(string $invalid_method): void
     {
         $this->expectException(Errors\RoutingError::class);
@@ -344,7 +338,7 @@ class RouterTest extends TestCase
     /**
      * @return array<array{string}>
      */
-    public function invalidMethodProvider(): array
+    public static function invalidMethodProvider(): array
     {
         return [
             ['invalid'],

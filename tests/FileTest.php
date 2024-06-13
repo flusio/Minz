@@ -38,9 +38,7 @@ class FileTest extends TestCase
         $this->assertStringContainsString('FOO=bar', $content);
     }
 
-    /**
-     * @dataProvider errorsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('errorsProvider')]
     public function testContentReturnsNothingIfInError(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
@@ -93,9 +91,7 @@ class FileTest extends TestCase
         $this->assertSame($tmp_destination, $file->filepath);
     }
 
-    /**
-     * @dataProvider errorsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('errorsProvider')]
     public function testMoveFailsIfInError(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
@@ -152,9 +148,7 @@ class FileTest extends TestCase
         $this->assertFalse($result);
     }
 
-    /**
-     * @dataProvider tooLargeErrorsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('tooLargeErrorsProvider')]
     public function testIsTooLargeWithTooLargeErrors(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
@@ -170,9 +164,7 @@ class FileTest extends TestCase
         $this->assertTrue($result);
     }
 
-    /**
-     * @dataProvider notTooLargeErrorsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('notTooLargeErrorsProvider')]
     public function testIsTooLargeWithNotTooLargeErrors(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
@@ -237,9 +229,7 @@ class FileTest extends TestCase
         $this->assertNull($file->error);
     }
 
-    /**
-     * @dataProvider errorsProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('errorsProvider')]
     public function testErrorIsSetIfNotOk(int $error): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
@@ -272,7 +262,7 @@ class FileTest extends TestCase
     /**
      * @return array<array{int}>
      */
-    public function errorsProvider(): array
+    public static function errorsProvider(): array
     {
         return [
             [UPLOAD_ERR_INI_SIZE],
@@ -288,7 +278,7 @@ class FileTest extends TestCase
     /**
      * @return array<array{int}>
      */
-    public function tooLargeErrorsProvider(): array
+    public static function tooLargeErrorsProvider(): array
     {
         return [
             [UPLOAD_ERR_INI_SIZE],
@@ -299,7 +289,7 @@ class FileTest extends TestCase
     /**
      * @return array<array{int}>
      */
-    public function notTooLargeErrorsProvider(): array
+    public static function notTooLargeErrorsProvider(): array
     {
         return [
             [UPLOAD_ERR_PARTIAL],

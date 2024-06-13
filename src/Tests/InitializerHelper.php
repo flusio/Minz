@@ -15,9 +15,8 @@ trait InitializerHelper
 
     /**
      * Load the schema from the configuration $schema_path.
-     *
-     * @beforeClass
      */
+    #[\PHPUnit\Framework\Attributes\BeforeClass]
     public static function loadSchema(): void
     {
         $schema_path = \Minz\Configuration::$schema_path;
@@ -32,9 +31,8 @@ trait InitializerHelper
 
     /**
      * Reset the database and load the schema.
-     *
-     * @before
      */
+    #[\PHPUnit\Framework\Attributes\Before]
     public function initDatabase(): void
     {
         if (\Minz\Configuration::$database && self::$schema) {
@@ -44,17 +42,13 @@ trait InitializerHelper
         }
     }
 
-    /**
-     * @before
-     */
+    #[\PHPUnit\Framework\Attributes\Before]
     public function resetSession(): void
     {
         session_unset();
     }
 
-    /**
-     * @before
-     */
+    #[\PHPUnit\Framework\Attributes\Before]
     public function resetTestMailer(): void
     {
         Mailer::clear();

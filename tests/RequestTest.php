@@ -112,9 +112,7 @@ class RequestTest extends TestCase
         $this->assertSame('GET', $method);
     }
 
-    /**
-     * @dataProvider requestToPathProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('requestToPathProvider')]
     public function testPath(string $requestUri, string $expectedPath): void
     {
         $request = new Request('GET', $requestUri);
@@ -410,9 +408,7 @@ class RequestTest extends TestCase
         $this->assertSame('baz', $foo);
     }
 
-    /**
-     * @dataProvider isAcceptingProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('isAcceptingProvider')]
     public function testIsAccepting(string $header, string $media, bool $expected): void
     {
         $request = new Request('GET', '/', [], [
@@ -479,7 +475,7 @@ class RequestTest extends TestCase
     /**
      * @return array<array{string, string}>
      */
-    public function requestToPathProvider(): array
+    public static function requestToPathProvider(): array
     {
         return [
             ['/', '/'],
@@ -502,7 +498,7 @@ class RequestTest extends TestCase
     /**
      * @return array<array{string, string, bool}>
      */
-    public function isAcceptingProvider(): array
+    public static function isAcceptingProvider(): array
     {
         return [
             ['text/html', 'text/html', true],

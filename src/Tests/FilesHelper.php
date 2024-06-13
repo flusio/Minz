@@ -12,9 +12,8 @@ trait FilesHelper
 {
     /**
      * Make sure the tmp folder exists.
-     *
-     * @beforeClass
      */
+    #[\PHPUnit\Framework\Attributes\BeforeClass]
     public static function createTmpFolder(): void
     {
         @mkdir(\Minz\Configuration::$tmp_path, 0777, true);

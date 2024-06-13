@@ -46,9 +46,8 @@ install: ## Install the dependencies
 test: ## Run the tests suite
 	DB_DSN=$(DB_DSN) DB_USERNAME=$(DB_USERNAME) DB_PASSWORD=$(DB_PASSWORD) \
 		$(PHP) ./vendor/bin/phpunit \
-		$(COVERAGE) --whitelist ./src \
-		--bootstrap ./tests/bootstrap.php \
-		--testdox \
+		-c .phpunit.xml \
+		$(COVERAGE) \
 		$(PHPUNIT_FILTER) \
 		$(PHPUNIT_FILE)
 

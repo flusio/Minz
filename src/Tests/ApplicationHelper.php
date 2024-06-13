@@ -30,9 +30,8 @@ trait ApplicationHelper
      *
      * The application class MUST declare a `run` method accepting a
      * \Minz\Request and returning a \Minz\Response.
-     *
-     * @beforeClass
      */
+    #[\PHPUnit\Framework\Attributes\BeforeClass]
     public static function loadApplication(): void
     {
         $app_name = \Minz\Configuration::$app_name;

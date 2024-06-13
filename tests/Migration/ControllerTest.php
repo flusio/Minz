@@ -11,9 +11,7 @@ class ControllerTest extends TestCase
 
     private static Controller $controller;
 
-    /**
-     * @beforeClass
-     */
+    #[\PHPUnit\Framework\Attributes\BeforeClass]
     public static function loadController(): void
     {
         self::$controller = new \AppTest\Migrations();

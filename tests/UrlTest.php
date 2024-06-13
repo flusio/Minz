@@ -49,9 +49,7 @@ class UrlTest extends TestCase
         $this->assertSame('/rabbits', $url);
     }
 
-    /**
-     * @dataProvider methodProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('methodProvider')]
     public function testForWithAnyVia(string $method): void
     {
         $router = new Router();
@@ -150,10 +148,9 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @dataProvider defaultPortProvider
-     *
      * @param 'http'|'https' $protocol
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('defaultPortProvider')]
     public function testAbsoluteForWithDefaultPort(string $protocol, int $port): void
     {
         Configuration::$url_options['host'] = 'my-domain.com';
@@ -200,7 +197,7 @@ class UrlTest extends TestCase
     /**
      * @return array<array{RequestMethod}>
      */
-    public function methodProvider(): array
+    public static function methodProvider(): array
     {
         return [
             ['GET'],
@@ -215,7 +212,7 @@ class UrlTest extends TestCase
     /**
      * @return array<array{'http'|'https', int}>
      */
-    public function defaultPortProvider(): array
+    public static function defaultPortProvider(): array
     {
         return [
             ['http', 80],

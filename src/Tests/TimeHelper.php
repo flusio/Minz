@@ -13,9 +13,7 @@ namespace Minz\Tests;
  */
 trait TimeHelper
 {
-    /**
-     * @after
-     */
+    #[\PHPUnit\Framework\Attributes\After]
     public function unfreeze(): void
     {
         \Minz\Time::unfreeze();
