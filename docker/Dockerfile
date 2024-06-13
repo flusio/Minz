@@ -1,4 +1,4 @@
-FROM php:8.1-cli
+FROM php:8.2-cli
 
 ENV COMPOSER_HOME /tmp
 
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
         libzip-dev \
         unzip \
         libpq-dev \
-    && pecl install xdebug-3.1.6 \
+    && pecl install xdebug \
     && docker-php-ext-configure intl \
     && docker-php-ext-install -j$(nproc) intl gettext pcntl zip pdo pdo_pgsql \
     && docker-php-ext-enable xdebug \
