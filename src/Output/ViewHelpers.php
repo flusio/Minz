@@ -134,6 +134,8 @@ class ViewHelpers
      *
      * @see https://www.php.net/manual/function.gettext
      * @see https://www.php.net/manual/function.vsprintf.php
+     *
+     * @param bool|float|int|string|null ...$args
      */
     public static function formatGettext(string $message, mixed ...$args): string
     {
@@ -145,6 +147,8 @@ class ViewHelpers
      *
      * @see https://www.php.net/manual/function.ngettext
      * @see https://www.php.net/manual/function.vsprintf.php
+     *
+     * @param bool|float|int|string|null ...$args
      */
     public static function formatNgettext(string $message1, string $message2, int $n, mixed ...$args): string
     {

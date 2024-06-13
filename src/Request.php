@@ -331,7 +331,13 @@ class Request
     public function paramInteger(string $name, ?int $default = null): ?int
     {
         if (isset($this->parameters[$name])) {
-            return intval($this->parameters[$name]);
+            $value = $this->parameters[$name];
+
+            if (!is_float($value) && !is_integer($value) && !is_string($value)) {
+                return $default;
+            }
+
+            return intval($value);
         } else {
             return $default;
         }
@@ -352,7 +358,12 @@ class Request
         string $format = 'Y-m-d\\TH:i'
     ): ?\DateTimeImmutable {
         if (isset($this->parameters[$name])) {
-            $value = strval($this->parameters[$name]);
+            $value = $this->parameters[$name];
+
+            if (!is_string($value)) {
+                return $default;
+            }
+
             $datetime = \DateTimeImmutable::createFromFormat($format, $value);
 
             if ($datetime === false) {
@@ -502,7 +513,12 @@ class Request
     {
         // No Accept header implies the user agent accepts any media type (cf.
         // the RFC 7231)
-        $accept_header = strval($this->header('HTTP_ACCEPT', '*/*'));
+        $accept_header = $this->header('HTTP_ACCEPT', '*/*');
+
+        if (!is_string($accept_header)) {
+            return false;
+        }
+
         $accept_medias = explode(',', $accept_header);
 
         list($media_type, $media_subtype) = explode('/', $media);

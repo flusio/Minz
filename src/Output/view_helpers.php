@@ -99,6 +99,8 @@ if (!function_exists('_d')) {
 if (!function_exists('_f')) {
     /**
      * @see \Minz\Output\ViewHelpers::formatGettext
+     *
+     * @param bool|float|int|string|null ...$args
      */
     function _f(string $message, mixed ...$args): string
     {
@@ -119,6 +121,8 @@ if (!function_exists('_n')) {
 if (!function_exists('_nf')) {
     /**
      * @see \Minz\Output\ViewHelpers::formatNgettext
+     *
+     * @param bool|float|int|string|null ...$args
      */
     function _nf(string $message1, string $message2, int $n, mixed ...$args): string
     {

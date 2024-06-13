@@ -97,7 +97,9 @@ class DatabaseTest extends TestCase
     {
         $sqlite_file = tmpfile();
         assert($sqlite_file !== false);
-        $sqlite_filename = stream_get_meta_data($sqlite_file)['uri'];
+        $sqlite_metadata = stream_get_meta_data($sqlite_file);
+        assert(isset($sqlite_metadata['uri']));
+        $sqlite_filename = $sqlite_metadata['uri'];
         /** @var ConfigurationDatabase */
         $configuration = Configuration::$database;
         $configuration['type'] = 'sqlite';

@@ -79,7 +79,16 @@ class Length extends Check
 
     private function getLength(): int
     {
-        $value = strval($this->getValue());
-        return mb_strlen($value);
+        $value = $this->getValue();
+
+        if ($value === null) {
+            return 0;
+        }
+
+        if (!is_float($value) && !is_integer($value) && !is_string($value)) {
+            return 0;
+        }
+
+        return mb_strlen(strval($value));
     }
 }
