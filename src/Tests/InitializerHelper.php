@@ -11,14 +11,13 @@ namespace Minz\Tests;
  */
 trait InitializerHelper
 {
-    protected static string $schema;
-
-    /**
-     * Load the schema from the configuration $schema_path.
-     */
     #[\PHPUnit\Framework\Attributes\BeforeClass]
-    public static function loadSchema(): void
+    public static function initDatabase(): void
     {
+        if (!\Minz\Configuration::$database) {
+            return;
+        }
+
         $schema_path = \Minz\Configuration::$schema_path;
         $schema = @file_get_contents($schema_path);
 
@@ -26,20 +25,24 @@ trait InitializerHelper
             throw new \RuntimeException("SQL schema under {$schema_path} cannot be read.");
         }
 
-        self::$schema = $schema;
+        \Minz\Database::reset();
+
+        $database = \Minz\Database::get();
+        $database->exec($schema);
     }
 
-    /**
-     * Reset the database and load the schema.
-     */
     #[\PHPUnit\Framework\Attributes\Before]
-    public function initDatabase(): void
+    public function beginDatabaseTransaction(): void
     {
-        if (\Minz\Configuration::$database && self::$schema) {
-            \Minz\Database::reset();
-            $database = \Minz\Database::get();
-            $database->exec(self::$schema);
-        }
+        $database = \Minz\Database::get();
+        $database->beginTransaction();
+    }
+
+    #[\PHPUnit\Framework\Attributes\After]
+    public function rollbackDatabaseTransaction(): void
+    {
+        $database = \Minz\Database::get();
+        $database->rollBack();
     }
 
     #[\PHPUnit\Framework\Attributes\Before]
