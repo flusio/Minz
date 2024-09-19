@@ -195,4 +195,24 @@ class DatabaseTest extends TestCase
 
         Database::drop();
     }
+
+    public function testNestedTransactions(): void
+    {
+        $database = Database::get();
+
+        $database->exec('CREATE TABLE my_table(value INTEGER)');
+        $database->beginTransaction();
+        $database->exec('INSERT INTO my_table VALUES (10)');
+        $database->beginTransaction();
+        $database->exec('INSERT INTO my_table VALUES (20)');
+        $database->rollBack();
+        $database->exec('INSERT INTO my_table VALUES (30)');
+        $database->commit();
+
+        $statement = $database->query('SELECT value FROM my_table ORDER BY value');
+        $results = $statement->fetchAll();
+        $this->assertSame(2, count($results));
+        $this->assertSame(10, $results[0]['value']);
+        $this->assertSame(30, $results[1]['value']);
+    }
 }

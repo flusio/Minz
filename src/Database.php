@@ -18,6 +18,8 @@ class Database
 
     private bool $connect_to_db;
 
+    private int $transaction_depth = 0;
+
     /**
      * Initialize a database. Note it is private, you must use `\Minz\Database::get`
      * to get an instance.
@@ -84,26 +86,6 @@ class Database
     }
 
     /**
-     * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
-     */
-    public function beginTransaction(): bool
-    {
-        /** @var bool $result */
-        $result = $this->pdoCall('beginTransaction');
-        return $result;
-    }
-
-    /**
-     * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
-     */
-    public function commit(): bool
-    {
-        /** @var bool $result */
-        $result = $this->pdoCall('commit');
-        return $result;
-    }
-
-    /**
      * @see \PDO::errorCode https://www.php.net/manual/pdo.errorcode.php
      */
     public function errorCode(): ?string
@@ -155,16 +137,6 @@ class Database
     }
 
     /**
-     * @see \PDO::inTransaction() https://www.php.net/manual/pdo.intransaction.php
-     */
-    public function inTransaction(): bool
-    {
-        /** @var bool $result */
-        $result = $this->pdoCall('inTransaction');
-        return $result;
-    }
-
-    /**
      * @see \PDO::lastInsertId() https://www.php.net/manual/pdo.lastinsertid.php
      */
     public function lastInsertId(?string $name = null): string
@@ -207,12 +179,76 @@ class Database
     }
 
     /**
+     * Start a transaction or create a savepoint, allowing for nested
+     * transactions.
+     *
+     * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
+     */
+    public function beginTransaction(): bool
+    {
+        if ($this->transaction_depth === 0) {
+            /** @var bool $result */
+            $result = $this->pdoCall('beginTransaction');
+        } else {
+            $savepoint_name = "savepoint_{$this->transaction_depth}";
+            $this->exec("SAVEPOINT {$savepoint_name}");
+            $result = true;
+        }
+
+        $this->transaction_depth += 1;
+
+        return $result;
+    }
+
+    /**
+     * Commit a transaction or release a savepoint.
+     *
+     * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
+     */
+    public function commit(): bool
+    {
+        $this->transaction_depth = max(0, $this->transaction_depth - 1);
+
+        if ($this->transaction_depth === 0) {
+            /** @var bool $result */
+            $result = $this->pdoCall('commit');
+        } else {
+            $savepoint_name = "savepoint_{$this->transaction_depth}";
+            $this->exec("RELEASE SAVEPOINT {$savepoint_name}");
+            $result = true;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Rollback a transaction or a savepoint.
+     *
      * @see \PDO::rollBack https://www.php.net/manual/pdo.rollback.php
      */
     public function rollBack(): bool
     {
+        $this->transaction_depth = max(0, $this->transaction_depth - 1);
+
+        if ($this->transaction_depth === 0) {
+            /** @var bool $result */
+            $result = $this->pdoCall('rollBack');
+        } else {
+            $savepoint_name = "savepoint_{$this->transaction_depth}";
+            $this->exec("ROLLBACK TO SAVEPOINT {$savepoint_name}");
+            $result = true;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @see \PDO::inTransaction() https://www.php.net/manual/pdo.intransaction.php
+     */
+    public function inTransaction(): bool
+    {
         /** @var bool $result */
-        $result = $this->pdoCall('rollBack');
+        $result = $this->pdoCall('inTransaction');
         return $result;
     }
 
