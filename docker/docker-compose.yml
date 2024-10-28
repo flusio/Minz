@@ -1,3 +1,5 @@
+name: minz
+
 services:
     php:
         build: .

@@ -36,7 +36,7 @@ endif
 
 .PHONY: docker-build
 docker-build: ## Rebuild the Docker images
-	docker compose -p minz -f docker/docker-compose.yml build
+	docker compose -f docker/docker-compose.yml build
 
 .PHONY: install
 install: ## Install the dependencies
