@@ -62,7 +62,7 @@ ifeq ($(LINTER),$(filter $(LINTER), all rector))
 	$(PHP) vendor/bin/rector process --dry-run --config .rector.php
 endif
 ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
-	$(PHP) ./vendor/bin/phpcs --standard=PSR12 ./src ./tests
+	$(PHP) ./vendor/bin/phpcs
 endif
 
 .PHONY: lint-fix
@@ -71,7 +71,7 @@ ifeq ($(LINTER), $(filter $(LINTER), all rector))
 	$(PHP) vendor/bin/rector process --config .rector.php
 endif
 ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
-	$(PHP) ./vendor/bin/phpcbf --standard=PSR12 ./src ./tests
+	$(PHP) ./vendor/bin/phpcbf
 endif
 
 .PHONY: help
