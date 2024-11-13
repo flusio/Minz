@@ -1,6 +1,10 @@
 {
+    "name": "flus/minz",
+    "description": "A simple and personal PHP framework",
+    "license": "AGPL-3.0-or-later",
     "type": "library",
-    "license": "AGPL-3.0",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "require": {
         "php": ">=8.2"
     },
