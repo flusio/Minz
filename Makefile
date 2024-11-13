@@ -2,7 +2,7 @@
 
 USER = $(shell id -u):$(shell id -g)
 
-DOCKER_COMPOSE = docker compose -f docker/docker-compose.yml
+DOCKER_COMPOSE = docker compose -f docker/development/docker-compose.yml
 
 ifdef NODOCKER
 	PHP = php

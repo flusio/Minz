@@ -1,5 +1,5 @@
 SCRIPT_PATH=$(dirname $(realpath -s $0))
-export COMPOSE_FILE=$SCRIPT_PATH/../docker-compose.yml
+export COMPOSE_FILE=$SCRIPT_PATH/../development/docker-compose.yml
 export USER=$(id -u):$(id -g)
 
 docker compose run --rm php composer "$@"
