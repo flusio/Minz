@@ -66,7 +66,7 @@ class RequestTest extends TestCase
         $this->assertSame('./cli', $request->param('bin'));
         $this->assertSame('bar', $request->param('foo'));
         $this->assertSame('qux', $request->param('foo-baz'));
-        $this->assertTrue($request->param('spam'));
+        $this->assertTrue($request->paramBoolean('spam'));
     }
 
     public function testInitFromCliWhenNoArguments(): void
@@ -163,12 +163,18 @@ class RequestTest extends TestCase
     public function testParam(): void
     {
         $request = new Request('GET', '/', [
-            'foo' => 'bar'
+            'foo' => 'bar',
+            'baz' => 42,
+            'spam' => true,
         ]);
 
         $foo = $request->param('foo');
+        $baz = $request->param('baz');
+        $spam = $request->param('spam');
 
         $this->assertSame('bar', $foo);
+        $this->assertSame('42', $baz);
+        $this->assertSame('1', $spam);
     }
 
     public function testParamWithDefaultValue(): void

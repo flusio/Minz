@@ -293,16 +293,41 @@ class Request
     }
 
     /**
-     * @template T of mixed
+     * @template T of ?string
+     *
+     * @param T $default
+     *
+     * @return string|T
+     *
+     * @see Request::paramString
+     */
+    public function param(string $name, ?string $default = null): mixed
+    {
+        return $this->paramString($name, $default);
+    }
+
+    /**
+     * @template T of ?string
      *
      * @param T $default
      *
      * @return string|T
      */
-    public function param(string $name, mixed $default = null): mixed
+    public function paramString(string $name, ?string $default = null): mixed
     {
         if (isset($this->parameters[$name])) {
-            return $this->parameters[$name];
+            $value = $this->parameters[$name];
+
+            if (
+                !is_bool($value) &&
+                !is_float($value) &&
+                !is_integer($value) &&
+                !is_string($value)
+            ) {
+                return $default;
+            }
+
+            return strval($value);
         } else {
             return $default;
         }
