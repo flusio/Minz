@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Controller;
 
 /**
@@ -53,9 +57,6 @@ namespace Minz\Controller;
  *
  *     // The handler will only be used for the `myAction` action.
  *     #[Controller\ErrorHandler(MissingCurrentUserError::class, only: ['myAction'])]
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class ErrorHandler

@@ -1,13 +1,14 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Tests;
 
 /**
  * Make sure the context is correctly initialized before executing a test.
  * It (re)initializes the database, the session and the test mailer.
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 trait InitializerHelper
 {

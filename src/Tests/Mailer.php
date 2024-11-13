@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Tests;
 
 use PHPMailer\PHPMailer;
@@ -8,9 +12,6 @@ use PHPMailer\PHPMailer;
  * Allow to access sent emails during tests. If configuration mailer type is
  * `test`, the PHPMailer object is stored in the \Minz\Tests\Mailer::$emails
  * static attribute and can be accessed then to test different values.
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Mailer
 {

@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Database;
 
 use Minz\Errors;
@@ -84,9 +88,6 @@ use Minz\Errors;
  * @phpstan-type ModelType string|int|bool|\DateTimeImmutable
  * @phpstan-type ModelValue ModelType|ModelType[]|null
  * @phpstan-type ModelValues array<literal-string, ModelValue>
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 trait Recordable
 {

@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Validable;
 
 /**
@@ -33,9 +37,6 @@ namespace Minz\Validable;
  *
  * Note that the "null" value is considered as valid in order to accept
  * optional values.
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Comparison extends Check

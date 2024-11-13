@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Database;
 
 /**
@@ -21,9 +25,6 @@ namespace Minz\Database;
  * An optional `primary_key` parameter can be passed to declare the primary key
  * of the table (default is `id`). It must be a single column name (multi-columns
  * primary keys are not supported).
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Table

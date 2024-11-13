@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Migration;
 
 use Minz\Errors;
@@ -33,9 +37,6 @@ use Minz\Errors;
  * @phpstan-type MigrationResult string|bool
  *
  * @phpstan-type MigrationVersion string
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Migrator
 {

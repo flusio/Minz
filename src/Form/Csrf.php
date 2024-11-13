@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Form;
 
 /**
@@ -29,9 +33,6 @@ namespace Minz\Form;
  * Note that the $csrf_token is generated with \Minz\Csrf::generate() in the
  * controller. The CSRF error is registered in the special "@global" error
  * namespace.
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 trait Csrf
 {

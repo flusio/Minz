@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Validable;
 
 /**
@@ -24,9 +28,6 @@ namespace Minz\Validable;
  * accept optional values.
  *
  * @see https://www.php.net/manual/function.preg-match.php
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Format extends Check

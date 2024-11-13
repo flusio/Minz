@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz;
 
 use Minz\Output;
@@ -141,9 +145,6 @@ use Minz\Output;
  * @phpstan-type ResponseGenerator \Generator<int, Response, void, void>
  *
  * @phpstan-type ResponseReturnable Response|ResponseGenerator
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class Response
 {

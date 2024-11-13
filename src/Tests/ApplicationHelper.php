@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Tests;
 
 use Minz\Request;
@@ -12,9 +16,6 @@ use Minz\Response;
  * @phpstan-import-type RequestParameters from Request
  * @phpstan-import-type RequestHeaders from Request
  * @phpstan-import-type ResponseReturnable from Response
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 trait ApplicationHelper
 {

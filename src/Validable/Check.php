@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Validable;
 
 /**
@@ -24,9 +28,6 @@ namespace Minz\Validable;
  * The property itself is accessible as a `ReflectionProperty` with
  * `$this->property` while the instance of the object is accessible with
  * `$this->instance`.
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 abstract class Check
 {

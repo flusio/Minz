@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Output;
 
 /**
@@ -11,9 +15,6 @@ namespace Minz\Output;
  * @phpstan-import-type UrlPointer from \Minz\Url
  *
  * @phpstan-import-type UrlParameters from \Minz\Url
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 class ViewHelpers
 {

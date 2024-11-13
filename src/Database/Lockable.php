@@ -1,5 +1,9 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 namespace Minz\Database;
 
 /**
@@ -41,9 +45,6 @@ namespace Minz\Database;
  *     $lock_timeout = \Minz\Time::ago(2, 'hours');
  *     $user->lock($lock_timeout);
  *     assert($user->isLocked($lock_timeout));
- *
- * @author  Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 trait Lockable
 {

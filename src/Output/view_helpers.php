@@ -1,13 +1,14 @@
 <?php
 
+// This file is part of Minz.
+// Copyright 2020-2024 Marien Fressinaud
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /**
  * These functions are meant to be used inside View files.
  *
  * They are declared in global namespace so we don't have to declare the
  * namespaces in views.
- *
- * @author Marien Fressinaud <dev@marienfressinaud.fr>
- * @license http://www.gnu.org/licenses/agpl-3.0.en.html AGPL
  */
 
 if (!function_exists('protect')) {
