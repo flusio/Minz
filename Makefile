@@ -1,5 +1,9 @@
 .DEFAULT_GOAL := help
 
+USER = $(shell id -u):$(shell id -g)
+
+DOCKER_COMPOSE = docker compose -f docker/docker-compose.yml
+
 ifdef NODOCKER
 	PHP = php
 	COMPOSER = composer
@@ -18,47 +22,51 @@ else
 	DB_PASSWORD=none
 endif
 
-ifndef COVERAGE
-	COVERAGE = --coverage-html ./coverage
-endif
-
-ifdef FILTER
-	PHPUNIT_FILTER = --filter=$(FILTER)
-else
-	PHPUNIT_FILTER =
-endif
-
-ifdef FILE
-	PHPUNIT_FILE = $(FILE)
-else
-	PHPUNIT_FILE = ./tests
-endif
-
 .PHONY: docker-build
 docker-build: ## Rebuild the Docker images
-	docker compose -f docker/docker-compose.yml build
+	$(DOCKER_COMPOSE) build --pull
+
+.PHONY: docker-pull
+docker-pull: ## Pull the Docker images from the Docker Hub
+	$(DOCKER_COMPOSE) pull --ignore-buildable
+
+.PHONY: docker-clean
+docker-clean: ## Clean the Docker stuff
+	$(DOCKER_COMPOSE) down -v
 
 .PHONY: install
 install: ## Install the dependencies
 	$(COMPOSER) install
 
 .PHONY: test
-test: ## Run the tests suite
+test: FILE ?= ./tests
+ifdef FILTER
+test: override FILTER := --filter=$(FILTER)
+endif
+test: COVERAGE ?= --coverage-html ./coverage
+test: ## Run the tests suite (can take FILE, FILTER and COVERAGE arguments)
 	DB_DSN=$(DB_DSN) DB_USERNAME=$(DB_USERNAME) DB_PASSWORD=$(DB_PASSWORD) \
 		$(PHP) ./vendor/bin/phpunit \
 		-c .phpunit.xml \
 		$(COVERAGE) \
-		$(PHPUNIT_FILTER) \
-		$(PHPUNIT_FILE)
+		$(FILTER) \
+		$(FILE)
 
 .PHONY: lint
-lint: ## Run the linters on the PHP files
+lint: LINTER ?= all
+lint: ## Run the linters on the PHP files (can take a LINTER argument)
+ifeq ($(LINTER), $(filter $(LINTER), all phpstan))
 	$(PHP) ./vendor/bin/phpstan analyse --memory-limit 1G -c phpstan.neon
+endif
+ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
 	$(PHP) ./vendor/bin/phpcs --standard=PSR12 ./src ./tests
+endif
 
 .PHONY: lint-fix
-lint-fix: ## Fix the errors raised by the linter
+lint-fix: ## Fix the errors raised by the linter (can take a LINTER argument)
+ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
 	$(PHP) ./vendor/bin/phpcbf --standard=PSR12 ./src ./tests
+endif
 
 .PHONY: help
 help:
