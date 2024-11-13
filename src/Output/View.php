@@ -45,7 +45,7 @@ class View implements \Minz\Output
     private array $layout_variables;
 
     /** @var ViewVariables */
-    private static $default_variables = [];
+    private static array $default_variables = [];
 
     /**
      * Declare default variables so they can be used without passing them

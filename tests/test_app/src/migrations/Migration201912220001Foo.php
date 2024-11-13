@@ -7,7 +7,7 @@ class Migration201912220001Foo
     /**
      * @return boolean true if the migration was successful, false otherwise
      */
-    public function migrate()
+    public function migrate(): bool
     {
         return true;
     }

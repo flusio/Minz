@@ -172,8 +172,9 @@ abstract class Factory
     public static function sequence(mixed $value = 1, ?callable $callback = null): \Closure
     {
         if ($callback === null) {
-            $callback = function ($n) {
-                return $n + 1;
+            $callback = function (int|string $n): int|string {
+                $n++;
+                return $n;
             };
         }
 

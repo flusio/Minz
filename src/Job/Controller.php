@@ -217,7 +217,7 @@ class Controller
     public function index(Request $request): Response
     {
         $jobs = Job::listAll();
-        usort($jobs, function ($job_1, $job_2) {
+        usort($jobs, function ($job_1, $job_2): int {
             return $job_1->id - $job_2->id;
         });
 
@@ -272,7 +272,7 @@ class Controller
         $date_format = \Minz\Database\Column::DATETIME_FORMAT;
 
         if ($job->args) {
-            $args = array_map(function ($arg) {
+            $args = array_map(function ($arg): string {
                 return var_export($arg, true);
             }, $job->args);
 

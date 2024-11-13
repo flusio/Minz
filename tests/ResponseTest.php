@@ -112,7 +112,7 @@ class ResponseTest extends TestCase
         /** @var string[] $headers */
         $headers = $response->headers();
 
-        $content_type_header = current(array_filter($headers, function ($header) {
+        $content_type_header = current(array_filter($headers, function ($header): bool {
             return str_starts_with($header, 'Content-Type');
         }));
         $this->assertSame('Content-Type: image/png', $content_type_header);
@@ -129,7 +129,7 @@ class ResponseTest extends TestCase
         /** @var string[] $headers */
         $headers = $response->headers();
 
-        $csp_header = current(array_filter($headers, function ($header) {
+        $csp_header = current(array_filter($headers, function ($header): bool {
             return str_starts_with($header, 'Content-Security-Policy');
         }));
         $this->assertSame(

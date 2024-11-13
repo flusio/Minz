@@ -7,7 +7,7 @@ class Migration201912220002Bar
     /**
      * @return boolean true if the migration was successful, false otherwise
      */
-    public function migrate()
+    public function migrate(): bool
     {
         return true;
     }
@@ -15,7 +15,7 @@ class Migration201912220002Bar
     /**
      * @return boolean true if the rollback was successful, false otherwise
      */
-    public function rollback()
+    public function rollback(): bool
     {
         return true;
     }
