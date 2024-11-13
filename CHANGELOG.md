@@ -1,0 +1,3 @@
+# Changelog of Minz
+
+## unreleased
