@@ -44,6 +44,8 @@ it for Composer.
 
 However, I'll be glad to accept patches for bugs and security flaws.
 
+[See the documentation to develop Minz.](/docs/development.md)
+
 ## A bit of Minz-story
 
 When I was a student, my professors introduced me to the [Zend Framework](https://framework.zend.com/)
