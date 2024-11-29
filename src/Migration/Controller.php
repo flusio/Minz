@@ -419,20 +419,20 @@ class Controller
             {
                 public function migrate(): bool
                 {
-                    // \$database = \Minz\Database::get();
+                    \$database = \Minz\Database::get();
 
-                    // \$database->exec(<<<'SQL'
-                    // SQL);
+                    \$database->exec(<<<'SQL'
+                    SQL);
 
                     return true;
                 }
 
                 public function rollback(): bool
                 {
-                    // \$database = \Minz\Database::get();
+                    \$database = \Minz\Database::get();
 
-                    // \$database->exec(<<<'SQL'
-                    // SQL);
+                    \$database->exec(<<<'SQL'
+                    SQL);
 
                     return true;
                 }
