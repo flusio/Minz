@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised if the migration system failed.
  */
-class MigrationError extends \RuntimeException
+class MigrationError extends LogicException
 {
 }

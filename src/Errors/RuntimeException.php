@@ -7,8 +7,8 @@
 namespace Minz\Errors;
 
 /**
- * Exception raised when building an Output.
+ * Exception thrown when an error occurs that can only be found at runtime.
  */
-class DotenvError extends \RuntimeException
+class RuntimeException extends Exception
 {
 }

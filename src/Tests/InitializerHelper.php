@@ -6,6 +6,8 @@
 
 namespace Minz\Tests;
 
+use Minz\Errors;
+
 /**
  * Make sure the context is correctly initialized before executing a test.
  * It (re)initializes the database, the session and the test mailer.
@@ -23,7 +25,7 @@ trait InitializerHelper
         $schema = @file_get_contents($schema_path);
 
         if ($schema === false) {
-            throw new \RuntimeException("SQL schema under {$schema_path} cannot be read.");
+            throw new Errors\RuntimeException("SQL schema under {$schema_path} cannot be read.");
         }
 
         \Minz\Database::reset();

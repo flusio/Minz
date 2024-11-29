@@ -14,7 +14,7 @@ class FileTest extends TestCase
 
     public function testConstructFailsIfInvalidErrorKey(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(Errors\RuntimeException::class);
         $this->expectExceptionMessage('Invalid parameter: unknown error.');
 
         $file_filepath = Configuration::$app_path . '/dotenv';

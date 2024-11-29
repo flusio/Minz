@@ -75,7 +75,7 @@ class Helper
      * @param class-string $class_name
      * @param ModelValues $values
      *
-     * @throws Errors\DatabaseError
+     * @throws Errors\DatabaseModelError
      *     If the values include invalid parameters (undefined or computed
      *     column, or bad format).
      *
@@ -88,7 +88,7 @@ class Helper
 
         foreach ($values as $property => $value) {
             if (!isset($columns[$property])) {
-                throw new Errors\DatabaseError("{$class_name} doesn't define a {$property} property");
+                throw new Errors\DatabaseModelError("{$class_name} doesn't define a {$property} property");
             }
 
             $column = $columns[$property];
@@ -116,7 +116,7 @@ class Helper
                 $json = json_encode($value);
 
                 if ($json === false) {
-                    throw new Errors\DatabaseError("Cannot encode {$property} JSON value");
+                    throw new Errors\DatabaseModelError("Cannot encode {$property} JSON value");
                 }
 
                 $converted_values[$property] = $json;
@@ -128,7 +128,7 @@ class Helper
             } elseif ($value === null) {
                 $converted_values[$property] = null;
             } else {
-                throw new Errors\DatabaseError("Cannot convert {$property} value");
+                throw new Errors\DatabaseModelError("Cannot convert {$property} value");
             }
         }
 
@@ -141,7 +141,7 @@ class Helper
      * @param class-string $class_name
      * @param DatabaseValuesUnsafe $values
      *
-     * @throws Errors\DatabaseError
+     * @throws Errors\DatabaseModelError
      *     If values include a parameter that is not defined as a column.
      *
      * @return ModelValues
@@ -153,7 +153,7 @@ class Helper
 
         foreach ($values as $property => $value) {
             if (!isset($columns[$property])) {
-                throw new Errors\DatabaseError("{$class_name} doesn't define a {$property} property");
+                throw new Errors\DatabaseModelError("{$class_name} doesn't define a {$property} property");
             }
 
             /**

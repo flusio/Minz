@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised on request initialization errors.
  */
-class RequestError extends \RuntimeException
+class RequestError extends RuntimeException
 {
 }

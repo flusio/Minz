@@ -176,7 +176,7 @@ class Engine
     public static function run(Request $request): mixed
     {
         if (!self::$router) {
-            $e = new \LogicException('The Engine must be initialized before running.');
+            $e = new Errors\LogicException('The Engine must be initialized before running.');
             return self::internalServerErrorResponse($e);
         }
 

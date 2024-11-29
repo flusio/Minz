@@ -21,7 +21,7 @@ class RandomTest extends TestCase
 
     public function testHexFailsIfLengthIs0(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(Errors\LogicException::class);
         $this->expectExceptionMessage('Length must be a positive integer');
 
         Random::hex(0);

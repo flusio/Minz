@@ -6,6 +6,7 @@
 
 namespace Minz\Database;
 
+use Minz\Errors;
 use PHPUnit\Framework\TestCase;
 use AppTest\models;
 
@@ -107,7 +108,7 @@ class RecordableTest extends TestCase
 
     public function testCreateFailsWhenUnknownPropertyIsSpecified(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Errors\DatabaseModelError::class);
         $this->expectExceptionMessage("AppTest\\models\\Friend doesn't define a foo property");
 
         models\Friend::create([
@@ -593,7 +594,7 @@ class RecordableTest extends TestCase
 
     public function testReloadFailsIfTheModelIsNotPersisted(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Errors\LogicException::class);
         $this->expectExceptionMessage("AppTest\\models\\Friend model is not persisted");
 
         $friend = new models\Friend();
@@ -603,7 +604,7 @@ class RecordableTest extends TestCase
 
     public function testReloadFailsIfTheModelHasBeenDeleted(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Errors\RuntimeException::class);
         $this->expectExceptionMessage("AppTest\\models\\Friend model #1 no longer exists");
 
         $friend = new models\Friend();

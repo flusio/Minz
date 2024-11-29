@@ -26,11 +26,14 @@ class File
      *     'error': int,
      *     'is_uploaded_file'?: bool,
      * } $file_info
+     *
+     * @throws Errors\RuntimeException
+     *     Raised if the file is in error.
      */
     public function __construct(array $file_info)
     {
         if ($file_info['error'] < UPLOAD_ERR_OK || $file_info['error'] > UPLOAD_ERR_EXTENSION) {
-            throw new \RuntimeException('Invalid parameter: unknown error.');
+            throw new Errors\RuntimeException('Invalid parameter: unknown error.');
         }
 
         $this->filepath = $file_info['tmp_name'];

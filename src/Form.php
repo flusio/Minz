@@ -157,7 +157,7 @@ class Form
 
             if (!($property_type instanceof \ReflectionNamedType)) {
                 $class_name = static::class;
-                throw new \LogicException("{$class_name} must define the {$property_name} property type");
+                throw new Errors\LogicException("{$class_name} must define the {$property_name} property type");
             }
 
             $field_type = $property_type->getName();
@@ -219,7 +219,7 @@ class Form
         $configuration = $this->configuration();
 
         if (!isset($configuration[$field_name])) {
-            throw new \LogicException("Form doesn't declare a {$field_name} field.");
+            throw new Errors\LogicException("Form doesn't declare a {$field_name} field.");
         }
 
         $field_configuration = $configuration[$field_name];
@@ -243,11 +243,11 @@ class Form
     {
         $configuration = $this->configuration();
         if (!isset($configuration[$field_name])) {
-            throw new \LogicException("Form doesn't declare a {$field_name} field.");
+            throw new Errors\LogicException("Form doesn't declare a {$field_name} field.");
         }
 
         if ($configuration[$field_name]['type'] !== 'DateTimeImmutable') {
-            throw new \LogicException("{$field_name} must be of type DateTimeImmutable.");
+            throw new Errors\LogicException("{$field_name} must be of type DateTimeImmutable.");
         }
 
         if (!$this->$field_name) {
@@ -317,11 +317,14 @@ class Form
 
     /**
      * @return T
+     *
+     * @throws Errors\LogicException
+     *     Raised if the model is not set.
      */
     public function getModel(): object
     {
         if (!$this->model) {
-            throw new \RuntimeException('Model is not set');
+            throw new Errors\LogicException('Model is not set');
         }
 
         return $this->model;

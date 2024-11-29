@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised for Url errors.
  */
-class UrlError extends \LogicException
+class UrlError extends LogicException
 {
 }

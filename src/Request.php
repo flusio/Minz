@@ -499,7 +499,7 @@ class Request
 
         try {
             return new File($file_info);
-        } catch (\RuntimeException $e) {
+        } catch (Errors\RuntimeException $e) {
             return null;
         }
     }

@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised when looking for an inexisting route.
  */
-class RouteNotFoundError extends \UnexpectedValueException
+class RouteNotFoundError extends RuntimeException
 {
 }

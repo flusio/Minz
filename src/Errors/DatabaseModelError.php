@@ -7,8 +7,8 @@
 namespace Minz\Errors;
 
 /**
- * Exception raised for errors occuring when accessing the database.
+ * Exception raised for errors occuring when accessing database models incorrectly.
  */
-class DatabaseModelError extends \RuntimeException
+class DatabaseModelError extends LogicException
 {
 }

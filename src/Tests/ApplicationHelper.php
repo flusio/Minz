@@ -6,6 +6,7 @@
 
 namespace Minz\Tests;
 
+use Minz\Errors;
 use Minz\Request;
 use Minz\Response;
 
@@ -74,13 +75,16 @@ trait ApplicationHelper
      * @param RequestHeaders $headers
      *
      * @return ResponseReturnable
+     *
+     * @throws Errors\RuntimeException
+     *     Raised if the Application class doesn't exist.
      */
     public function appRun(string $method, string $uri, array $parameters = [], array $headers = []): mixed
     {
         if (!self::$application) {
             $app_name = \Minz\Configuration::$app_name;
             $application_class_name = "\\{$app_name}\\Application";
-            throw new \RuntimeException("{$application_class_name} doesn't exist, or run() is not callable.");
+            throw new Errors\RuntimeException("{$application_class_name} doesn't exist, or run() is not callable.");
         }
 
         $request = new Request($method, $uri, $parameters, $headers);

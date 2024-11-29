@@ -7,8 +7,8 @@
 namespace Minz\Errors;
 
 /**
- * Exception raised when for routing logic errors.
+ * The global exception for Minz.
  */
-class RoutingError extends LogicException
+class Exception extends \Exception
 {
 }

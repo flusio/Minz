@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised when trying to call a non-callable action.
  */
-class ActionError extends \LogicException
+class ActionError extends LogicException
 {
 }

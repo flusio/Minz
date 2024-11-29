@@ -71,6 +71,24 @@ Minz.** You’ll often have to interact with them.
     - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL
       addresses.
 
+## Errors
+
+- **[`\Minz\Errors\Exception`](/src/Errors/Exception.php) the base exception for all the Minz exceptions.**
+    - [`\Minz\Errors\LogicException`](/src/Errors/LogicException.php)
+        - [`\Minz\Errors\ActionError`](/src/Errors/ActionError.php) used when the action of controller doesn't behave as expected.
+        - [`\Minz\Errors\ConfigurationError`](/src/Errors/ConfigurationError.php) used when the configuration is invalid.
+        - [`\Minz\Errors\ControllerError`](/src/Errors/ControllerError.php) used when the expected controller doesn't exist
+        - [`\Minz\Errors\DatabaseModelError`](/src/Errors/DatabaseModelError.php) used when accessing a database model incorrectly.
+        - [`\Minz\Errors\MigrationError`](/src/Errors/MigrationError.php) used when migrations are not correctly declared.
+        - [`\Minz\Errors\OutputError`](/src/Errors/OutputError.php) used when an output cannot be initialized.
+        - [`\Minz\Errors\ResponseError`](/src/Errors/ResponseError.php) used when a Response cannot be initialized.
+        - [`\Minz\Errors\RoutingError`](/src/Errors/RoutingError.php) used when a Router isn't correctly configured.
+        - [`\Minz\Errors\UrlError`](/src/Errors/UrlError.php) used when getting an url incorrectly.
+    - [`\Minz\Errors\RuntimeException`](/src/Errors/RuntimeException.php)
+        - [`\Minz\Errors\DatabaseError`](/src/Errors/DatabaseError.php) used when an error happens when connecting to a database.
+        - [`\Minz\Errors\RequestError`](/src/Errors/RequestError.php) used when the request is incorrectly initialized.
+        - [`\Minz\Errors\RouteNotFoundError`](/src/Errors/RouteNotFoundError.php) used when a request calls an unknown route.
+
 ## Additional classes
 
 - **[`\Minz\Form`](/src/Form.php) provides an easy way to handle forms.** It is used alongside with:

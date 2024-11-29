@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised when trying to call a non-existing controller.
  */
-class ControllerError extends \LogicException
+class ControllerError extends LogicException
 {
 }

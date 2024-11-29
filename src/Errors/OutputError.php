@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised when building an Output.
  */
-class OutputError extends \LogicException
+class OutputError extends LogicException
 {
 }

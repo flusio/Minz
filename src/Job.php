@@ -189,7 +189,7 @@ class Job
         $jobs_adapter = \Minz\Configuration::$jobs_adapter;
         if ($jobs_adapter === 'test') {
             if (!is_callable([$this, 'perform'])) {
-                throw new \Exception("{$this->name} class does not declare any perform() method.");
+                throw new Errors\LogicException("{$this->name} class does not declare any perform() method.");
             }
 
             $this->perform(...$args);
@@ -275,7 +275,7 @@ class Job
     /**
      * Reschedule the current job for later based on its frequency.
      *
-     * @throws \DomainException
+     * @throws Errors\LogicException
      *     If the Job frequency goes backward.
      */
     public function reschedule(): void
@@ -294,16 +294,16 @@ class Job
      * It takes the current perform_at and it modifies it with its "frequency"
      * until the date is in the future.
      *
-     * @throws \LogicException
+     * @throws Errors\LogicException
      *     If the Job has no frequency.
-     * @throws \DomainException
+     * @throws Errors\LogicException
      *     If the Job frequency goes backward.
      */
     private function nextPerformAt(): \DateTimeImmutable
     {
         if (!$this->frequency) {
             $class_name = static::class;
-            throw new \LogicException("{$class_name} cannot be reschedule as it has no frequency");
+            throw new Errors\LogicException("{$class_name} cannot be reschedule as it has no frequency");
         }
 
         $timezone = new \DateTimeZone(date_default_timezone_get());
@@ -314,7 +314,7 @@ class Job
 
             if ($new_date < $date) {
                 $class_name = static::class;
-                throw new \DomainException("{$class_name} has a frequency going backward");
+                throw new Errors\LogicException("{$class_name} has a frequency going backward");
             }
 
             $date = $new_date;

@@ -12,7 +12,7 @@ class Random
      * Return a random cryptographically secure string containing characters in
      * range 0-9a-f.
      *
-     * @throws \InvalidArgumentException
+     * @throws Errors\LogicException
      *     If the length is less than 1
      *
      * @see https://paragonie.com/blog/2015/07/how-safely-generate-random-strings-and-integers-in-php
@@ -20,7 +20,7 @@ class Random
     public static function hex(int $length): string
     {
         if ($length < 1) {
-            throw new \InvalidArgumentException('Length must be a positive integer');
+            throw new Errors\LogicException('Length must be a positive integer');
         }
 
         $string = '';

@@ -200,7 +200,7 @@ class JobTest extends TestCase
 
     public function testRescheduleFailsIfFrequencyGoesBackward(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(Errors\LogicException::class);
         $this->expectExceptionMessage('AppTest\\jobs\\DummyJob has a frequency going backward');
 
         $job = new jobs\DummyJob();

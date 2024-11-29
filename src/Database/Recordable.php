@@ -512,8 +512,10 @@ trait Recordable
     /**
      * Reload the current model from the database.
      *
-     * @throws \Exception
-     *     If the model is not persisted or no longer exists.
+     * @throws Errors\LogicException
+     *     If the model is not persisted.
+     * @throws Errors\RuntimeException
+     *     If the model no longer exists.
      */
     public function reload(): self
     {
@@ -521,7 +523,7 @@ trait Recordable
 
         if (!$this->is_persisted) {
             $class = self::class;
-            throw new \Exception("{$class} model is not persisted");
+            throw new Errors\LogicException("{$class} model is not persisted");
         }
 
         $pk_value = $this->$pk_column;
@@ -529,7 +531,7 @@ trait Recordable
 
         if ($model === null) {
             $class = self::class;
-            throw new \Exception("{$class} model #{$pk_value} no longer exists");
+            throw new Errors\RuntimeException("{$class} model #{$pk_value} no longer exists");
         }
 
         return $model;
@@ -560,13 +562,16 @@ trait Recordable
 
     /**
      * Return the table name of the model.
+     *
+     * @throws Errors\LogicException
+     *     If the class doesn't define a Table attribute.
      */
     public static function tableName(): string
     {
         $reflection = new \ReflectionClass(self::class);
         $table_attributes = $reflection->getAttributes(Table::class);
         if (empty($table_attributes)) {
-            throw new \Exception(self::class . ' must define a \Minz\Database\Table attribute');
+            throw new Errors\LogicException(self::class . ' must define a \Minz\Database\Table attribute');
         }
         $table = $table_attributes[0]->newInstance();
         return $table->name;
@@ -576,13 +581,16 @@ trait Recordable
      * Return the primary key column name of the model.
      *
      * @return literal-string
+     *
+     * @throws Errors\LogicException
+     *     If the class doesn't define a Table attribute.
      */
     public static function primaryKeyColumn(): string
     {
         $reflection = new \ReflectionClass(self::class);
         $table_attributes = $reflection->getAttributes(Table::class);
         if (empty($table_attributes)) {
-            throw new \Exception(self::class . ' must define a \Minz\Database\Table attribute');
+            throw new Errors\LogicException(self::class . ' must define a \Minz\Database\Table attribute');
         }
         $table = $table_attributes[0]->newInstance();
         return $table->primary_key;

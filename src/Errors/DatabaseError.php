@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised for errors occuring when manipulating the database.
  */
-class DatabaseError extends \RuntimeException
+class DatabaseError extends RuntimeException
 {
 }

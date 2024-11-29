@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised when trying to create an invalid response.
  */
-class ResponseError extends \LogicException
+class ResponseError extends LogicException
 {
 }

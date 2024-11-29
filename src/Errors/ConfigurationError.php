@@ -9,6 +9,6 @@ namespace Minz\Errors;
 /**
  * Exception raised for configuration errors.
  */
-class ConfigurationError extends \LogicException
+class ConfigurationError extends LogicException
 {
 }
