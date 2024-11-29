@@ -54,6 +54,27 @@ namespace Minz;
  * are automatically generated, some must be declared, and the last are
  * optional.
  *
+ * You can declare configuration options specific to your application in the
+ * `$application` attribute. This attribute is declared as a array<string, mixed> type.
+ * You can precise the types by defining a custom Configuration in your app that
+ * inherits from the Minz Configuration:
+ *
+ * ```php
+ * namespace App;
+ *
+ * /**
+ *  * @phpstan-type ConfigurationApplication array{
+ *  *     'your_option': string,
+ *  *     // ...
+ *  * }
+ *  *
+ * class Configuration extends \Minz\Configuration
+ * {
+ *     /** @var ConfigurationApplication *
+ *     public static array $application;
+ * }
+ * ```
+ *
  * @see \Minz\Dotenv
  *
  * @phpstan-type ConfigurationEnvironment value-of<self::VALID_ENVIRONMENTS>
@@ -323,30 +344,30 @@ class Configuration
         $raw_configuration = include($configuration_filepath);
 
         // Initialize the automatic variables
-        self::$environment = $environment;
-        self::$app_path = $app_path;
-        self::$configuration_path = $configuration_path;
-        self::$configuration_filepath = $configuration_filepath;
+        static::$environment = $environment;
+        static::$app_path = $app_path;
+        static::$configuration_path = $configuration_path;
+        static::$configuration_filepath = $configuration_filepath;
 
         // Then, get the required variables from the configuration file
-        self::$secret_key = self::getSecretKey($raw_configuration, $environment);
-        self::$url_options = self::getUrlOptions($raw_configuration);
+        static::$secret_key = self::getSecretKey($raw_configuration, $environment);
+        static::$url_options = self::getUrlOptions($raw_configuration);
 
         // And, finally, get the optional variables
-        self::$app_name = $raw_configuration['app_name'] ?? 'App';
-        self::$application = $raw_configuration['application'] ?? [];
-        self::$data_path = $raw_configuration['data_path'] ?? $app_path . '/data';
-        self::$schema_path = $raw_configuration['schema_path'] ?? $app_path . '/src/schema.sql';
-        $default_tmp_path = sys_get_temp_dir() . '/' . self::$app_name . '/' . bin2hex(random_bytes(10));
-        self::$tmp_path = $raw_configuration['tmp_path'] ?? $default_tmp_path;
-        self::$database = self::getDatabase($raw_configuration);
-        self::$mailer = self::getMailer($raw_configuration, $environment);
+        static::$app_name = $raw_configuration['app_name'] ?? 'App';
+        static::$application = $raw_configuration['application'] ?? [];
+        static::$data_path = $raw_configuration['data_path'] ?? $app_path . '/data';
+        static::$schema_path = $raw_configuration['schema_path'] ?? $app_path . '/src/schema.sql';
+        $default_tmp_path = sys_get_temp_dir() . '/' . static::$app_name . '/' . bin2hex(random_bytes(10));
+        static::$tmp_path = $raw_configuration['tmp_path'] ?? $default_tmp_path;
+        static::$database = self::getDatabase($raw_configuration);
+        static::$mailer = self::getMailer($raw_configuration, $environment);
         $jobs_adapter = $raw_configuration['jobs_adapter'] ?? 'database';
         if (!in_array($jobs_adapter, self::VALID_JOBS_ADAPTERS)) {
             $jobs_adapter = 'database';
         }
-        self::$jobs_adapter = $jobs_adapter;
-        self::$no_syslog_output = $raw_configuration['no_syslog_output'] ?? false;
+        static::$jobs_adapter = $jobs_adapter;
+        static::$no_syslog_output = $raw_configuration['no_syslog_output'] ?? false;
     }
 
     /**
