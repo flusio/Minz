@@ -17,6 +17,25 @@ use PHPMailer\PHPMailer;
  *
  * This class can be inherited in order to specialize it into smaller Mailers.
  *
+ * ```php
+ * class UserMailer extends \Minz\Mailer
+ * {
+ *     public function sendResetPasswordEmail($user_id): bool
+ *     {
+ *         $user = models\User::find($user_id);
+ *
+ *         $subject = 'Reset your password';
+ *         $this->setBody(
+ *             'path/to/view.phtml',
+ *             'path/to/view.txt',
+ *             ['user => $user],
+ *         );
+ *
+ *         return $this->send($user->email, $subject);
+ *     }
+ * }
+ * ```
+ *
  * @phpstan-import-type ViewVariables from Output\View
  *
  * @phpstan-import-type ViewPointer from Output\View
