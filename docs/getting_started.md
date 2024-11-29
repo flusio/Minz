@@ -365,9 +365,10 @@ index file:
 
 // ...
 
+$application = new \App\Application();
+
 $request = \Minz\Request::initFromGlobals();
 
-$application = new \App\Application();
 $response = $application->run($request);
 
 \Minz\Response::sendByHttp($response);
@@ -379,6 +380,32 @@ if you open [localhost/test](http://localhost/test), you should get an error
 telling you that “Path "GET /test" doesn’t match any route.” It’s because we
 didn’t create the corresponding route in the router. The error is ugly for
 now, but we’ll fix that later.
+
+As a lot of different errors can occur during the runtime, it's advised to wrap
+the code in a try / catch block:
+
+```php
+
+// ...
+
+try {
+    $application = new \App\Application();
+
+    $request = \Minz\Request::initFromGlobals();
+
+    $response = $application->run($request);
+} catch (\Minz\Errors\RequestError $e) {
+    $response = \Minz\Response::notFound('not_found.phtml', [
+        'error' => $e,
+    ]);
+} catch (\Exception $e) {
+    $response = \Minz\Response::internalServerError('internal_server_error.phtml', [
+        'error' => $e,
+    ]);
+}
+
+\Minz\Response::sendByHttp($response);
+```
 
 **To learn more, [explore the `\Minz\Router` class](/src/Router.php).**
 
