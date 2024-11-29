@@ -88,6 +88,7 @@ namespace Minz;
  */
 class Request
 {
+    public const VALID_HTTP_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'];
     public const VALID_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'CLI'];
 
     /** @var RequestMethod */
@@ -112,7 +113,7 @@ class Request
         $request_method = strtoupper($_SERVER['REQUEST_METHOD']);
 
         $http_method = $request_method === 'HEAD' ? 'GET' : $request_method;
-        if (!in_array($http_method, self::VALID_METHODS)) {
+        if (!in_array($http_method, self::VALID_HTTP_METHODS)) {
             throw new Errors\RequestError("The HTTP method '{$http_method}' is not supported.");
         }
 

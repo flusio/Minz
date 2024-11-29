@@ -48,6 +48,16 @@ class RequestTest extends TestCase
         $request = Request::initFromGlobals();
     }
 
+    public function testInitFromGlobalsFailsIfRequestMethodIsCli(): void
+    {
+        $this->expectException(Errors\RequestError::class);
+        $this->expectExceptionMessage("The HTTP method 'CLI' is not supported.");
+
+        $_SERVER['REQUEST_METHOD'] = 'CLI';
+
+        $request = Request::initFromGlobals();
+    }
+
     public function testInitFromCli(): void
     {
         $argv = [
