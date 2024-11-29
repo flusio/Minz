@@ -14,12 +14,19 @@ namespace Minz\Tests;
  */
 trait TimeHelper
 {
+    /**
+     * Unfreeze the time at the end of each test.
+     */
     #[\PHPUnit\Framework\Attributes\After]
     public function unfreeze(): void
     {
         \Minz\Time::unfreeze();
     }
 
+    /**
+     * Freeze the time at the given date. If no date is passed, freeze the
+     * time at the current time.
+     */
     public function freeze(?\DateTimeInterface $datetime = null): void
     {
         \Minz\Time::freeze($datetime);

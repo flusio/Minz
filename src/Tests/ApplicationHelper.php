@@ -12,6 +12,20 @@ use Minz\Response;
 /**
  * Provide an appRun() method to help to run requests over Application.
  *
+ * ```php
+ * class ControllerTest extends \PHPUnit\Framework\TestCase
+ * {
+ *     use \Minz\Tests\ApplicationHelper;
+ *
+ *     public function testGetHome(): void
+ *     {
+ *         $response = $this->appRun('GET', '/');
+ *
+ *         // Assert things on $response
+ *     }
+ * }
+ * ```
+ *
  * @phpstan-import-type RequestMethod from Request
  * @phpstan-import-type RequestParameters from Request
  * @phpstan-import-type RequestHeaders from Request
