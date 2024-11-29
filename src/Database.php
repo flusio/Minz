@@ -9,6 +9,20 @@ namespace Minz;
 /**
  * Handle the database requests.
  *
+ * This class makes sure that you initialize only one PDO connection to the
+ * database and provides some additional utility functions.
+ *
+ * The database is usually accessed as:
+ *
+ * ```php
+ * $database = \Minz\Database::get();
+ * $statement = $database->query('SELECT 1');
+ * ```
+ *
+ * Most of the PDO class methods can be called directly on the Database object.
+ *
+ * @see https://www.php.net/manual/class.pdo.php
+ *
  * @phpstan-import-type ConfigurationDatabase from Configuration
  */
 class Database
