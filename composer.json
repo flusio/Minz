@@ -9,7 +9,10 @@
     "autoload": {
         "psr-4": {
             "Minz\\": "src/"
-        }
+        },
+        "files": [
+            "src/Output/view_helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
