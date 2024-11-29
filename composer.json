@@ -1,10 +1,21 @@
 {
     "name": "flus/minz",
     "description": "A simple and personal PHP framework",
+    "homepage": "https://github.com/flusio/Minz",
     "license": "AGPL-3.0-or-later",
     "type": "library",
     "minimum-stability": "stable",
     "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Minz\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppTest\\": "tests/test_app/src/"
+        }
+    },
     "require": {
         "php": ">=8.2",
         "phpmailer/phpmailer": "^6.9"

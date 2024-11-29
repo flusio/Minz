@@ -99,40 +99,10 @@ $ mkdir src/
 $ mkdir tests/
 ```
 
-We’ll download Minz under the `lib/` folder:
+Then, install Minz with [Composer](https://getcomposer.org):
 
 ```console
-$ wget https://github.com/flusio/Minz/archive/refs/heads/main.zip
-$ unzip main.zip
-$ rm main.zip
-$ mv Minz-main/ lib/Minz
-```
-
-_Alternatively, you can `git clone` the Minz repository under the `lib/`
-folder. That's what I always do, but I recommend that you clone your own fork
-so you’ll be able to hack Minz the way that you want later._
-
-Now, let’s create an autoloader for the Minz classes as well as your app
-classes. Create a new `autoload.php` file at the root of your project:
-
-```php
-<?php
-
-spl_autoload_register(
-    function ($class_name) {
-        $app_namespace = 'App';
-        $app_path = __DIR__;
-        $lib_path = $app_path . '/lib';
-
-        if (str_starts_with($class_name, 'Minz')) {
-            include $lib_path . '/Minz/autoload.php';
-        } elseif (str_starts_with($class_name, $app_namespace)) {
-            $class_name = substr($class_name, strlen($app_namespace) + 1);
-            $class_path = str_replace('\\', '/', $class_name) . '.php';
-            include $app_path . '/src/' . $class_path;
-        }
-    }
-);
+$ composer require flus/minz
 ```
 
 Finally, you can load Minz in your `public/index.php` file:
@@ -142,7 +112,7 @@ Finally, you can load Minz in your `public/index.php` file:
 
 $app_path = realpath(__DIR__ . '/..');
 
-include $app_path . '/autoload.php';
+require $app_path . '/vendor/autoload.php';
 
 \Minz\Configuration::load('development', $app_path);
 
@@ -437,7 +407,7 @@ Let’s write a `tests/bootstrap.php` file, it will be loaded by PHPUnit:
 
 $app_path = realpath(__DIR__ . '/..');
 
-include $app_path . '/autoload.php';
+require $app_path . '/vendor/autoload.php';
 \Minz\Configuration::load('test', $app_path);
 ```
 

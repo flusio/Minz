@@ -2,9 +2,4 @@ parameters:
     level: 9
     paths:
         - src
-        - lib
         - tests
-
-    excludePaths:
-        analyse:
-            - lib/PHPMailer/*

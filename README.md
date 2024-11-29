@@ -8,8 +8,7 @@ What I like in Minz is:
 - I know the code perfectly (I wrote it);
 - it's powerful enough for my needs;
 - it has a relative small size;
-- it grows ONLY when I need it (the consequence is basic features might be
-  missing);
+- it grows ONLY when I need it (the consequence is basic features might be missing);
 - it's easy to perform integration tests;
 - it provides a common interface for both Web and CLI requests;
 - it has very few dependencies (only one at the moment, i.e. PHPMailer);
@@ -17,13 +16,20 @@ What I like in Minz is:
 
 ## Install
 
-Download the repository into your project and include the autoload file. For
-instance, if you've put Minz under a `lib/` folder:
+You must use [Composer](https://getcomposer.org) to install Minz.
+
+Run:
+
+```console
+$ composer require flus/minz
+```
+
+Then, in your code:
 
 ```php
 <?php
 
-include(__DIR__ . '/lib/Minz/autoload.php');
+require '/path/to/vendor/autoload.php';
 ```
 
 ## Guide
@@ -36,11 +42,6 @@ include(__DIR__ . '/lib/Minz/autoload.php');
 I'm not intended to develop features that I have no uses (sorry!) That being
 said, forks are very welcome and I would be happy to link to yours if it brings
 value over my own codebase.
-
-The reason for this choice is that I consider I have to control most of the
-code I rely on. Minz is a framework to ship next to the rest of your codebase,
-not as an external dependance. That's also the reason I don't plan to package
-it for Composer.
 
 However, I'll be glad to accept patches for bugs and security flaws.
 

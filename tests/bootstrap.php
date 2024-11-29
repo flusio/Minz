@@ -4,6 +4,6 @@
 // Copyright 2020-2024 Marien Fressinaud
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-include __DIR__ . '/../autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
 \Minz\Configuration::load('test', __DIR__ . '/test_app');
