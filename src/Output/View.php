@@ -193,8 +193,6 @@ class View implements \Minz\Output
             $$var_name = $var_value;
         }
 
-        include_once('view_helpers.php');
-
         ob_start();
         include $this->filepath;
         $output = ob_get_clean();
