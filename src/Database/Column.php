@@ -60,7 +60,7 @@ class Column
 
     public ?string $format;
 
-    public function __construct(bool $computed = false, string $format = null)
+    public function __construct(bool $computed = false, ?string $format = null)
     {
         $this->computed = $computed;
         $this->format = $format;
