@@ -6,6 +6,7 @@
 
 namespace Minz\Migration;
 
+use Minz\Database;
 use Minz\Errors;
 
 /**
@@ -205,11 +206,9 @@ class Migrator
      * Migrate the system to the latest version.
      *
      * It only executes migrations AFTER the current version. If a migration
-     * returns false or fails, it immediatly stops the process.
-     *
-     * If the migration doesn't return false nor raise an exception, it is
-     * considered as successful. It is considered as good practice to return
-     * true on success though.
+     * returns false or fails, it immediatly stops the process. A migration can
+     * also return a string to explain an error. The migration must return true
+     * if it's successful.
      *
      * Return the results of each executed migration. If an exception was
      * raised in a migration, its result is set to the exception message.
@@ -218,12 +217,23 @@ class Migrator
      */
     public function migrate(): array
     {
+        try {
+            $database = Database::get();
+        } catch (Errors\DatabaseError $e) {
+            $database = null;
+        }
+
         $result = [];
         $apply_migration = $this->version === null;
+
         foreach ($this->migrations() as $version => $callbacks) {
             if (!$apply_migration) {
                 $apply_migration = $this->version === $version;
                 continue;
+            }
+
+            if ($database) {
+                $database->beginTransaction();
             }
 
             try {
@@ -235,7 +245,13 @@ class Migrator
                 $result[$version] = $e->getMessage();
             }
 
-            if ($migration_result === false) {
+            if ($database && $migration_result === true) {
+                $database->commit();
+            } elseif ($database) {
+                $database->rollBack();
+            }
+
+            if ($migration_result !== true) {
                 break;
             }
 
@@ -250,11 +266,8 @@ class Migrator
      *
      * It executes migrations from the current version until $max_steps or
      * until the last first version. If a rollback returns false or fails, it
-     * immediatly stops the process.
-     *
-     * If the rollback doesn't return false nor raise an exception, it is
-     * considered as successful. It is considered as good practice to return
-     * true on success though.
+     * immediatly stops the process. A rollback can also return a strign to
+     * explain an error. The rollback must return true if it's successful.
      *
      * If a migration was added without rollback function, it’s considered as a
      * failing rollback.
@@ -276,7 +289,13 @@ class Migrator
             return $result;
         }
 
-        foreach ($this->migrations(true) as $version => $callbacks) {
+        try {
+            $database = Database::get();
+        } catch (Errors\DatabaseError $e) {
+            $database = null;
+        }
+
+        foreach ($this->migrations(reverse: true) as $version => $callbacks) {
             // Skip the rollbacks until we found the current versions (useful
             // if we’re not at the latest version)
             if (!$apply_rollback && $this->version === $version) {
@@ -295,6 +314,10 @@ class Migrator
                 break;
             }
 
+            if ($database) {
+                $database->beginTransaction();
+            }
+
             // Execute the rollback and get the result
             if (isset($callbacks['rollback'])) {
                 try {
@@ -310,8 +333,14 @@ class Migrator
                 $result[$version] = 'No rollback!';
             }
 
+            if ($database && $migration_result === true) {
+                $database->commit();
+            } elseif ($database) {
+                $database->rollBack();
+            }
+
             // The current rollback failed, stop here
-            if ($migration_result === false) {
+            if ($migration_result !== true) {
                 $set_version_to_null = false;
                 break;
             }
