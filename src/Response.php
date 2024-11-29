@@ -24,6 +24,7 @@ use Minz\Output;
  * output implementing the Output interface:
  *
  * - \Minz\Output\File: to serve a file;
+ * - \Minz\Output\Json: to render Json;
  * - \Minz\Output\Text: to render text;
  * - \Minz\Output\View: to generate more complex structures (e.g. HTML) based
  *   on a simple template system.
@@ -58,6 +59,7 @@ use Minz\Output;
  *
  * @see \Minz\Output
  * @see \Minz\Output\File
+ * @see \Minz\Output\Json
  * @see \Minz\Output\Text
  * @see \Minz\Output\View
  *
@@ -394,14 +396,8 @@ class Response
      */
     public static function json(int $code, array $values): Response
     {
-        $json = json_encode($values);
-        if (!$json) {
-            $json = '';
-        }
-        $output = new \Minz\Output\Text($json);
-        $response = new Response($code, $output);
-        $response->setHeader('Content-Type', 'application/json');
-        return $response;
+        $output = new \Minz\Output\Json($values);
+        return new Response($code, $output);
     }
 
     /**

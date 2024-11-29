@@ -22,6 +22,7 @@ Minz.** You’ll often have to interact with them.
   rendering the content. Here is the list of available outputs:
     - **[`\Minz\Output\View`](/src/Output/View.php) is a simple template system to render your content,**
       often used for (but not limited to) HTML;
+    - [`\Minz\Output\Json`](/src/Output/Json.php) renders Json;
     - [`\Minz\Output\Text`](/src/Output/Text.php) renders text;
     - [`\Minz\Output\File`](/src/Output/File.php) renders files;
 - **[`\Minz\Router`](/src/Router.php) is in charge of the routing of your
