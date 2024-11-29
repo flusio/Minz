@@ -10,10 +10,48 @@ use Minz\Configuration;
 use Minz\Errors;
 
 /**
- * A View represents the (string) content to deliver to users.
+ * An output class to return content to users based on a template file.
  *
  * It is represented by a file under src/views. The view file is called
  * "pointer".
+ *
+ * ```php
+ * $view_output = new Output\View('pointer/to/view.phtml', [
+ *     'foo' => 'bar',
+ * ]);
+ * $response = new Response(200, $view_output);
+ * ```
+ *
+ * You should not have to initialize this output manually as it can be
+ * shortened in:
+ *
+ * ```php
+ * $response = Response::ok('pointer/to/view.phtml', [
+ *     'foo' => 'bar',
+ * ]);
+ * ```
+ *
+ * The view file contains most of the time some templated HTML content:
+ *
+ * ```php
+ * <p>
+ *     Hello {$foo}!
+ * </p>
+ * ```
+ *
+ * The template has access to different methods defined in this file (see below
+ * for their full documentation):
+ *
+ * ```php
+ * $this->layout('path/to/layout.phtml', ['foo' => $foo]);
+ * $this->include('path/to/partial.phtml', ['foo', => $foo]);
+ * $this->safe('foo');
+ * $this->protect($foo);
+ * ```
+ *
+ * The template also has access to some helper functions defined in the file view_helpers.php.
+ *
+ * @see /src/Output/view_helpers.php
  *
  * @phpstan-type ViewVariables array<string, mixed>
  *
@@ -51,6 +89,9 @@ class View implements \Minz\Output
     /**
      * Declare default variables so they can be used without passing them
      * explicitely when creating a View.
+     *
+     * This is usually called in the Application class, before running the
+     * Engine.
      *
      * @param ViewVariables $variables
      */
@@ -176,6 +217,9 @@ class View implements \Minz\Output
      * Allow to set a layout to the view.
      *
      * It must be called from within the view file directly.
+     *
+     * The layout should render the calling view by displaying the special
+     * `$content` variable.
      *
      * @param ViewVariables $layout_variables
      *

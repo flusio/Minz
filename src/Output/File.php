@@ -9,7 +9,17 @@ namespace Minz\Output;
 use Minz\Errors;
 
 /**
- * Allow to return a file via a Response.
+ * An output class that read and return the content of a file to users.
+ *
+ * ```php
+ * $file_output = new \Minz\Output\File('/path/to/a/file.pdf');
+ * $response = new Response(200, $file_output);
+ * ```
+ *
+ * For now, it can only serve CSS, JS, PDF and ZIP files.
+ *
+ * @see \Minz\Output
+ * @see \Minz\Response
  */
 class File implements \Minz\Output
 {

@@ -7,7 +7,22 @@
 namespace Minz\Output;
 
 /**
- * An output Text class allows to return plain text easily to users.
+ * An output class to return plain text to users.
+ *
+ * ```php
+ * $text_output = new \Minz\Output\Text('some text');
+ * $response = new Response(200, $text_output);
+ * ```
+ *
+ * You should not have to initialize this output manually as it can be
+ * shortened in:
+ *
+ * ```php
+ * $response = Response::text(200, 'some text');
+ * ```
+ *
+ * @see \Minz\Output
+ * @see \Minz\Response
  */
 class Text implements \Minz\Output
 {
