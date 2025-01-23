@@ -56,6 +56,22 @@ class ControllerTest extends TestCase
         $this->assertResponseEquals($response, 'Your system is already up to date.');
     }
 
+    public function testSetupWhenDatabaseAlreadyExists(): void
+    {
+        \Minz\Database::create();
+        $migrations_version_path = self::$controller->migrationsVersionPath();
+
+        $this->assertFalse(file_exists($migrations_version_path));
+
+        $request = new Request('CLI', '/');
+        $response = self::$controller->setup($request);
+
+        $this->assertNotNull($response);
+        $this->assertResponseCode($response, 200);
+        $this->assertResponseEquals($response, 'The system has been initialized.');
+        $this->assertTrue(file_exists($migrations_version_path));
+    }
+
     public function testSetupWithMigrations(): void
     {
         $migrations_version_path = self::$controller->migrationsVersionPath();

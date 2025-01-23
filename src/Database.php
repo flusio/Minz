@@ -373,8 +373,19 @@ class Database
             }
         } elseif ($database_type === 'pgsql') {
             $database = new self(false);
-            $result = $database->exec("CREATE DATABASE {$database_configuration['dbname']} ENCODING 'UTF8'");
-            $database->close();
+
+            try {
+                $result = $database->exec("CREATE DATABASE {$database_configuration['dbname']} ENCODING 'UTF8'");
+                $database->close();
+            } catch (\PDOException $e) {
+                $database->close();
+
+                // Throw the error only if the error is not about "database already exists".
+                if ($e->getCode() !== '42P04') {
+                    throw $e;
+                }
+            }
+
             return true;
         } else {
             return false;
