@@ -83,7 +83,7 @@ use Minz\Errors;
  * @phpstan-type DatabaseCriteria array<literal-string, ModelValue|ModelValue[]>
  * @phpstan-type DatabaseValue mixed
  * @phpstan-type DatabaseValues array<literal-string, DatabaseValue>
- * @phpstan-type DatabaseValuesUnsafe array<string, DatabaseValue>
+ * @phpstan-type DatabaseValuesUnsafe array<mixed, DatabaseValue>
  * @phpstan-type ModelPrimaryKey string|int
  * @phpstan-type ModelType string|int|bool|\DateTimeImmutable
  * @phpstan-type ModelValue ModelType|ModelType[]|null
