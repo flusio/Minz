@@ -44,6 +44,7 @@ class RequestTest extends TestCase
         $this->expectExceptionMessage("The HTTP method 'UNSUPPORTED' is not supported.");
 
         $_SERVER['REQUEST_METHOD'] = 'unsupported';
+        $_SERVER['REQUEST_URI'] = '/';
 
         $request = Request::initFromGlobals();
     }
@@ -54,6 +55,7 @@ class RequestTest extends TestCase
         $this->expectExceptionMessage("The HTTP method 'CLI' is not supported.");
 
         $_SERVER['REQUEST_METHOD'] = 'CLI';
+        $_SERVER['REQUEST_URI'] = '/';
 
         $request = Request::initFromGlobals();
     }

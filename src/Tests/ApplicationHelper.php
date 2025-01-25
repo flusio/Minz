@@ -31,6 +31,8 @@ use Minz\Response;
  * @phpstan-import-type RequestParameters from Request
  * @phpstan-import-type RequestHeaders from Request
  * @phpstan-import-type ResponseReturnable from Response
+ *
+ * @phpstan-ignore-next-line trait.unused
  */
 trait ApplicationHelper
 {

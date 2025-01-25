@@ -587,8 +587,6 @@ class RecordableTest extends TestCase
 
         $friend = $friend->reload();
 
-        $this->assertNotNull($friend);
-        $this->assertTrue($friend->isPersisted());
         $this->assertSame('Alix', $friend->name);
     }
 

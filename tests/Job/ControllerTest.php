@@ -133,7 +133,6 @@ class ControllerTest extends TestCase
             Job 1 lock has been released.
             TEXT);
         $job = $job->reload();
-        $this->assertNotNull($job);
         $this->assertFalse($job->isLocked());
     }
 
@@ -158,7 +157,6 @@ class ControllerTest extends TestCase
             Job 1 was not locked.
             TEXT);
         $job = $job->reload();
-        $this->assertNotNull($job);
         $this->assertFalse($job->isLocked());
     }
 
@@ -197,7 +195,6 @@ class ControllerTest extends TestCase
             oops
             TEXT);
         $job = $job->reload();
-        $this->assertNotNull($job);
         $this->assertSame('', $job->last_error);
         $this->assertNull($job->failed_at);
     }
@@ -274,7 +271,6 @@ class ControllerTest extends TestCase
             job#1 (AppTest\jobs\DummyJob): done
             TEXT);
         $job = $job->reload();
-        $this->assertNotNull($job);
         $this->assertSame(
             '2023-04-20 12:55:00+00:00',
             $job->perform_at->format(Database\Column::DATETIME_FORMAT)
@@ -333,7 +329,6 @@ class ControllerTest extends TestCase
             job#1 (AppTest\jobs\DummyJob): failed
             TEXT);
         $job = $job->reload();
-        $this->assertNotNull($job);
         $this->assertSame(
             '2023-04-20 12:00:06+00:00',
             $job->perform_at->format(Database\Column::DATETIME_FORMAT)

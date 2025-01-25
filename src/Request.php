@@ -110,6 +110,14 @@ class Request
      */
     public static function initFromGlobals(): Request
     {
+        if (!isset($_SERVER['REQUEST_METHOD']) || !is_string($_SERVER['REQUEST_METHOD'])) {
+            throw new Errors\RequestError('The server REQUEST_METHOD is invalid.');
+        }
+
+        if (!isset($_SERVER['REQUEST_URI']) || !is_string($_SERVER['REQUEST_URI'])) {
+            throw new Errors\RequestError('The server REQUEST_URI is invalid.');
+        }
+
         $request_method = strtoupper($_SERVER['REQUEST_METHOD']);
 
         $http_method = $request_method === 'HEAD' ? 'GET' : $request_method;
@@ -487,13 +495,21 @@ class Request
             return null;
         }
 
+        $tmp_name = $parameter['tmp_name'] ?? '';
+        $error = $parameter['error'] ?? -1;
+        $name = $parameter['name'] ?? '';
+
+        if (!is_string($tmp_name) || !is_int($error) || !is_string($name)) {
+            return null;
+        }
+
         $file_info = [
-            'tmp_name' => $parameter['tmp_name'] ?? '',
-            'error' => $parameter['error'] ?? -1,
-            'name' => $parameter['name'] ?? '',
+            'tmp_name' => $tmp_name,
+            'error' => $error,
+            'name' => $name,
         ];
 
-        if (isset($parameter['is_uploaded_file'])) {
+        if (isset($parameter['is_uploaded_file']) && is_bool($parameter['is_uploaded_file'])) {
             $file_info['is_uploaded_file'] = $parameter['is_uploaded_file'];
         };
 

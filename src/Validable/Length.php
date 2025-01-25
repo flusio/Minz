@@ -69,12 +69,13 @@ class Length extends Check
     public function getMessage(): string
     {
         $value = $this->getValue();
+
         $length = $this->getLength();
 
-        return str_replace(
+        return $this->formatMessage(
+            $this->message,
             ['{value}', '{min}', '{max}', '{length}'],
             [$value, $this->min, $this->max, $length],
-            $this->message,
         );
     }
 

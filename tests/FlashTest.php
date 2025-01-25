@@ -26,11 +26,13 @@ class FlashTest extends TestCase
         Flash::set('foo', 'bar');
 
         $this->assertTrue(isset($_SESSION['_flash']));
+        $this->assertIsArray($_SESSION['_flash']);
         $this->assertTrue(isset($_SESSION['_flash']['foo']));
 
         $this->assertSame('bar', Flash::pop('foo'));
 
         $this->assertTrue(isset($_SESSION['_flash']));
+        // @phpstan-ignore-next-line isset.offset
         $this->assertFalse(isset($_SESSION['_flash']['foo']));
     }
 

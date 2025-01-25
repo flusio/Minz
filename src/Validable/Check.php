@@ -53,10 +53,65 @@ abstract class Check
     {
         $value = $this->getValue();
 
-        return str_replace(
+        return $this->formatMessage(
+            $this->message,
             ['{value}'],
             [$value],
-            $this->message,
+        );
+    }
+
+    /**
+     * Format a message by replacing the $search strings by the $replace values.
+     *
+     * @param string[] $search
+     * @param mixed[] $replace
+     */
+    protected function formatMessage(string $message, array $search, array $replace): string
+    {
+        $replace = array_map(function ($value): string {
+            if ($value instanceof \DateTimeInterface) {
+                return $value->format('Y-m-d H:i:s');
+            }
+
+            if (is_object($value)) {
+                if ($value instanceof \Stringable) {
+                    return $value->__toString();
+                }
+
+                return 'object';
+            }
+
+            if (is_array($value)) {
+                return 'array';
+            }
+
+            if (is_resource($value)) {
+                return 'resource';
+            }
+
+            if ($value === null) {
+                return 'null';
+            }
+
+            if ($value === false) {
+                return 'false';
+            }
+
+            if ($value === true) {
+                return 'true';
+            }
+
+            if (is_string($value) || is_integer($value) || is_float($value)) {
+                return (string) $value;
+            }
+
+            return '';
+        }, $replace);
+
+        return str_replace(
+            $search,
+            $replace,
+            $message,
         );
     }
 }

@@ -42,11 +42,14 @@ class Csrf
      */
     public static function generate(): string
     {
-        if (!isset($_SESSION['_csrf']) || !$_SESSION['_csrf']) {
-            $_SESSION['_csrf'] = Random::hex(64);
+        $csrf = $_SESSION['_csrf'] ?? '';
+
+        if (!is_string($csrf) || !$csrf) {
+            $csrf = Random::hex(64);
+            self::set($csrf);
         }
 
-        return $_SESSION['_csrf'];
+        return $csrf;
     }
 
     /**
@@ -56,13 +59,9 @@ class Csrf
      */
     public static function validate(string $token): bool
     {
-        if (isset($_SESSION['_csrf'])) {
-            $expected_token = $_SESSION['_csrf'];
-        } else {
-            $expected_token = '';
-        }
+        $expected_token = $_SESSION['_csrf'] ?? '';
 
-        if (!$token) {
+        if (!is_string($expected_token) || !$token) {
             return false;
         }
 

@@ -38,7 +38,6 @@ class ControllerTest extends TestCase
         $request = new Request('CLI', '/');
         $response = self::$controller->setup($request);
 
-        $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'The system has been initialized.');
         $this->assertTrue(file_exists($migrations_version_path));
@@ -66,7 +65,6 @@ class ControllerTest extends TestCase
         $request = new Request('CLI', '/');
         $response = self::$controller->setup($request);
 
-        $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'The system has been initialized.');
         $this->assertTrue(file_exists($migrations_version_path));
@@ -93,13 +91,11 @@ class ControllerTest extends TestCase
         ]);
         $response = self::$controller->setup($request);
 
-        $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'The system has been initialized.');
         $this->assertTrue(file_exists($migrations_version_path));
 
         $response->next();
-        $this->assertNotNull($response);
         $this->assertResponseCode($response, 200);
         $this->assertResponseEquals($response, 'Seeds loaded.');
     }

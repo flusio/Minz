@@ -233,12 +233,6 @@ class View implements \Minz\Output
             );
         }
 
-        if (!is_array($layout_variables)) {
-            throw new Errors\OutputError(
-                "Layout variables parameter must be an array."
-            );
-        }
-
         $this->layout_name = $layout_name;
         $this->layout_variables = $layout_variables;
     }

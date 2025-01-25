@@ -11,6 +11,8 @@ use Minz\Errors;
 /**
  * Make sure the context is correctly initialized before executing a test.
  * It (re)initializes the database, the session and the test mailer.
+ *
+ * @phpstan-ignore-next-line trait.unused
  */
 trait InitializerHelper
 {

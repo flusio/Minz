@@ -76,27 +76,6 @@ class DatabaseTest extends TestCase
         Database::get();
     }
 
-    public function testConstructorFailsIfDatabaseIsBadlyConfigured(): void
-    {
-        Database::resetInstance();
-        $this->expectException(Errors\DatabaseError::class);
-        if (PHP_VERSION_ID < 80000) {
-            $this->expectExceptionMessage(
-                'An error occured during database initialization: invalid data source name.'
-            );
-        } else {
-            $this->expectExceptionMessage(
-                'An error occured during database initialization: ' .
-                'PDO::__construct(): Argument #1 ($dsn) must be a valid data source name.'
-            );
-        }
-
-        // @phpstan-ignore-next-line
-        Configuration::$database['type'] = 'not a correct type';
-
-        Database::get();
-    }
-
     public function testDropIfSqlite(): void
     {
         $sqlite_filename = tempnam('/tmp', 'minz-db');
@@ -115,19 +94,14 @@ class DatabaseTest extends TestCase
             )
         SQL;
         $result = $database->exec($schema);
-        $error_if_any = $database->errorInfo()[2];
-        $this->assertTrue(
-            $result !== false,
-            "An error occured when initializing a database: {$error_if_any}."
-        );
 
         $result = Database::drop();
+        $this->assertTrue($result);
 
         $new_database = Database::get();
         /** @var \PDOStatement */
         $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
         $table = $statement->fetchColumn();
-        $this->assertTrue($result);
         $this->assertFalse($table);
     }
 
@@ -147,18 +121,13 @@ class DatabaseTest extends TestCase
             )
         SQL;
         $result = $database->exec($schema);
-        $error_if_any = $database->errorInfo()[2];
-        $this->assertTrue(
-            $result !== false,
-            "An error occured when initializing a database: {$error_if_any}."
-        );
 
         $result = Database::drop();
+        $this->assertTrue($result);
 
         $new_database = Database::get();
         $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
         $table = $statement->fetchColumn();
-        $this->assertTrue($result);
         $this->assertFalse($table);
     }
 

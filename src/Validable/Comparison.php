@@ -41,29 +41,16 @@ namespace Minz\Validable;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Comparison extends Check
 {
-    public mixed $greater;
-    public mixed $greater_or_equal;
-    public mixed $equal;
-    public mixed $less;
-    public mixed $less_or_equal;
-    public mixed $other;
-
     public function __construct(
         string $message,
-        mixed $greater = null,
-        mixed $greater_or_equal = null,
-        mixed $equal = null,
-        mixed $less = null,
-        mixed $less_or_equal = null,
-        mixed $other = null,
+        public mixed $greater = null,
+        public mixed $greater_or_equal = null,
+        public mixed $equal = null,
+        public mixed $less = null,
+        public mixed $less_or_equal = null,
+        public mixed $other = null,
     ) {
         parent::__construct($message);
-        $this->greater = $greater;
-        $this->greater_or_equal = $greater_or_equal;
-        $this->equal = $equal;
-        $this->less = $less;
-        $this->less_or_equal = $less_or_equal;
-        $this->other = $other;
     }
 
     public function assert(): bool
@@ -105,7 +92,8 @@ class Comparison extends Check
     {
         $value = $this->getValue();
 
-        return str_replace(
+        return $this->formatMessage(
+            $this->message,
             [
                 '{value}',
                 '{greater}',
@@ -124,7 +112,6 @@ class Comparison extends Check
                 $this->less_or_equal,
                 $this->other,
             ],
-            $this->message,
         );
     }
 }

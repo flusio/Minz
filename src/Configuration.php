@@ -319,7 +319,7 @@ class Configuration
             }
         }
 
-        if (!in_array($environment, self::VALID_ENVIRONMENTS)) {
+        if (!in_array($environment, self::VALID_ENVIRONMENTS, true)) {
             throw new Errors\ConfigurationError(
                 "{$environment} is not a valid environment."
             );
@@ -363,7 +363,7 @@ class Configuration
         static::$database = self::getDatabase($raw_configuration);
         static::$mailer = self::getMailer($raw_configuration, $environment);
         $jobs_adapter = $raw_configuration['jobs_adapter'] ?? 'database';
-        if (!in_array($jobs_adapter, self::VALID_JOBS_ADAPTERS)) {
+        if (!in_array($jobs_adapter, self::VALID_JOBS_ADAPTERS, true)) {
             $jobs_adapter = 'database';
         }
         static::$jobs_adapter = $jobs_adapter;
@@ -427,7 +427,7 @@ class Configuration
     {
         self::failIfMissing($array, 'url_options');
 
-        $url_options = $array['url_options'];
+        $url_options = $array['url_options'] ?? [];
 
         if (!is_array($url_options)) {
             throw new Errors\ConfigurationError(
@@ -435,27 +435,30 @@ class Configuration
             );
         }
 
-        if (!isset($url_options['host'])) {
+        $host = $url_options['host'] ?? '';
+        $protocol = $url_options['protocol'] ?? 'http';
+        $path = $url_options['path'] ?? '/';
+        $port = $url_options['port'] ?? null;
+
+        if (!is_string($host) || !$host) {
             throw new Errors\ConfigurationError(
                 'URL options configuration must contain at least a host key.'
             );
         }
 
-        $protocol = $url_options['protocol'] ?? 'http';
         if ($protocol !== 'http' && $protocol !== 'https') {
             throw new Errors\ConfigurationError(
                 'URL protocol must be either http or https.'
             );
         }
 
-        $port = $url_options['port'] ?? null;
-        if (!$port) {
+        if (!is_int($port)) {
             $port = $protocol === 'https' ? 443 : 80;
         }
 
         return [
-            'host' => $url_options['host'],
-            'path' => $url_options['path'] ?? '/',
+            'host' => $host,
+            'path' => $path,
             'protocol' => $protocol,
             'port' => $port,
         ];
@@ -476,6 +479,7 @@ class Configuration
     private static function getDatabase(array $array): ?array
     {
         $database = $array['database'] ?? null;
+
         if ($database === null) {
             return null;
         }
@@ -486,22 +490,26 @@ class Configuration
             );
         }
 
-        if (!isset($database['dsn'])) {
+        $dsn = $database['dsn'] ?? '';
+
+        if (!is_string($dsn) || !$dsn) {
             throw new Errors\ConfigurationError(
                 'Database configuration must contain at least a dsn key.'
             );
         }
 
-        $info_from_dsn = self::extractDsnInfo($database['dsn']);
+        $info_from_dsn = self::extractDsnInfo($dsn);
         $database = array_merge($database, $info_from_dsn);
 
-        if (!in_array($database['type'], self::VALID_DATABASE_TYPES)) {
+        $type = $database['type'] ?? '';
+
+        if (!in_array($type, self::VALID_DATABASE_TYPES, true)) {
             throw new Errors\ConfigurationError(
                 "{$database['type']} database is not supported."
             );
         }
 
-        if ($database['type'] === 'pgsql') {
+        if ($type === 'pgsql') {
             if (!isset($database['host'])) {
                 throw new Errors\ConfigurationError(
                     'pgsql connection requires a `host` key, check your dsn string.'
@@ -522,11 +530,11 @@ class Configuration
         }
 
         return [
-            'dsn' => $database['dsn'],
+            'dsn' => $dsn,
+            'type' => $type,
             'username' => $database['username'] ?? null,
             'password' => $database['password'] ?? null,
             'options' => $database['options'] ?? [],
-            'type' => $database['type'],
             'host' => $database['host'] ?? null,
             'port' => $database['port'] ?? null,
             'dbname' => $database['dbname'] ?? null,
@@ -544,6 +552,7 @@ class Configuration
         $info = [];
 
         list($database_type, $dsn_rest) = explode(':', $dsn, 2);
+
         if ($database_type === 'sqlite') {
             $info['path'] = $dsn_rest;
         } elseif ($database_type === 'pgsql') {
@@ -584,23 +593,23 @@ class Configuration
             );
         }
 
-        if (!isset($mailer['type'])) {
-            $mailer['type'] = 'mail';
+        $type = $mailer['type'] ?? '';
+
+        if (!is_string($type) || !$type) {
+            $type = 'mail';
         }
 
-        if (!in_array($mailer['type'], self::VALID_MAILER_TYPES)) {
-            throw new Errors\ConfigurationError(
-                "{$mailer['type']} is not a valid mailer type."
-            );
+        if (!in_array($type, self::VALID_MAILER_TYPES, true)) {
+            throw new Errors\ConfigurationError("{$type} is not a valid mailer type.");
         }
 
         $clean_mailer = [
-            'type' => $mailer['type'],
+            'type' => $type,
             'from' => $mailer['from'] ?? 'root@localhost',
             'debug' => $environment === 'development' ? 2 : 0,
         ];
 
-        if ($mailer['type'] === 'smtp') {
+        if ($type === 'smtp') {
             $clean_mailer['smtp'] = [
                 'domain' => $mailer['smtp']['domain'] ?? '',
                 'host' => $mailer['smtp']['host'] ?? 'localhost',

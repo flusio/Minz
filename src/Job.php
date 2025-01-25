@@ -265,7 +265,7 @@ class Job
         }
 
         $class_name = $result['name'] ?? '';
-        if (!is_subclass_of($class_name, Job::class)) {
+        if (!is_string($class_name) || !is_subclass_of($class_name, Job::class)) {
             return null;
         }
 

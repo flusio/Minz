@@ -417,7 +417,7 @@ class Database
     {
         if ($database_configuration['type'] === 'sqlite') {
             return 'sqlite:' . $database_configuration['path'];
-        } elseif ($database_configuration['type'] === 'pgsql') {
+        } else {
             $dsn = 'pgsql:';
             $dsn .= 'host=' . $database_configuration['host'];
             $dsn .= ';port=' . $database_configuration['port'];
@@ -425,8 +425,6 @@ class Database
                 $dsn .= ';dbname=' . $database_configuration['dbname'];
             }
             return $dsn;
-        } else {
-            return '';
         }
     }
 
