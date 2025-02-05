@@ -71,6 +71,12 @@ Minz.** You’ll often have to interact with them.
     - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL
       addresses.
 
+## Emails and mailers
+
+- **[`\Minz\Mailer`](/src/Mailer.php) allows to send emails.** It is used alongside with:
+    - [`\Minz\Mailer\Email`](/src/Mailer/Email.php) is a wrapper around [the PHPMailer class](https://github.com/PHPMailer/PHPMailer/);
+    - [`\Minz\Mailer\Job`](/src/Mailer/Job.php) allows to send emails asynchronously.
+
 ## Errors
 
 - **[`\Minz\Errors\Exception`](/src/Errors/Exception.php) the base exception for all the Minz exceptions.**
@@ -79,6 +85,7 @@ Minz.** You’ll often have to interact with them.
         - [`\Minz\Errors\ConfigurationError`](/src/Errors/ConfigurationError.php) used when the configuration is invalid.
         - [`\Minz\Errors\ControllerError`](/src/Errors/ControllerError.php) used when the expected controller doesn't exist
         - [`\Minz\Errors\DatabaseModelError`](/src/Errors/DatabaseModelError.php) used when accessing a database model incorrectly.
+        - [`\Minz\Errors\InvalidMailerError`](/src/Errors/InvalidMailerError.php) used when calling an invalid Mailer.
         - [`\Minz\Errors\MigrationError`](/src/Errors/MigrationError.php) used when migrations are not correctly declared.
         - [`\Minz\Errors\OutputError`](/src/Errors/OutputError.php) used when an output cannot be initialized.
         - [`\Minz\Errors\ResponseError`](/src/Errors/ResponseError.php) used when a Response cannot be initialized.
@@ -86,6 +93,7 @@ Minz.** You’ll often have to interact with them.
         - [`\Minz\Errors\UrlError`](/src/Errors/UrlError.php) used when getting an url incorrectly.
     - [`\Minz\Errors\RuntimeException`](/src/Errors/RuntimeException.php)
         - [`\Minz\Errors\DatabaseError`](/src/Errors/DatabaseError.php) used when an error happens when connecting to a database.
+        - [`\Minz\Errors\MailerError`](/src/Errors/MailerError.php) used when an error happens when sending an email.
         - [`\Minz\Errors\RequestError`](/src/Errors/RequestError.php) used when the request is incorrectly initialized.
         - [`\Minz\Errors\RouteNotFoundError`](/src/Errors/RouteNotFoundError.php) used when a request calls an unknown route.
 
@@ -104,13 +112,8 @@ Minz.** You’ll often have to interact with them.
 - [`\Minz\Flash`](/src/Flash.php) to pass messages from a page to another through redirections;
 - [`\Minz\Random`](/src/Random.php) to generate random values;
 - [`\Minz\Time`](/src/Time.php) abstracts the time;
-- [`\Minz\Mailer`](/src/Mailer.php) is a wrapper around [PHPMailer](/lib/PHPMailer)
-  to send emails;
 - [`\Minz\File`](/src/File.php) abstracts uploaded files;
-- [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message
-  to be translated.
-
-The three last classes are very useful during tests!
+- [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message to be translated.
 
 ## Tests
 

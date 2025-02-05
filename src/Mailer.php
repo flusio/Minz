@@ -6,118 +6,178 @@
 
 namespace Minz;
 
+use Minz\Errors;
 use PHPMailer\PHPMailer;
 
 /**
- * Allow to send emails easily with PHPMailer
+ * Allow to send emails.
  *
- * It allows to automatically configure a PHPMailer instance with
- * Configuration. Body can easily be set with both HTML and text content via
- * two Output\View.
+ * You should instantiate a Mailer\Email and then send it with the mailer
+ * `send()` method:
  *
- * This class can be inherited in order to specialize it into smaller Mailers.
+ * ```php
+ * $email = \Minz\Mailer\Email();
+ * $email->setSubject('Reset your password');
+ * $email->setBody(
+ *     'path/to/view.phtml',
+ *     'path/to/view.txt',
+ *     ['user => $user],
+ * );
+ *
+ * $mailer = new \Minz\Mailer();
+ * $mailer->send($email, to: $user->email);
+ * ```
+ *
+ * Internally, the Email object is a PHPMailer instance and the Mailer
+ * configures it with the parameters from the Configuration.
+ *
+ * An Errors\MailerError is raised if the mailer fails to send the email.
+ *
+ * You can also send emails asynchronously with the Mailer\Job class. First,
+ * you must extend the Mailer class with your own class:
  *
  * ```php
  * class UserMailer extends \Minz\Mailer
  * {
- *     public function sendResetPasswordEmail($user_id): bool
+ *     public function sendResetPasswordEmail($user_id): \Minz\Mailer\Email
  *     {
  *         $user = models\User::find($user_id);
  *
- *         $subject = 'Reset your password';
- *         $this->setBody(
+ *         $email = \Minz\Mailer\Email();
+ *         $email->setSubject('Reset your password');
+ *         $email->setBody(
  *             'path/to/view.phtml',
  *             'path/to/view.txt',
  *             ['user => $user],
  *         );
  *
- *         return $this->send($user->email, $subject);
+ *         $this->send($email, to: $user->email);
+ *
+ *         return $email;
  *     }
  * }
  * ```
  *
- * @phpstan-import-type ViewVariables from Output\View
+ * As the mailer action and arguments will be stored in the database, make sure
+ * that the parameters' types of the action are "string", "int", "bool" or
+ * "null".
  *
- * @phpstan-import-type ViewPointer from Output\View
+ * Then, execute the mailer with the job:
+ *
+ * ```php
+ * $mailer_job = new \Minz\Mailer\Job();
+ * $mailer_job->performAsap(UserMailer::class, 'sendResetPasswordEmail', $user_id);
+ * ```
+ *
+ * @see \Minz\Mailer\Email
+ * @see \Minz\Mailer\Job
  */
 class Mailer
 {
-    public PHPMailer\PHPMailer $mailer;
+    /**
+     * Send an email.
+     *
+     * @throws \Minz\Errors\MailerError
+     *
+     * @param string|string[] $to
+     * @param string|string[] $cc
+     * @param string|string[] $bcc
+     */
+    public function send(Mailer\Email $email, mixed $to, mixed $cc = [], mixed $bcc = []): void
+    {
+        if (is_string($to)) {
+            $to = [$to];
+        }
+
+        if (is_string($cc)) {
+            $cc = [$cc];
+        }
+
+        if (is_string($bcc)) {
+            $bcc = [$bcc];
+        }
+
+        $this->setupEmail($email);
+
+        try {
+            foreach ($to as $address) {
+                $email->addAddress($address);
+            }
+
+            foreach ($cc as $address) {
+                $email->addCC($address);
+            }
+
+            foreach ($bcc as $address) {
+                $email->addBCC($address);
+            }
+
+            if (Configuration::$mailer['type'] === 'test') {
+                Tests\Mailer::store($email);
+            } else {
+                $email->send();
+            }
+        } catch (PHPMailer\Exception $e) {
+            // Do nothing on purpose, the $email->ErrorInfo should be set and
+            // an error is raised below.
+        }
+
+        $this->cleanEmail($email);
+
+        if ($email->ErrorInfo) {
+            throw new Errors\MailerError($email->ErrorInfo);
+        }
+    }
 
     /**
-     * Setup the PHPMailer mailer with the application configuration.
+     * Setup the SMTP configuration of the email.
      */
-    public function __construct()
+    private function setupEmail(Mailer\Email $email): void
     {
         PHPMailer\PHPMailer::$validator = 'html5';
 
-        $mailer = new PHPMailer\PHPMailer(true);
-
         $mailer_configuration = Configuration::$mailer;
-        $mailer->SMTPDebug = $mailer_configuration['debug'];
-        $mailer->Debugoutput = 'error_log';
 
-        $mailer->setFrom($mailer_configuration['from']);
+        $email->SMTPDebug = $mailer_configuration['debug'];
+        $email->Debugoutput = 'error_log';
+        $email->setFrom($mailer_configuration['from']);
 
         if (
             $mailer_configuration['type'] === 'smtp' &&
             isset($mailer_configuration['smtp'])
         ) {
             $smtp_config = $mailer_configuration['smtp'];
-            $mailer->isSMTP();
-            $mailer->Hostname = $smtp_config['domain'];
-            $mailer->Host = $smtp_config['host'];
-            $mailer->Port = $smtp_config['port'];
-            $mailer->SMTPAuth = $smtp_config['auth'];
-            $mailer->AuthType = $smtp_config['auth_type'];
-            $mailer->Username = $smtp_config['username'];
-            $mailer->Password = $smtp_config['password'];
-            $mailer->SMTPSecure = $smtp_config['secure'];
+            $email->isSMTP();
+            $email->Hostname = $smtp_config['domain'];
+            $email->Host = $smtp_config['host'];
+            $email->Port = $smtp_config['port'];
+            $email->SMTPAuth = $smtp_config['auth'];
+            $email->AuthType = $smtp_config['auth_type'];
+            $email->Username = $smtp_config['username'];
+            $email->Password = $smtp_config['password'];
+            $email->SMTPSecure = $smtp_config['secure'];
         } else {
-            $mailer->isMail();
+            $email->isMail();
         }
 
-        $this->mailer = $mailer;
+        $email->clearAddresses();
     }
 
     /**
-     * Set the body with both HTML and text content.
-     *
-     * @param ViewPointer $html_view_pointer
-     * @param ViewPointer $text_view_pointer
-     * @param ViewVariables $variables
-     *
-     * @throws \Minz\Errors\OutputError if one of the pointers is invalid
+     * Reset SMTP configuration of the email.
      */
-    public function setBody(string $html_view_pointer, string $text_view_pointer, array $variables = []): void
+    private function cleanEmail(Mailer\Email $email): void
     {
-        $html_output = new Output\View($html_view_pointer, $variables);
-        $text_output = new Output\View($text_view_pointer, $variables);
+        $email->From = '';
+        $email->Hostname = '';
+        $email->Host = '';
+        $email->Port = 25;
+        $email->SMTPAuth = false;
+        $email->AuthType = '';
+        $email->Username = '';
+        $email->Password = '';
+        $email->SMTPSecure = '';
 
-        $this->mailer->isHTML(true);
-        $this->mailer->CharSet = 'utf-8';
-        $this->mailer->Body = $html_output->render();
-        $this->mailer->AltBody = $text_output->render();
-    }
-
-    /**
-     * Send an email.
-     */
-    public function send(string $to, string $subject): bool
-    {
-        try {
-            $this->mailer->clearAddresses();
-            $this->mailer->addAddress($to);
-            $this->mailer->Subject = $subject;
-            if (Configuration::$mailer['type'] === 'test') {
-                Tests\Mailer::store($this->mailer);
-            } else {
-                $this->mailer->send();
-            }
-            return true;
-        } catch (PHPMailer\Exception $e) {
-            Log::error('Mailer cannot send a message: ' . $this->mailer->ErrorInfo);
-            return false;
-        }
+        $email->clearAddresses();
     }
 }
