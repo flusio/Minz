@@ -31,6 +31,26 @@ be sure they always do what you want.
 The classes featured in this chapter are: `\Minz\Request`, `\Minz\Response`,
 `\Minz\Router`, `\Minz\Configuration`.
 
+## Setup Composer
+
+It is expected that you use [Composer](https://getcomposer.org/).
+
+Make sure to have a minimal `composer.json` file:
+
+```json
+{
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+
+    "require": {
+        "php": "^8.2"
+    }
+}
+```
+
 ## Serving the index file
 
 First, create a new folder for this project with a basic home page:
@@ -92,9 +112,7 @@ Once you have this right, we’ll setup Minz.
 First, create some more folders:
 
 ```console
-$ mkdir bin/
 $ mkdir configuration/
-$ mkdir lib/
 $ mkdir src/
 $ mkdir tests/
 ```
@@ -260,7 +278,8 @@ usually a ressource (e.g. users or posts). The controllers methods are called
 “actions”. They are dedicated to a specific activity such as listing users,
 creation or deletion. **An action always takes a `\Minz\Request` in parameter
 and returns a `\Minz\Response`.** Finally, an action is associated to a couple
-of a HTTP verb (e.g. `GET`, `POST`) and an URL (e.g. `/posts`).
+of a HTTP verb (e.g. `GET`, `POST`) and an URL (e.g. `/posts`); it's called the
+“routing”.
 
 **The previous paragraph contains a lot of important information. I recommend
 you to take the time to understand each sentence.** If it’s still too abstract
@@ -388,17 +407,11 @@ considered as secondary work; this is why I’ll introduce you to these in this
 first chapter.
 
 Tests will be written with [PHPUnit](https://phpunit.readthedocs.io). Let’s
-install it first under the `bin/` folder:
+install it first with Composer:
 
 ```console
-$ curl -LO https://phar.phpunit.de/phpunit-9.5.phar
-$ mv phpunit-9.5.phar bin/phpunit
-$ chmod u+x bin/phpunit
+$ composer require --dev phpunit/phpunit
 ```
-
-You should also consider [to verify the signature of the PHPUnit file](https://phpunit.readthedocs.io/en/9.5/installation.html#verifying-phpunit-phar-releases),
-but as it can be tedious, I consider it's out of the scope of this
-documentation.
 
 Let’s write a `tests/bootstrap.php` file, it will be loaded by PHPUnit:
 
@@ -471,7 +484,7 @@ To execute the tests and check that everything goes fine, run the following
 command:
 
 ```console
-$ ./bin/phpunit --bootstrap ./tests/bootstrap.php --testdox ./tests/
+$ ./vendor/bin/phpunit --bootstrap ./tests/bootstrap.php --testdox ./tests/
 ```
 
 The tests are pretty standard for PHPUnit tests except this `appRun` method and

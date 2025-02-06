@@ -52,6 +52,8 @@ Minz.** You’ll often have to interact with them.
       methods to the Recordable trait;
     - [`\Minz\Database\Lockable`](/src/Database/Lockable.php) provides some
       methods to (un)lock a model;
+- **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the
+  migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
 - **[`\Minz\Validable`](/src/Validable.php) a trait to validate the models
   properties values.** It is used alongside with `Check`s:
     - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
@@ -70,12 +72,21 @@ Minz.** You’ll often have to interact with them.
       that a property is present (not null nor an empty string);
     - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL
       addresses.
+- [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message to be translated.
 
 ## Emails and mailers
 
 - **[`\Minz\Mailer`](/src/Mailer.php) allows to send emails.** It is used alongside with:
     - [`\Minz\Mailer\Email`](/src/Mailer/Email.php) is a wrapper around [the PHPMailer class](https://github.com/PHPMailer/PHPMailer/);
     - [`\Minz\Mailer\Job`](/src/Mailer/Job.php) allows to send emails asynchronously.
+
+## Forms
+
+- **[`\Minz\Form`](/src/Form.php) provides an easy way to handle forms.** It is used alongside with:
+    - **[`\Minz\Form\Field`](/src/Form/Field.php) to declare fields in the forms;**
+    - **[`\Minz\Form\Csrf`](/src/Form/Csrf.php) to protect against CSRF attacks in the forms;**
+    - [`\Minz\Form\Check`](/src/Form/Check.php) to declare custom checks in the forms;
+- [`\Minz\Csrf`](/src/Csrf.php) protects you from [Cross-Site Request Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);
 
 ## Errors
 
@@ -99,21 +110,14 @@ Minz.** You’ll often have to interact with them.
 
 ## Additional classes
 
-- **[`\Minz\Form`](/src/Form.php) provides an easy way to handle forms.** It is used alongside with:
-    - **[`\Minz\Form\Field`](/src/Form/Field.php) to declare fields in the forms;**
-    - **[`\Minz\Form\Csrf`](/src/Form/Csrf.php) to protect against CSRF attacks in the forms;**
-    - [`\Minz\Form\Check`](/src/Form/Check.php) to declare custom checks in the forms;
-- **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
 - **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs,** it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php);
-- **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
-- **[`\Minz\Controller\ErrorHandler`](/src/Controller/ErrorHandler.php) allows to execute code on errors triggered in controllers;**
-- [`\Minz\Csrf`](/src/Csrf.php) protects you from [Cross-Site Request Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);
+- **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
+- [`\Minz\Controller\ErrorHandler`](/src/Controller/ErrorHandler.php) allows to execute code on errors triggered in controllers;
 - [`\Minz\Email`](/src/Email.php) is an utility class to sanitize and validate emails;
 - [`\Minz\Flash`](/src/Flash.php) to pass messages from a page to another through redirections;
 - [`\Minz\Random`](/src/Random.php) to generate random values;
 - [`\Minz\Time`](/src/Time.php) abstracts the time;
 - [`\Minz\File`](/src/File.php) abstracts uploaded files;
-- [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message to be translated.
 
 ## Tests
 
