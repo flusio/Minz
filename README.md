@@ -8,7 +8,7 @@ What I like in Minz is:
 - I know the code perfectly (I wrote it);
 - it's powerful enough for my needs;
 - it has a relative small size;
-- it grows ONLY when I need it (the consequence is basic features might be missing);
+- it grows ONLY when I need it;
 - it's easy to perform integration tests;
 - it provides a common interface for both Web and CLI requests;
 - it has very few dependencies (only one at the moment, i.e. PHPMailer);
@@ -16,7 +16,7 @@ What I like in Minz is:
 
 ## Install
 
-You must use [Composer](https://getcomposer.org) to install Minz.
+You should use [Composer](https://getcomposer.org) to install Minz.
 
 Run:
 
@@ -37,6 +37,8 @@ require '/path/to/vendor/autoload.php';
 - [Getting started: setup a project](/docs/getting_started.md)
 - [An overview of Minz classes](/docs/overview.md)
 
+You'll find more documentation directly in the source files.
+
 ## Contributing
 
 I'm not intended to develop features that I have no uses (sorry!) That being
@@ -47,32 +49,6 @@ However, I'll be glad to accept patches for bugs and security flaws.
 
 [See the documentation to develop Minz.](/docs/development.md)
 
-## A bit of Minz-story
-
-When I was a student, my professors introduced me to the [Zend Framework](https://framework.zend.com/)
-(now [Laminas project](https://getlaminas.org/)). At the time, it was very
-frustrating: too big, too abstracted and complicated for the young student I
-was. I've finally been able to use it, but I wasn't able to explain "how"
-things were working.
-
-That's when I started the first "Minz" project (for "Minz Is Not Zend", very
-inspired). Its first repository [is still visible on GitHub](https://github.com/marienfressinaud/MINZ),
-but I urge you not to judge the code quality! I learnt how a framework could
-work and I've got reconciliated with Zend (well, sort of… I've never used it
-again). I used Minz, first of its name, for a bunch of projects; the most (and
-only) known today is [FreshRSS](https://github.com/FreshRSS/FreshRSS). It's
-been hacked a lot since then, but the initial design is still there, in this
-RSS aggregator.
-
-Almost 10 years later, I started a new PHP project ([Webubbub](https://github.com/flusio/Webubbub))
-but I felt a bit rusty and I wanted to apply some ideas I had in mind for years
-concerning the architecture of Web applications. And that's how I ended up
-developing another PHP framework. I hope the years of experience are visible in
-this repository, but please remember I'm not a PHP expert (I mainly used Python
-and Ruby these last years).
-
-It's still fun to develop a framework from scratch… and it takes some time too.
-
 ## Minz in the real world
 
 Today, I use Minz in several projects:
@@ -81,6 +57,14 @@ Today, I use Minz in several projects:
 - [flus.fr](https://github.com/flusio/flus.fr): the website of the Web service I provide for Flus;
 - [taust](https://github.com/flusio/taust): a monitoring system easy to setup (provided as a proof of concept);
 - [Webubbub](https://github.com/flusio/Webubbub): a simple [WebSub](https://www.w3.org/TR/websub/) hub.
+
+## Last question: should you use Minz?
+
+Probably not for your own projects. Minz was designed for my needs.
+
+However, because I tried to keep the codebase away from too many levels of
+abstraction, it can help you to learn how a framework works. I think Minz can
+be great for educational purposes.
 
 ## License
 
