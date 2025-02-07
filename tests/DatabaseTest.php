@@ -188,4 +188,38 @@ class DatabaseTest extends TestCase
         $this->assertSame(10, $results[0]['value']);
         $this->assertSame(30, $results[1]['value']);
     }
+
+    public function testExistsWhenDatabaseExists(): void
+    {
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        if ($configuration['type'] === 'sqlite') {
+            $sqlite_filename = tempnam('/tmp', 'minz-db');
+            assert($sqlite_filename !== false);
+            $configuration['path'] = $sqlite_filename;
+            Configuration::$database = $configuration;
+        }
+        Database::reset();
+
+        $exists = Database::exists();
+
+        $this->assertTrue($exists);
+    }
+
+    public function testExistsWhenDatabaseDoesNotExist(): void
+    {
+        /** @var ConfigurationDatabase */
+        $configuration = Configuration::$database;
+        if ($configuration['type'] === 'sqlite') {
+            $sqlite_filename = tempnam('/tmp', 'minz-db');
+            assert($sqlite_filename !== false);
+            $configuration['path'] = $sqlite_filename;
+            Configuration::$database = $configuration;
+        }
+        Database::drop();
+
+        $exists = Database::exists();
+
+        $this->assertFalse($exists);
+    }
 }

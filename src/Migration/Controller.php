@@ -130,12 +130,14 @@ class Controller
         $migrations_version_path = static::migrationsVersionPath();
 
         if (file_exists($schema_path)) {
-            \Minz\Database::create();
-
             $schema = @file_get_contents($schema_path);
 
             if ($schema === false) {
                 return Response::text(500, "Cannot read the database schema ({$schema_path}).");
+            }
+
+            if (!\Minz\Database::exists()) {
+                \Minz\Database::create();
             }
 
             $database = \Minz\Database::get();

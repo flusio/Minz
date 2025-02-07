@@ -379,11 +379,7 @@ class Database
                 $database->close();
             } catch (\PDOException $e) {
                 $database->close();
-
-                // Throw the error only if the error is not about "database already exists".
-                if ($e->getCode() !== '42P04') {
-                    throw $e;
-                }
+                throw $e;
             }
 
             return true;
@@ -405,6 +401,59 @@ class Database
     {
         self::drop();
         self::create();
+    }
+
+    /**
+     * Return whether the database already exists or not.
+     */
+    public static function exists(): bool
+    {
+        $database_configuration = Configuration::$database;
+        if (!$database_configuration) {
+            throw new Errors\DatabaseError(
+                'The database is not set in the configuration file.'
+            );
+        }
+
+        $database_type = $database_configuration['type'];
+
+        if ($database_type === 'sqlite' && isset($database_configuration['path'])) {
+            $database_path = $database_configuration['path'];
+
+            if ($database_path === ':memory:') {
+                return true;
+            } else {
+                return file_exists($database_path);
+            }
+        } elseif ($database_type === 'pgsql') {
+            $database = new self(connect_to_db: false);
+
+            $db_name = $database_configuration['dbname'];
+
+            try {
+                $statement = $database->prepare(<<<SQL
+                    SELECT EXISTS (
+                        SELECT datname FROM pg_catalog.pg_database
+                        WHERE datname = :db_name
+                    )
+                SQL);
+
+                $statement->execute([
+                    ':db_name' => $db_name,
+                ]);
+
+                $result = $statement->fetch(\PDO::FETCH_COLUMN);
+
+                $database->close();
+            } catch (\PDOException $e) {
+                $database->close();
+                throw $e;
+            }
+
+            return is_bool($result) && $result;
+        } else {
+            return false;
+        }
     }
 
     /**
