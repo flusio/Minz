@@ -16,12 +16,12 @@ use PHPMailer\PHPMailer;
  * `send()` method:
  *
  * ```php
- * $email = \Minz\Mailer\Email();
+ * $email = new \Minz\Mailer\Email();
  * $email->setSubject('Reset your password');
  * $email->setBody(
  *     'path/to/view.phtml',
  *     'path/to/view.txt',
- *     ['user => $user],
+ *     ['user' => $user],
  * );
  *
  * $mailer = new \Minz\Mailer();
@@ -43,12 +43,12 @@ use PHPMailer\PHPMailer;
  *     {
  *         $user = models\User::find($user_id);
  *
- *         $email = \Minz\Mailer\Email();
+ *         $email = new \Minz\Mailer\Email();
  *         $email->setSubject('Reset your password');
  *         $email->setBody(
  *             'path/to/view.phtml',
  *             'path/to/view.txt',
- *             ['user => $user],
+ *             ['user' => $user],
  *         );
  *
  *         $this->send($email, to: $user->email);
