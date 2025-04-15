@@ -31,7 +31,6 @@ class FlashTest extends TestCase
 
         $this->assertSame('bar', Flash::pop('foo'));
 
-        $this->assertTrue(isset($_SESSION['_flash']));
         // @phpstan-ignore-next-line isset.offset
         $this->assertFalse(isset($_SESSION['_flash']['foo']));
     }

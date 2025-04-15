@@ -36,8 +36,10 @@ class CsrfTest extends TestCase
 
         $token = Csrf::generate();
 
-        $this->assertTrue(isset($_SESSION['_csrf']));
-        $this->assertSame($_SESSION['_csrf'], $token);
+        /** @var string */
+        $session_token = $_SESSION['_csrf'];
+        $this->assertNotEmpty($session_token);
+        $this->assertSame($session_token, $token);
     }
 
     public function testValidate(): void
