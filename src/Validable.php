@@ -49,7 +49,7 @@ namespace Minz;
 trait Validable
 {
     /**
-     * @return array<string, ValidableError[]|string>
+     * @return array<string, ($format is true ? string : ValidableError[])>
      */
     public function validate(bool $format = true): array
     {
