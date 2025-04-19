@@ -15,6 +15,11 @@ CREATE TABLE rabbits (
     FOREIGN KEY (friend_id) REFERENCES friends(id)
 );
 
+CREATE TABLE validable_unique_models (
+    id SERIAL NOT NULL PRIMARY KEY,
+    email VARCHAR(255)
+);
+
 CREATE TABLE jobs (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL,

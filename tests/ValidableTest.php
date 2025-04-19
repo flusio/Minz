@@ -222,6 +222,38 @@ class ValidableTest extends TestCase
         ], $errors);
     }
 
+    public function testValidateFailsIfNotUnique(): void
+    {
+        assert(\Minz\Configuration::$database !== null);
+
+        $database_type = \Minz\Configuration::$database['type'];
+        $sql_schema_path = \Minz\Configuration::$app_path . "/schema.{$database_type}.sql";
+        $sql_schema = file_get_contents($sql_schema_path);
+
+        assert($sql_schema !== false);
+
+        $database = \Minz\Database::get();
+        $database->exec($sql_schema);
+
+        $existing_model = new models\ValidableUniqueModel();
+        $existing_model->email = 'alix@example.org';
+        $existing_model->save();
+        $model = new models\ValidableUniqueModel();
+        $model->email = 'alix@example.org';
+
+        $errors_existing_model = $existing_model->validate(format: false);
+        $errors_model = $model->validate(format: false);
+
+        \Minz\Database::reset();
+
+        $this->assertEquals([], $errors_existing_model);
+        $this->assertEquals([
+            'email' => [
+                ['Minz\\Validable\\Unique', '"alix@example.org" is already taken.'],
+            ]
+        ], $errors_model);
+    }
+
     public function testValidateFailsWithMultipleErrors(): void
     {
         $model = new models\ValidableModel();

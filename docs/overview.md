@@ -70,6 +70,8 @@ Minz.** You’ll often have to interact with them.
       min and/or max length of a string;
     - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check
       that a property is present (not null nor an empty string);
+    - [`\Minz\Validable\Unique`](/src/Validable/Unique.php) allows to check
+      that a value is unique in database.
     - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL
       addresses.
 - [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message to be translated.
