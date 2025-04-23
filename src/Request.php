@@ -80,6 +80,12 @@ namespace Minz;
  * $my_cookie = $request->cookie('my_cookie');
  * ```
  *
+ * The Request object provides two special parameters, prefixed by an
+ * underscore (_):
+ *
+ * - "_self" parameter is the current URI without the domain (/path?query)
+ * - "_action_pointer" parameter is the current Router pointer
+ *
  * @phpstan-type RequestMethod value-of<Request::VALID_METHODS>
  *
  * @phpstan-type RequestParameters array<string, mixed>
@@ -236,13 +242,17 @@ class Request
             // For these reasons, we consider all URIs starting by a slash to
             // be a path and we remove query and hash manually.
             $path = $uri;
-            $pos_query = strpos($path, '?');
-            if ($pos_query !== false) {
-                $path = substr($path, 0, $pos_query);
-            }
+            $self_uri = $path;
+
             $pos_hash = strpos($path, '#');
             if ($pos_hash !== false) {
                 $path = substr($path, 0, $pos_hash);
+                $self_uri = $path;
+            }
+
+            $pos_query = strpos($path, '?');
+            if ($pos_query !== false) {
+                $path = substr($path, 0, $pos_query);
             }
         } else {
             // In other cases, the URI probably contains the protocol and
@@ -262,7 +272,22 @@ class Request
             if ($path[0] !== '/') {
                 throw new Errors\RequestError("{$uri} URI path must start with a slash.");
             }
+
+            $self_uri = $path;
+
+            $query = $uri_components['query'] ?? null;
+            if ($query !== null) {
+                $self_uri .= "?{$query}";
+            }
         }
+
+        // We add the current URI to the parameters array so it's possible to
+        // reuse it (for instance to automate redirection to a
+        // /login?redirect_to=<_self> path).
+        // _self only contains /path and ?query to make sure to point on the
+        // same server, and because #fragment shouldn't be sent to the server
+        // (so we shoudn't know about it).
+        $parameters['_self'] = $self_uri;
 
         // If a path is specified in url_options, we must remove its value
         // from the beginning of the request path because routes are relative

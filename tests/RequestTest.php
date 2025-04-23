@@ -32,6 +32,7 @@ class RequestTest extends TestCase
 
         $this->assertSame('GET', $request->method());
         $this->assertSame('/path', $request->path());
+        $this->assertSame('/path', $request->param('_self'));
         $this->assertSame('bar', $request->param('foo'));
         $this->assertSame('egg', $request->param('spam'));
         $this->assertSame('file', $request->param('some'));
@@ -75,6 +76,7 @@ class RequestTest extends TestCase
 
         $this->assertSame('CLI', $request->method());
         $this->assertSame('/users/create', $request->path());
+        $this->assertSame('/users/create', $request->param('_self'));
         $this->assertSame('./cli', $request->param('bin'));
         $this->assertSame('bar', $request->param('foo'));
         $this->assertSame('qux', $request->param('foo-baz'));
@@ -398,6 +400,16 @@ class RequestTest extends TestCase
         $this->assertNull($foo->error);
     }
 
+    #[\PHPUnit\Framework\Attributes\DataProvider('requestToUriProvider')]
+    public function testParamSelf(string $request_uri, string $expected_uri): void
+    {
+        $request = new Request('GET', $request_uri);
+
+        $self_uri = $request->param('_self');
+
+        $this->assertSame($expected_uri, $self_uri);
+    }
+
     public function testParamFileReturnsNullIfFileInvalid(): void
     {
         $request = new Request('GET', '/', [
@@ -513,6 +525,29 @@ class RequestTest extends TestCase
             ['http://domain.com/rabbits', '/rabbits'],
             ['http://domain.com//rabbits', '//rabbits'],
             ['http://domain.com/rabbits?id=42', '/rabbits'],
+            ['http://domain.com/rabbits#hash', '/rabbits'],
+        ];
+    }
+
+    /**
+     * @return array<array{string, string}>
+     */
+    public static function requestToUriProvider(): array
+    {
+        return [
+            ['/', '/'],
+            ['/rabbits', '/rabbits'],
+            ['//rabbits', '//rabbits'],
+            ['///rabbits', '///rabbits'],
+            ['/rabbits/details.html', '/rabbits/details.html'],
+            ['/rabbits//details.html', '/rabbits//details.html'],
+            ['/rabbits?id=42', '/rabbits?id=42'],
+            ['/rabbits#hash', '/rabbits'],
+            ['http://domain.com', '/'],
+            ['http://domain.com/', '/'],
+            ['http://domain.com/rabbits', '/rabbits'],
+            ['http://domain.com//rabbits', '//rabbits'],
+            ['http://domain.com/rabbits?id=42', '/rabbits?id=42'],
             ['http://domain.com/rabbits#hash', '/rabbits'],
         ];
     }
