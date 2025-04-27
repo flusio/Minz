@@ -31,7 +31,7 @@ namespace Minz\Validable;
  * @phpstan-type InclusionMode 'values'|'keys'
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Inclusion extends Check
+class Inclusion extends PropertyCheck
 {
     /** @var mixed[] */
     public array $in;

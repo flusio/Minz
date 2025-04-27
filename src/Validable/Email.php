@@ -34,7 +34,7 @@ namespace Minz\Validable;
  * @see \Minz\Email::validate
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Email extends Check
+class Email extends PropertyCheck
 {
     /** @var EmailMode */
     public string $mode;
