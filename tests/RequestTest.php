@@ -32,7 +32,7 @@ class RequestTest extends TestCase
 
         $this->assertSame('GET', $request->method());
         $this->assertSame('/path', $request->path());
-        $this->assertSame('/path', $request->param('_self'));
+        $this->assertSame('/path', $request->selfUri());
         $this->assertSame('bar', $request->param('foo'));
         $this->assertSame('egg', $request->param('spam'));
         $this->assertSame('file', $request->param('some'));
@@ -76,7 +76,7 @@ class RequestTest extends TestCase
 
         $this->assertSame('CLI', $request->method());
         $this->assertSame('/users/create', $request->path());
-        $this->assertSame('/users/create', $request->param('_self'));
+        $this->assertSame('/users/create', $request->selfUri());
         $this->assertSame('./cli', $request->param('bin'));
         $this->assertSame('bar', $request->param('foo'));
         $this->assertSame('qux', $request->param('foo-baz'));
@@ -151,6 +151,16 @@ class RequestTest extends TestCase
         \Minz\Configuration::$url_options['path'] = $old_url_path;
 
         $this->assertSame('/rabbits', $path);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('requestToUriProvider')]
+    public function testSelfUri(string $request_uri, string $expected_uri): void
+    {
+        $request = new Request('GET', $request_uri);
+
+        $self_uri = $request->selfUri();
+
+        $this->assertSame($expected_uri, $self_uri);
     }
 
     public function testHasParamWithExistingParam(): void
@@ -398,16 +408,6 @@ class RequestTest extends TestCase
 
         $this->assertSame($tmp_filepath, $foo->filepath);
         $this->assertNull($foo->error);
-    }
-
-    #[\PHPUnit\Framework\Attributes\DataProvider('requestToUriProvider')]
-    public function testParamSelf(string $request_uri, string $expected_uri): void
-    {
-        $request = new Request('GET', $request_uri);
-
-        $self_uri = $request->param('_self');
-
-        $this->assertSame($expected_uri, $self_uri);
     }
 
     public function testParamFileReturnsNullIfFileInvalid(): void
