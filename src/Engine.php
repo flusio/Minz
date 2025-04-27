@@ -234,13 +234,13 @@ class Engine
 
         try {
             $response = $controller->$action_name($request);
-        } catch (\Exception $e) {
+        } catch (\Exception $error) {
             // Execute errors handlers defined at the controller level. A
             // handler allows to execute code on specific errors.
-            $errors_handlers = self::loadErrorsHandlers($controller, $action_name, $e::class);
+            $errors_handlers = self::loadErrorsHandlers($controller, $action_name, $error::class);
 
             foreach ($errors_handlers as $error_handler) {
-                $response = $error_handler->invokeArgs($controller, [$request]);
+                $response = $error_handler->invokeArgs($controller, [$request, $error]);
 
                 // If the handler returns a response, returns it immediately.
                 if ($response instanceof Response) {
@@ -248,7 +248,7 @@ class Engine
                 }
             }
 
-            throw $e;
+            throw $error;
         }
 
         if (!($response instanceof Response) && !($response instanceof \Generator)) {

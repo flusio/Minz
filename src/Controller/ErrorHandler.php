@@ -42,15 +42,15 @@ namespace Minz\Controller;
  *         }
  *
  *         #[Controller\ErrorHandler(MissingCurrentUserError::class)]
- *         public function redirectToLogin(Request $request): Response
+ *         public function redirectToLogin(Request $request, MissingCurrentUserError $error): Response
  *         {
  *             return Response::redirect('login');
  *         }
  *     }
  *
- * The methods defined with this attribute must accept a Request as a unique
- * parameter, and can return a Response. If it returns a Response, the Engine
- * will immediately stop and not execute the following handlers, if any.
+ * The methods defined with this attribute must accept a Request and the error
+ * as parameters, and can return a Response. If it returns a Response, the
+ * Engine will immediately stop and not execute the following handlers, if any.
  *
  * You can pass the `only` parameter to the attribute in order to apply the
  * handler only for specific actions:
