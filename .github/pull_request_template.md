@@ -3,12 +3,6 @@
 <!-- Copy-paste the URL to the related issue(s) if any ("N/A" if not applicable).
   -->
 
-## How to test manually
-
-<!-- List actions (step by step) of what have to be done in order to test your
-  -- changes manually ("N/A" if not applicable).
-  -->
-
 ## Reviewer checklist
 
 <!-- Please don't change or remove this checklist. It will be used by the
