@@ -7,111 +7,39 @@
 namespace Minz\Validable;
 
 /**
- * The base class for various checks that are validable with the Validable
- * trait.
+ * An attribute to run custom checks in Validable objects.
  *
- * It cannot be used directly.
+ * This attribute must be applied on class methods. They must not take
+ * parameters and should return nothing. They must use the `addError` method to
+ * declares errors.
  *
- * The child classes must be declared as being usable as PHP Attribute. They
- * also have to implements the `assert()` method:
+ *     use Minz\Form;
+ *     use Minz\Validable;
  *
- *     #[\Attribute(\Attribute::TARGET_PROPERTY)]
- *     class MyCheck extends \Minz\Check
+ *     class Article extends Form
  *     {
- *         public function assert(): bool
+ *         #[Form\Field(transform: 'trim')]
+ *         public string $title = '';
+ *
+ *         #[Form\Field]
+ *         public string $content = '';
+ *
+ *         #[Validable\Check]
+ *         public function checkOpenHour(): void
  *         {
- *             // check the value of the property and return a boolean
+ *             $now = \Minz\Time::now();
+ *             $height_am = \Minz\Time::relative('8AM');
+ *             $height_pm = \Minz\Time::relative('8PM');
+ *
+ *             if ($now < $height_am || $now > $height_pm) {
+ *                 $this->addError('@base', 'checkOpenHour', 'You can only publish between 8AM and 8PM.');
+ *             }
  *         }
  *     }
  *
- * The property value is accessible with the `getValue()` method.
- * The property itself is accessible as a `ReflectionProperty` with
- * `$this->property` while the instance of the object is accessible with
- * `$this->instance`.
+ * @see \Minz\Validable
  */
-abstract class Check
+#[\Attribute(\Attribute::TARGET_METHOD)]
+class Check
 {
-    public string $message = 'Invalid value';
-
-    public \ReflectionProperty $property;
-
-    public object $instance;
-
-    public function __construct(string $message)
-    {
-        $this->message = $message;
-    }
-
-    abstract public function assert(): bool;
-
-    public function getValue(): mixed
-    {
-        return $this->property->getValue($this->instance);
-    }
-
-    public function getMessage(): string
-    {
-        $value = $this->getValue();
-
-        return $this->formatMessage(
-            $this->message,
-            ['{value}'],
-            [$value],
-        );
-    }
-
-    /**
-     * Format a message by replacing the $search strings by the $replace values.
-     *
-     * @param string[] $search
-     * @param mixed[] $replace
-     */
-    protected function formatMessage(string $message, array $search, array $replace): string
-    {
-        $replace = array_map(function ($value): string {
-            if ($value instanceof \DateTimeInterface) {
-                return $value->format('Y-m-d H:i:s');
-            }
-
-            if (is_object($value)) {
-                if ($value instanceof \Stringable) {
-                    return $value->__toString();
-                }
-
-                return 'object';
-            }
-
-            if (is_array($value)) {
-                return 'array';
-            }
-
-            if (is_resource($value)) {
-                return 'resource';
-            }
-
-            if ($value === null) {
-                return 'null';
-            }
-
-            if ($value === false) {
-                return 'false';
-            }
-
-            if ($value === true) {
-                return 'true';
-            }
-
-            if (is_string($value) || is_integer($value) || is_float($value)) {
-                return (string) $value;
-            }
-
-            return '';
-        }, $replace);
-
-        return str_replace(
-            $search,
-            $replace,
-            $message,
-        );
-    }
 }

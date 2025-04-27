@@ -30,7 +30,7 @@ namespace Minz\Validable;
  * @see https://www.php.net/manual/function.preg-match.php
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Format extends Check
+class Format extends PropertyCheck
 {
     public string $pattern;
 
@@ -42,7 +42,7 @@ class Format extends Check
 
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         if ($value === null || $value === '') {
             return true;

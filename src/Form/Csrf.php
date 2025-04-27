@@ -6,44 +6,50 @@
 
 namespace Minz\Form;
 
+use Minz\Validable;
+
 /**
  * A trait to check CSRF tokens.
  *
- * It is used in Form classes.
+ * You can handle CSRF validation with this trait. It is recommended to declare
+ * it in a BaseForm. It is possible to override the `csrfErrorMessage()` method
+ * to customize the error message (e.g. to translate it).
  *
  *     use Minz\Form;
  *
- *     class Article extends Form
+ *     class BaseForm extends Form
  *     {
  *         use Form\Csrf;
  *
- *         // ...
+ *         public function csrfErrorMessage(): string
+ *         {
+ *             return _('CSRF token is invalid, try to resubmit the form.');
+ *         }
  *     }
  *
  * Don't forget to include the CSRF token and errors in the form view:
  *
  *     <input type="hidden" name="csrf" value="<?= $csrf_token ?>" />
  *
- *     <?php if ($form->hasError('@global')): ?>
+ *     <?php if ($form->isInvalid('@base')): ?>
  *         <p>
- *             <?= $form->getError('@global') ?>
+ *             <?= $form->error('@base') ?>
  *         </p>
  *     <?php endif ?>
  *
- * Note that the $csrf_token is generated with \Minz\Csrf::generate() in the
- * controller. The CSRF error is registered in the special "@global" error
- * namespace.
+ * Note that the $csrf_token should be generated with the `\Minz\Csrf::generate()`
+ * method. The CSRF error is registered in the special "@base" error namespace.
  */
 trait Csrf
 {
-    #[Field(bind_model: false)]
+    #[Field(bind: false)]
     public string $csrf = '';
 
-    #[Check]
+    #[Validable\Check]
     public function checkCsrf(): void
     {
         if (!\Minz\Csrf::validate($this->csrf)) {
-            $this->addError('@global', $this->csrfErrorMessage());
+            $this->addError('@base', 'csrf', $this->csrfErrorMessage());
         }
     }
 

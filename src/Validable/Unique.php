@@ -9,12 +9,19 @@ namespace Minz\Validable;
 /**
  * Check that a property is unique in database.
  *
+ *     use Minz\Database;
  *     use Minz\Validable;
  *
+ *     #[Database\Table(name: 'users')]
  *     class User
  *     {
+ *         use Database\Recordable;
  *         use Validable;
  *
+ *         #[Database\Column]
+ *         public int $id;
+ *
+ *         #[Database\Column]
  *         #[Validable\Unique(message: 'Email {value} is already taken.')]
  *         public string $email;
  *     }
@@ -22,11 +29,11 @@ namespace Minz\Validable;
  * This check can be used only on Recordable models.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Unique extends Check
+class Unique extends PropertyCheck
 {
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
         $property_name = $this->property->getName();
         $instance = $this->instance;
         $instance_class = get_class($instance);

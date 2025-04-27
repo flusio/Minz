@@ -20,12 +20,12 @@ namespace Minz\Form;
  * You can declare as many fields as you want, including different types
  * (string, boolean, integer, datetime, arrays of strings).
  *
- * You can initialize the Field with `trim: true` to trim the value coming
- * from the form data.
+ * You can initialize the Field with `transform: 'a_callable'`. For instance,
+ * to trim the value coming from the form data.
  *
  *     class Article extends Form
  *     {
- *         #[Form\Field(trim: true)]
+ *         #[Form\Field(transform: 'trim')]
  *         public string $title = '';
  *     }
  *
@@ -41,14 +41,14 @@ namespace Minz\Form;
  *         public ?\DateTimeImmutable $published_at = null;
  *     }
  *
- * Fields are automatically bind to model attributes if the form is bind to a
+ * Fields are automatically bound to model attributes if the form is bound to a
  * model. It means that if the model has the same attribute name as the field,
  * it will be set when running `$form->handleRequest`. You can disable this
- * behaviour by passing `bind_model: false`.
+ * behaviour by passing `bind: false`.
  *
  *     class Article extends Form
  *     {
- *         #[Form\Field(bind_model: false)]
+ *         #[Form\Field(bind: false)]
  *         public string $title = '';
  *     }
  *
@@ -57,7 +57,7 @@ namespace Minz\Form;
  *
  *     class Article extends Form
  *     {
- *         #[Form\Field(bind_model: 'setTitle')]
+ *         #[Form\Field(bind: 'setTitle')]
  *         public string $title = '';
  *     }
  */
@@ -67,9 +67,10 @@ class Field
     public const DATETIME_FORMAT = 'Y-m-dTH:i';
 
     public function __construct(
-        public bool $trim = false,
+        /** @var callable-string */
+        public ?string $transform = null,
         public ?string $format = null,
-        public bool|string $bind_model = true
+        public bool|string $bind = true
     ) {
     }
 }

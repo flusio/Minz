@@ -31,7 +31,7 @@ namespace Minz\Validable;
  * @phpstan-type InclusionMode 'values'|'keys'
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Inclusion extends Check
+class Inclusion extends PropertyCheck
 {
     /** @var mixed[] */
     public array $in;
@@ -52,7 +52,7 @@ class Inclusion extends Check
 
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         if ($value === null) {
             return true;

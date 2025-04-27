@@ -25,7 +25,7 @@ namespace Minz\Validable;
  * accept optional values.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Url extends Check
+class Url extends PropertyCheck
 {
     /** @var string[] */
     public array $schemes;
@@ -41,7 +41,7 @@ class Url extends Check
 
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         if ($value === null || $value === '') {
             return true;

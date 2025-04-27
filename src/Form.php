@@ -16,7 +16,7 @@ namespace Minz;
  *
  *     class Article extends Form
  *     {
- *         #[Form\Field(trim: true)]
+ *         #[Form\Field(transform: 'trim')]
  *         public string $title = '';
  *
  *         #[Form\Field]
@@ -43,27 +43,27 @@ namespace Minz;
  *     <label for="title">
  *         Title
  *     </label>
-
- *     <?php if ($form->hasError('title')): ?>
+ *
+ *     <?php if ($form->isInvalid('title')): ?>
  *         <p id="title-error">
- *             <?= $form->getError('title') ?>
+ *             <?= $form->error('title') ?>
  *         </p>
  *     <?php endif ?>
-
+ *
  *     <input
  *         type="text"
  *         id="title"
  *         name="title"
  *         value="<?= $form->title ?>"
  *         required
- *         <?php if ($form->hasError('title')): ?>
+ *         <?php if ($form->isInvalid('title')): ?>
  *             aria-invalid="true"
  *             aria-errormessage="title-error"
  *         <?php endif ?>
  *     />
  *
  * Then, handle the request in the controller. You can bind the form to a model
- * with the Validable trait in order to validate it.
+ * so it will automatically set its properties.
  *
  *     public function create(Request $request): Response
  *     {
@@ -78,39 +78,82 @@ namespace Minz;
  *             ]);
  *         }
  *
- *         // You need to call getModel to refresh the model with the values
+ *         // You need to call model() to refresh the model with the values
  *         // set from the request.
- *         $article = $form->getModel();
+ *         $article = $form->model();
  *         $article->save();
  *
  *         return Response::redirect('articles');
  *     }
  *
+ * As the Form class uses the `Validable` trait, you can call `$form->validate()`
+ * to validate the fields. You also can run additionnal checks that are
+ * validated on `$form->validate()` with the Validable\Check attribute (as you
+ * would do on a model).
+ *
+ * Note that if a Validable model is bound to the form, it will call the
+ * `validate()` method on it too and copy the errors to the form errors. This
+ * avoids to duplicate validations.
+ *
+ *     use Minz\Form;
+ *     use Minz\Validable;
+ *
+ *     class Article extends Form
+ *     {
+ *         // These checks could be declared in the Article model instead.
+ *         #[Form\Field(transform: 'trim')]
+ *         #[Validable\Presence(message: 'Enter a title.')]
+ *         public string $title = '';
+ *
+ *         #[Form\Field]
+ *         #[Validable\Presence(message: 'Enter a content.')]
+ *         public string $content = '';
+ *
+ *         #[Validable\Check]
+ *         public function checkOpenHour(): void
+ *         {
+ *             $now = \Minz\Time::now();
+ *             $height_am = \Minz\Time::relative('8AM');
+ *             $height_pm = \Minz\Time::relative('8PM');
+ *
+ *             if ($now < $height_am || $now > $height_pm) {
+ *                 $this->addError('@base', 'checkOpenHour', 'You can only publish between 8AM and 8PM.');
+ *             }
+ *         }
+ *     }
+ *
  * You can handle CSRF validation with the Form\Csrf trait.
  *
- * You can run special checks that are validated on `$form->validate()` with
- * the Form\Check attribute.
+ * @see \Minz\Validable
  *
  * @template T of ?object
  *
- * @phpstan-type FieldConfiguration array{
+ * @phpstan-type FieldSchema array{
  *     'type': string,
- *     'trim': bool,
+ *     'transform': ?callable-string,
  *     'format': string,
- *     'bind_model': bool|string,
+ *     'bind': bool|string,
  * }
  *
  * @phpstan-import-type ValidableError from Validable
  */
 class Form
 {
-    /** @var array<string, string[]> */
-    protected array $errors = [];
+    use Validable;
 
     /** @var T */
     protected ?object $model = null;
 
     /**
+     * Initialize a form.
+     *
+     * You can override default values with the default_values parameter.
+     *
+     * You can bind a model to the form so its properties are synchronized with
+     * the form fields (see Form\Field::$bind).
+     *
+     * If both default_values and model are passed, the latter has the priority.
+     *
      * @param array<string, mixed> $default_values
      * @param T $model
      */
@@ -120,8 +163,8 @@ class Form
             $this->model = clone $model;
         }
 
-        $configuration = $this->configuration();
-        foreach ($configuration as $field_name => $field_configuration) {
+        $fields_schema = $this->fieldsSchema();
+        foreach ($fields_schema as $field_name => $field_schema) {
             if ($this->model && isset($this->model->$field_name)) {
                 $this->set($field_name, $this->model->$field_name);
             } elseif (isset($default_values[$field_name])) {
@@ -131,14 +174,22 @@ class Form
     }
 
     /**
-     * @return array<string, FieldConfiguration>
+     * Return the schema of the form fields.
+     *
+     * The method returns an array where keys corresponds to the name of the
+     * Form/Field fields, and values are the corresponding schema.
+     *
+     * @throws Errors\LogicException
+     *     Raised if a field doesn't declare its type.
+     *
+     * @return array<string, FieldSchema>
      */
-    public function configuration(): array
+    public function fieldsSchema(): array
     {
         $class_reflection = new \ReflectionClass(static::class);
         $properties = $class_reflection->getProperties();
 
-        $configuration = [];
+        $fields_schema = [];
 
         foreach ($properties as $property) {
             $field_attributes = $property->getAttributes(
@@ -165,42 +216,39 @@ class Form
                 $field_type = 'DateTimeImmutable';
             }
 
-            $field_declaration = [
-                'type' => $field_type,
-            ];
-
-            if ($field_type === 'string') {
-                $field_declaration['trim'] = $field_attribute->trim;
-            } else {
-                $field_declaration['trim'] = false;
-            }
-
+            $format = '';
             if ($field_type === 'DateTimeImmutable') {
                 $format = $field_attribute->format ?? Form\Field::DATETIME_FORMAT;
-                $field_declaration['format'] = $format;
-            } else {
-                $field_declaration['format'] = '';
             }
 
-            $field_declaration['bind_model'] = $field_attribute->bind_model;
-
-            $configuration[$property_name] = $field_declaration;
+            $fields_schema[$property_name] = [
+                'type' => $field_type,
+                'transform' => $field_attribute->transform,
+                'bind' => $field_attribute->bind,
+                'format' => $format,
+            ];
         }
 
-        return $configuration;
+        return $fields_schema;
     }
 
+    /**
+     * Retrieve the fields values from a Request.
+     *
+     * The values are automatically casted to the correct types, based on the
+     * fields schema.
+     */
     public function handleRequest(Request $request): void
     {
-        $configuration = $this->configuration();
-        foreach ($configuration as $field_name => $field_configuration) {
-            if ($field_configuration['type'] === 'bool') {
+        $fields_schema = $this->fieldsSchema();
+        foreach ($fields_schema as $field_name => $field_schema) {
+            if ($field_schema['type'] === 'bool') {
                 $value = $request->paramBoolean($field_name);
-            } elseif ($field_configuration['type'] === 'int') {
+            } elseif ($field_schema['type'] === 'int') {
                 $value = $request->paramInteger($field_name);
-            } elseif ($field_configuration['type'] === 'DateTimeImmutable') {
-                $value = $request->paramDatetime($field_name, format: $field_configuration['format']);
-            } elseif ($field_configuration['type'] === 'array') {
+            } elseif ($field_schema['type'] === 'DateTimeImmutable') {
+                $value = $request->paramDatetime($field_name, format: $field_schema['format']);
+            } elseif ($field_schema['type'] === 'array') {
                 $value = $request->paramArray($field_name);
             } else {
                 $value = $request->param($field_name);
@@ -214,39 +262,60 @@ class Form
         }
     }
 
+    /**
+     * Set a field with the given value.
+     *
+     * If the field is declared with a `transform` callback, the value is
+     * passed to it and the returned value is used.
+     *
+     * If the form has been bound to a model, its properties are synchronized
+     * (see the field `bind` attribute).
+     *
+     * @throws Errors\LogicException
+     *     Raised if $field_name doesn't correspond to an existing field.
+     */
     public function set(string $field_name, mixed $value): void
     {
-        $configuration = $this->configuration();
+        $fields_schema = $this->fieldsSchema();
 
-        if (!isset($configuration[$field_name])) {
+        if (!isset($fields_schema[$field_name])) {
             throw new Errors\LogicException("Form doesn't declare a {$field_name} field.");
         }
 
-        $field_configuration = $configuration[$field_name];
-        if ($field_configuration['trim'] && is_string($value)) {
-            $value = trim($value);
+        $field_schema = $fields_schema[$field_name];
+
+        if ($field_schema['transform']) {
+            $transform_function = $field_schema['transform'];
+            $value = call_user_func($transform_function, $value);
         }
 
         $this->$field_name = $value;
 
-        $bind_model = $field_configuration['bind_model'];
-        if ($bind_model && $this->model) {
-            if (is_string($bind_model)) {
-                $this->model->$bind_model($value);
+        $bind = $field_schema['bind'];
+        if ($bind && $this->model) {
+            if (is_string($bind)) {
+                $this->model->$bind($value);
             } else {
                 $this->model->$field_name = $value;
             }
         }
     }
 
+    /**
+     * Format a DateTimeImmutable field using the Field `format` option.
+     *
+     * @throws Errors\LogicException
+     *     Raised if the field doesn't exist or if the field is not a
+     *     DateTimeImmutable.
+     */
     public function format(string $field_name): string
     {
-        $configuration = $this->configuration();
-        if (!isset($configuration[$field_name])) {
+        $fields_schema = $this->fieldsSchema();
+        if (!isset($fields_schema[$field_name])) {
             throw new Errors\LogicException("Form doesn't declare a {$field_name} field.");
         }
 
-        if ($configuration[$field_name]['type'] !== 'DateTimeImmutable') {
+        if ($fields_schema[$field_name]['type'] !== 'DateTimeImmutable') {
             throw new Errors\LogicException("{$field_name} must be of type DateTimeImmutable.");
         }
 
@@ -254,79 +323,69 @@ class Form
             return '';
         }
 
-        return $this->$field_name->format($configuration[$field_name]['format']);
-    }
-
-    public function hasError(string $field_name): bool
-    {
-        return isset($this->errors[$field_name]);
-    }
-
-    public function getError(string $field_name): string
-    {
-        if ($this->hasError($field_name)) {
-            return implode(' ', $this->errors[$field_name]);
-        } else {
-            return '';
-        }
-    }
-
-    public function addError(string $field_name, string $error): void
-    {
-        $this->errors[$field_name][] = $error;
+        return $this->$field_name->format($fields_schema[$field_name]['format']);
     }
 
     /**
-     * @param string[] $errors
-     */
-    public function addErrors(string $field_name, array $errors): void
-    {
-        foreach ($errors as $error) {
-            $this->addError($field_name, $error);
-        }
-    }
-
-    public function validate(): bool
-    {
-        // Check the custom "check" methods.
-        $class_reflection = new \ReflectionClass(static::class);
-        $methods = $class_reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-
-        foreach ($methods as $method) {
-            $check_attributes = $method->getAttributes(Form\Check::class);
-            if (empty($check_attributes)) {
-                continue;
-            }
-
-            $method->invoke($this);
-        }
-
-        // Check the (validable) model.
-        if ($this->model && is_callable([$this->model, 'validate'])) {
-            /** @var array<string, ValidableError[]> */
-            $errors = call_user_func([$this->model, 'validate'], false);
-
-            foreach ($errors as $field_name => $field_errors) {
-                $field_errors = array_column($field_errors, 1);
-                $this->addErrors($field_name, $field_errors);
-            }
-        }
-
-        return empty($this->errors);
-    }
-
-    /**
-     * @return T
+     * Return the synchronized model.
      *
      * @throws Errors\LogicException
      *     Raised if the model is not set.
+     *
+     * @return T
      */
-    public function getModel(): ?object
+    public function model(): ?object
     {
         if (!$this->model) {
             throw new Errors\LogicException('Model is not set');
         }
 
         return $this->model;
+    }
+
+    /**
+     * Check the model when validating the form and copy the errors to the form
+     * errors.
+     */
+    #[Validable\Check]
+    public function checkModel(): void
+    {
+        if (
+            !$this->model ||
+            !is_callable([$this->model, 'validate']) ||
+            !is_callable([$this->model, 'errors'])
+        ) {
+            return;
+        }
+
+        $is_valid = $this->model->validate();
+
+        if ($is_valid) {
+            return;
+        }
+
+        $model_errors = $this->model->errors(false);
+        $fields_schema = $this->fieldsSchema();
+
+        $this->copyModelErrors($model_errors, '@base');
+
+        foreach ($fields_schema as $field_name => $field_schema) {
+            if ($field_schema['bind'] === false) {
+                continue;
+            }
+
+            $this->copyModelErrors($model_errors, $field_name);
+        }
+    }
+
+    /**
+     * @param array<string, ValidableError[]> $model_errors
+     */
+    private function copyModelErrors(array $model_errors, string $field_name): void
+    {
+        $field_errors = $model_errors[$field_name] ?? [];
+        foreach ($field_errors as $field_error) {
+            $this->addError($field_name, $field_error[0], $field_error[1]);
+        }
     }
 }

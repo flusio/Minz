@@ -12,9 +12,14 @@ class Rabbit extends Form
 {
     use Form\Csrf;
 
-    #[Form\Field(trim: true)]
+    #[Form\Field(transform: '\AppTest\forms\Rabbit::transformName')]
     public string $name;
 
     #[Form\Field]
     public int $friend_id;
+
+    public static function transformName(string $name): string
+    {
+        return trim($name);
+    }
 }

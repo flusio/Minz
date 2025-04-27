@@ -32,7 +32,7 @@ namespace Minz\Validable;
  * accept optional values.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Length extends Check
+class Length extends PropertyCheck
 {
     public ?int $min;
 
@@ -47,13 +47,13 @@ class Length extends Check
 
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         if ($value === null || $value === '') {
             return true;
         }
 
-        $length = $this->getLength();
+        $length = $this->length();
 
         if ($this->min !== null && $length < $this->min) {
             return false;
@@ -66,11 +66,11 @@ class Length extends Check
         return true;
     }
 
-    public function getMessage(): string
+    public function message(): string
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
-        $length = $this->getLength();
+        $length = $this->length();
 
         return $this->formatMessage(
             $this->message,
@@ -79,9 +79,9 @@ class Length extends Check
         );
     }
 
-    private function getLength(): int
+    private function length(): int
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         if ($value === null) {
             return 0;

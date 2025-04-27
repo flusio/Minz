@@ -39,7 +39,7 @@ namespace Minz\Validable;
  * optional values.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Comparison extends Check
+class Comparison extends PropertyCheck
 {
     public function __construct(
         string $message,
@@ -55,7 +55,7 @@ class Comparison extends Check
 
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         if ($value === null) {
             return true;
@@ -88,9 +88,9 @@ class Comparison extends Check
         return true;
     }
 
-    public function getMessage(): string
+    public function message(): string
     {
-        $value = $this->getValue();
+        $value = $this->value();
 
         return $this->formatMessage(
             $this->message,

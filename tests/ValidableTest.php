@@ -16,9 +16,10 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'Alix';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([], $errors);
+        $this->assertTrue($is_valid);
+        $this->assertSame([], $model->errors(format: false));
     }
 
     public function testValidateDoesNotFailIfEmptyAndOptional(): void
@@ -26,9 +27,10 @@ class ValidableTest extends TestCase
         $model = new models\ValidableOptionalModel();
         $model->nickname = '';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertEquals([], $errors);
+        $this->assertTrue($is_valid);
+        $this->assertSame([], $model->errors(format: false));
     }
 
     public function testValidateFailsIfEmpty(): void
@@ -36,13 +38,14 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = '';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
+        $this->assertFalse($is_valid);
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Presence', 'Choose a nickname.'],
+                ['presence', 'Choose a nickname.'],
             ]
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsIfTooLong(): void
@@ -50,13 +53,14 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = str_repeat('a', 50);
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
+        $this->assertFalse($is_valid);
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Length', 'Choose a nickname between 2 and 42 characters.'],
+                ['length', 'Choose a nickname between 2 and 42 characters.'],
             ]
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsIfTooShort(): void
@@ -64,13 +68,14 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'A';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
+        $this->assertFalse($is_valid);
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Length', 'Choose a nickname between 2 and 42 characters.'],
+                ['length', 'Choose a nickname between 2 and 42 characters.'],
             ]
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsIfInvalid(): void
@@ -78,13 +83,14 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'Alix Hambourg';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
+        $this->assertFalse($is_valid);
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Format', 'Choose a nickname that only contains letters.'],
+                ['format', 'Choose a nickname that only contains letters.'],
             ]
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidEmail(): void
@@ -93,13 +99,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->email = 'not an email';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'email' => [
-                ['Minz\\Validable\\Email', 'Choose a valid email.'],
+                ['email', 'Choose a valid email.'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidUrl(): void
@@ -108,13 +115,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->website = 'not an URL';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'website' => [
-                ['Minz\\Validable\\Url', 'Choose a valid URL.'],
+                ['url', 'Choose a valid URL.'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidInclusion(): void
@@ -123,13 +131,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->role = 'not a role';
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'role' => [
-                ['Minz\\Validable\\Inclusion', 'Choose a valid role.'],
+                ['inclusion', 'Choose a valid role.'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidGreaterComparison(): void
@@ -138,13 +147,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->greater = 42;
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'greater' => [
-                ['Minz\\Validable\\Comparison', 'Must be greater than 42'],
+                ['comparison', 'Must be greater than 42'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidGreaterOrEqualComparison(): void
@@ -153,13 +163,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->greater_or_equal = 41;
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'greater_or_equal' => [
-                ['Minz\\Validable\\Comparison', 'Must be greater than or equal to 42'],
+                ['comparison', 'Must be greater than or equal to 42'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidEqualComparison(): void
@@ -168,13 +179,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->equal = 41;
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'equal' => [
-                ['Minz\\Validable\\Comparison', 'Must be equal to 42'],
+                ['comparison', 'Must be equal to 42'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidLessComparison(): void
@@ -183,13 +195,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->less = 42;
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'less' => [
-                ['Minz\\Validable\\Comparison', 'Must be less than 42'],
+                ['comparison', 'Must be less than 42'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidLessOrEqualComparison(): void
@@ -198,13 +211,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->less_or_equal = 43;
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'less_or_equal' => [
-                ['Minz\\Validable\\Comparison', 'Must be less than or equal to 42'],
+                ['comparison', 'Must be less than or equal to 42'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithInvalidOtherComparison(): void
@@ -213,13 +227,14 @@ class ValidableTest extends TestCase
         $model->nickname = 'Alix';
         $model->other = 42;
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
-        $this->assertSame([
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
             'other' => [
-                ['Minz\\Validable\\Comparison', 'Must be other than 42'],
+                ['comparison', 'Must be other than 42'],
             ],
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsIfNotUnique(): void
@@ -241,17 +256,19 @@ class ValidableTest extends TestCase
         $model = new models\ValidableUniqueModel();
         $model->email = 'alix@example.org';
 
-        $errors_existing_model = $existing_model->validate(format: false);
-        $errors_model = $model->validate(format: false);
+        $is_valid_existing_model = $existing_model->validate();
+        $is_valid_model = $model->validate();
 
         \Minz\Database::reset();
 
-        $this->assertEquals([], $errors_existing_model);
+        $this->assertTrue($is_valid_existing_model);
+        $this->assertFalse($is_valid_model);
+        $this->assertEquals([], $existing_model->errors(format: false));
         $this->assertEquals([
             'email' => [
-                ['Minz\\Validable\\Unique', '"alix@example.org" is already taken.'],
+                ['unique', '"alix@example.org" is already taken.'],
             ]
-        ], $errors_model);
+        ], $model->errors(format: false));
     }
 
     public function testValidateFailsWithMultipleErrors(): void
@@ -259,28 +276,40 @@ class ValidableTest extends TestCase
         $model = new models\ValidableModel();
         $model->nickname = 'Alix Hambourg' . str_repeat('a', 50);
 
-        $errors = $model->validate(format: false);
+        $is_valid = $model->validate();
 
+        $this->assertFalse($is_valid);
         $this->assertEquals([
             'nickname' => [
-                ['Minz\\Validable\\Length', 'Choose a nickname between 2 and 42 characters.'],
-                ['Minz\\Validable\\Format', 'Choose a nickname that only contains letters.'],
+                ['length', 'Choose a nickname between 2 and 42 characters.'],
+                ['format', 'Choose a nickname that only contains letters.'],
             ]
-        ], $errors);
+        ], $model->errors(format: false));
     }
 
-    public function testValidateFormatErrorsByDefault(): void
+    public function testGetErrorsFormatsErrors(): void
     {
         $model = new models\ValidableModel();
         $model->nickname = 'Alix Hambourg' . str_repeat('a', 50);
 
-        $errors = $model->validate();
+        $is_valid = $model->validate();
 
-        $this->assertEquals([
-            'nickname' => (
-                'Choose a nickname between 2 and 42 characters. ' .
-                'Choose a nickname that only contains letters.'
-            )
-        ], $errors);
+        $this->assertFalse($is_valid);
+        $message = 'Choose a nickname between 2 and 42 characters. Choose a nickname that only contains letters.';
+        $this->assertEquals(['nickname' => $message], $model->errors());
+    }
+
+    public function testGetErrorFormatsErrors(): void
+    {
+        $model = new models\ValidableModel();
+        $model->nickname = 'Alix Hambourg' . str_repeat('a', 50);
+
+        $is_valid = $model->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals(
+            'Choose a nickname between 2 and 42 characters. Choose a nickname that only contains letters.',
+            $model->error('nickname')
+        );
     }
 }

@@ -20,11 +20,11 @@ namespace Minz\Validable;
  *     }
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Presence extends Check
+class Presence extends PropertyCheck
 {
     public function assert(): bool
     {
-        $value = $this->getValue();
+        $value = $this->value();
         return $value !== null && $value !== '';
     }
 }

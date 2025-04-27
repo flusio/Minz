@@ -57,7 +57,7 @@ class FormTest extends TestCase
 
         $form->handleRequest($request);
 
-        $rabbit = $form->getModel();
+        $rabbit = $form->model();
         $this->assertSame('Bugs', $rabbit->name);
         $this->assertSame(1, $rabbit->friend_id);
     }
@@ -91,18 +91,58 @@ class FormTest extends TestCase
         $request = new \Minz\Request('GET', '/', [
             'name' => ' Bugs ',
             'friend_id' => 1,
+            'csrf' => \Minz\Csrf::generate(),
+        ]);
+        $form = new forms\Rabbit();
+        $form->handleRequest($request);
+
+        $is_valid = $form->validate();
+
+        $this->assertTrue($is_valid);
+        $this->assertEquals([], $form->errors(format: false));
+    }
+
+    public function testValidateWithValidableModel(): void
+    {
+        $validable_model = new models\ValidableModel();
+        $request = new \Minz\Request('GET', '/', [
+            'nickname' => '',
+            'email' => 'not an email',
+        ]);
+        $form = new forms\ValidableModel(model: $validable_model);
+        $form->handleRequest($request);
+
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            'nickname' => [
+                ['presence', 'Choose a nickname.'],
+            ],
+            'email' => [
+                ['email', 'Choose a valid email.'],
+            ],
+        ], $form->errors(format: false));
+    }
+
+    public function testValidateWithInvalidCsrf(): void
+    {
+        $request = new \Minz\Request('GET', '/', [
+            'name' => ' Bugs ',
+            'friend_id' => 1,
             'csrf' => 'not the token',
         ]);
         $form = new forms\Rabbit();
         $form->handleRequest($request);
 
-        $result = $form->validate();
+        $is_valid = $form->validate();
 
-        $this->assertFalse($result);
-        $this->assertSame(
-            'The security token is invalid. Please try to submit the form again.',
-            $form->getError('@global')
-        );
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            '@base' => [
+                ['csrf', 'The security token is invalid. Please try to submit the form again.'],
+            ],
+        ], $form->errors(format: false));
     }
 
     public function testValidateWithCustomCheck(): void
@@ -113,9 +153,13 @@ class FormTest extends TestCase
         $form = new forms\FormWithCheck();
         $form->handleRequest($request);
 
-        $result = $form->validate();
+        $is_valid = $form->validate();
 
-        $this->assertFalse($result);
-        $this->assertSame('Name must be equal to "Bugs"', $form->getError('name'));
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            'name' => [
+                ['checkName', 'Name must be equal to "Bugs"'],
+            ],
+        ], $form->errors(format: false));
     }
 }
