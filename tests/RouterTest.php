@@ -218,6 +218,26 @@ class RouterTest extends TestCase
         $router->match($invalidMethod, '/rabbits');
     }
 
+    public function testAllowedMethodsForPathWithKnownPath(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits/new', 'rabbits#new');
+        $router->addRoute('POST', '/rabbits/new', 'rabbits#create');
+
+        $allowed_methods = $router->allowedMethodsForPath('/rabbits/new');
+
+        $this->assertEquals(['GET', 'POST'], $allowed_methods);
+    }
+
+    public function testAllowedMethodsForPathWithUnknownPath(): void
+    {
+        $router = new Router();
+
+        $allowed_methods = $router->allowedMethodsForPath('/rabbits/new');
+
+        $this->assertEquals([], $allowed_methods);
+    }
+
     public function testUriByPointer(): void
     {
         $router = new Router();

@@ -160,6 +160,26 @@ class Router
     }
 
     /**
+     * Return the list of allowed methods for the given path.
+     *
+     * @return RequestMethod[]
+     */
+    public function allowedMethodsForPath(string $path): array
+    {
+        $allowed_methods = [];
+
+        foreach (Request::VALID_METHODS as $method) {
+            try {
+                $this->match($method, $path);
+                $allowed_methods[] = $method;
+            } catch (Errors\RouteNotFoundError $e) {
+            }
+        }
+
+        return $allowed_methods;
+    }
+
+    /**
      * Return an URI by its name. It is generated with the given parameters.
      *
      * @param RouteName $name
