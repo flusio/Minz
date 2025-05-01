@@ -91,8 +91,8 @@ namespace Minz;
  */
 class Request
 {
-    public const VALID_HTTP_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'];
-    public const VALID_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'CLI'];
+    public const VALID_HTTP_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'];
+    public const VALID_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS', 'CLI'];
 
     /** @var RequestMethod */
     private string $method;

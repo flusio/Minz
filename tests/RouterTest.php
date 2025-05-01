@@ -84,7 +84,7 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalidMethod} method is invalid (GET, POST, PATCH, PUT, DELETE, CLI)."
+            "{$invalidMethod} method is invalid (GET, POST, PATCH, PUT, DELETE, OPTIONS, CLI)."
         );
 
         $router = new Router();
@@ -208,7 +208,7 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalidMethod} method is invalid (GET, POST, PATCH, PUT, DELETE, CLI)."
+            "{$invalidMethod} method is invalid (GET, POST, PATCH, PUT, DELETE, OPTIONS, CLI)."
         );
 
         $router = new Router();
@@ -276,7 +276,7 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            "{$invalid_method} method is invalid (GET, POST, PATCH, PUT, DELETE, CLI)."
+            "{$invalid_method} method is invalid (GET, POST, PATCH, PUT, DELETE, OPTIONS, CLI)."
         );
 
         $router = new Router();
