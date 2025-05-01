@@ -232,15 +232,39 @@ class Engine
             );
         }
 
-        try {
-            $response = $controller->$action_name($request);
-        } catch (\Exception $error) {
-            // Execute errors handlers defined at the controller level. A
-            // handler allows to execute code on specific errors.
-            $errors_handlers = self::loadErrorsHandlers($controller, $action_name, $error::class);
+        $handlers = self::loadHandlers($controller, $action_name);
 
-            foreach ($errors_handlers as $error_handler) {
-                $response = $error_handler->invokeArgs($controller, [$request, $error]);
+        try {
+            foreach ($handlers['before'] as $handler) {
+                $method_handler = $handler[0];
+                $method_handler->invokeArgs($controller, [$request]);
+            }
+
+            $response = $controller->$action_name($request);
+
+            foreach ($handlers['after'] as $handler) {
+                $method_handler = $handler[0];
+                $method_handler->invokeArgs($controller, [$request, $response]);
+            }
+        } catch (\Exception $error) {
+            foreach ($handlers['error'] as $handler) {
+                $error_handlers = $handler[1];
+
+                $does_handler_apply = array_filter(
+                    $error_handlers,
+                    function ($error_handler) use ($error): bool {
+                        return is_a($error, $error_handler->class_error, true);
+                    }
+                );
+
+                // Call the handle method only if the error matched on of the
+                // handlers "class_error" attribute.
+                if (!$does_handler_apply) {
+                    continue;
+                }
+
+                $method_handler = $handler[0];
+                $response = $method_handler->invokeArgs($controller, [$request, $error]);
 
                 // If the handler returns a response, returns it immediately.
                 if ($response instanceof Response) {
@@ -261,48 +285,75 @@ class Engine
     }
 
     /**
-     * Return a list of methods defined with the Controller\ErrorHandler
-     * attribute for the given action and error class.
+     * Return a list of handler methods for the given action.
      *
-     * @param class-string<\Exception> $class_error
-     *
-     * @return \ReflectionMethod[]
+     * @return array{
+     *     before: array<array{\ReflectionMethod, Controller\BeforeAction[]}>,
+     *     after: array<array{\ReflectionMethod, Controller\AfterAction[]}>,
+     *     error: array<array{\ReflectionMethod, Controller\ErrorHandler[]}>,
+     * }
      */
-    private static function loadErrorsHandlers(
+    private static function loadHandlers(
         object $controller,
         string $action_name,
-        string $class_error
     ): array {
-        // Load all the methods of the controller class.
         $class_reflection = new \ReflectionClass($controller::class);
         $methods = $class_reflection->getMethods();
 
-        $errors_handlers = [];
+        $handlers = [
+            'before' => [],
+            'after' => [],
+            'error' => [],
+        ];
 
         foreach ($methods as $method) {
-            // Keep only methods defined with the Controller\ErrorHandler attribute.
-            $error_handler_attributes = $method->getAttributes(Controller\ErrorHandler::class);
+            $before_handlers = self::getMethodControllerHandlers($method, Controller\BeforeAction::class, $action_name);
+            if ($before_handlers) {
+                $handlers['before'][] = [$method, $before_handlers];
+            }
 
-            foreach ($error_handler_attributes as $error_handler_attribute) {
-                $error_handler = $error_handler_attribute->newInstance();
+            $after_handlers = self::getMethodControllerHandlers($method, Controller\AfterAction::class, $action_name);
+            if ($after_handlers) {
+                $handlers['after'][] = [$method, $after_handlers];
+            }
 
-                if (!empty($error_handler->only) && !in_array($action_name, $error_handler->only)) {
-                    // Keep only handlers defined for the current action, or if
-                    // if $only is empty (i.e. meaning the handler applies to
-                    // all the methods).
-                    continue;
-                }
-
-                if (!is_a($class_error, $error_handler->class_error, true)) {
-                    // Keep only handlers defined for the given $class_error
-                    continue;
-                }
-
-                $errors_handlers[] = $method;
+            $error_handlers = self::getMethodControllerHandlers($method, Controller\ErrorHandler::class, $action_name);
+            if ($error_handlers) {
+                $handlers['error'][] = [$method, $error_handlers];
             }
         }
 
-        return $errors_handlers;
+        return $handlers;
+    }
+
+    /**
+     * @template T of Controller\Handler
+     *
+     * @param class-string<T> $handler_class_name
+     * @return T[]
+     */
+    private static function getMethodControllerHandlers(
+        \ReflectionMethod $method,
+        string $handler_class_name,
+        string $action_name,
+    ): array {
+        $handlers = [];
+        $attributes = $method->getAttributes($handler_class_name);
+
+        foreach ($attributes as $attribute) {
+            $handler = $attribute->newInstance();
+
+            if (!empty($handler->only) && !in_array($action_name, $handler->only)) {
+                // Keep only handlers defined for the current action, or if
+                // $only is empty (i.e. meaning the handler applies to all the
+                // methods).
+                continue;
+            }
+
+            $handlers[] = $handler;
+        }
+
+        return $handlers;
     }
 
     private static function notFoundResponse(\Exception $error): Response

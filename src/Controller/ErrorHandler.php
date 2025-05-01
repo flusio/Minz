@@ -59,21 +59,16 @@ namespace Minz\Controller;
  *     #[Controller\ErrorHandler(MissingCurrentUserError::class, only: ['myAction'])]
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-class ErrorHandler
+class ErrorHandler extends Handler
 {
-    /** @var class-string<\Exception> */
-    public string $class_error;
-
-    /** @var string[] */
-    public array $only = [];
-
     /**
      * @param class-string<\Exception> $class_error
      * @param string[] $only
      */
-    public function __construct(string $class_error, array $only = [])
-    {
-        $this->class_error = $class_error;
-        $this->only = $only;
+    public function __construct(
+        public string $class_error,
+        array $only = [],
+    ) {
+        parent::__construct($only);
     }
 }

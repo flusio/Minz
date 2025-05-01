@@ -42,6 +42,21 @@ class EngineTest extends TestCase
         $this->assertSame('42', $request->param('id'));
     }
 
+    public function testRunWithBeforeAndAfterHandlers(): void
+    {
+        $router = new \Minz\Router();
+        $router->addRoute('GET', '/rabbits/before-after-handlers', 'Rabbits#beforeAndAfterHandled');
+        \Minz\Engine::init($router);
+        $request = new \Minz\Request('GET', '/rabbits/before-after-handlers');
+
+        /** @var Response */
+        $response = \Minz\Engine::run($request);
+
+        $this->assertSame(200, $response->code());
+        $this->assertSame('The text is set in before action', $response->render());
+        $this->assertSame('The header is set in after action', $response->headers(raw: true)['Custom-Header']);
+    }
+
     public function testRunWithErrorHandler(): void
     {
         $router = new \Minz\Router();

@@ -114,7 +114,10 @@ Minz.** You’ll often have to interact with them.
 
 - **[`\Minz\Job`](/src/Job.php) to manage asynchronous jobs,** it is used with [`\Minz\Job\Controller`](/src/Job/Controller.php);
 - **[`\Minz\Log`](/src/Log.php) logs errors and information to [syslog](https://en.wikipedia.org/wiki/Syslog);**
-- [`\Minz\Controller\ErrorHandler`](/src/Controller/ErrorHandler.php) allows to execute code on errors triggered in controllers;
+- [`\Minz\Controller\Handler`](/src/Controller/Handler.php) is a base class for various controller handlers, extended by:
+    - [`\Minz\Controller\BeforeAction`](/src/Controller/BeforeAction.php) declares an handler that must be called before the controller action;
+    - [`\Minz\Controller\AfterAction`](/src/Controller/AfterAction.php) declares an handler that must be called after the controller action;
+    - [`\Minz\Controller\ErrorHandler`](/src/Controller/ErrorHandler.php) allows to execute code on errors triggered in controllers;
 - [`\Minz\Email`](/src/Email.php) is an utility class to sanitize and validate emails;
 - [`\Minz\Flash`](/src/Flash.php) to pass messages from a page to another through redirections;
 - [`\Minz\Random`](/src/Random.php) to generate random values;
