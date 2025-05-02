@@ -14,8 +14,8 @@ use PHPMailer\PHPMailer;
  *
  * @see \Minz\Mailer
  *
- * @phpstan-import-type ViewPointer from Output\View
- * @phpstan-import-type ViewVariables from Output\View
+ * @phpstan-import-type TemplateName from \Minz\Template\TemplateInterface
+ * @phpstan-import-type TemplateContext from \Minz\Template\TemplateInterface
  */
 class Email extends PHPMailer\PHPMailer
 {
@@ -30,16 +30,20 @@ class Email extends PHPMailer\PHPMailer
     /**
      * Set the body with both HTML and text content.
      *
-     * @param ViewPointer $html_view_pointer
-     * @param ViewPointer $text_view_pointer
-     * @param ViewVariables $variables
+     * @param TemplateName $html_template_name
+     * @param TemplateName $text_template_name
+     * @param TemplateContext $context
      *
-     * @throws \Minz\Errors\OutputError if one of the pointers is invalid
+     * @throws \Minz\Errors\OutputError
+     *     Raised if one of the template name refers to an inexisting file.
      */
-    public function setBody(string $html_view_pointer, string $text_view_pointer, array $variables = []): void
-    {
-        $html_output = new Output\View($html_view_pointer, $variables);
-        $text_output = new Output\View($text_view_pointer, $variables);
+    public function setBody(
+        string $html_template_name,
+        string $text_template_name,
+        array $context = [],
+    ): void {
+        $html_output = new Output\Template($html_template_name, $context);
+        $text_output = new Output\Template($text_template_name, $context);
 
         $this->isHTML(true);
         $this->CharSet = 'utf-8';
