@@ -39,7 +39,7 @@ namespace Minz\Validable;
  * optional values.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Comparison extends Check
+class Comparison extends PropertyCheck
 {
     public function __construct(
         string $message,

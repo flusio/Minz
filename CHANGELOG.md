@@ -1,5 +1,29 @@
 # Changelog of Minz
 
+## unreleased
+
+### Breaking changes
+
+The `Form` and `Validable` classes have been extensively redesigned so they work better together.
+`Form` now uses the `Validable` trait so the `validate` method is provided by the latter.
+However, this broke how the `Validable` trait worked previously:
+
+- `validate()` now returns a boolean telling if the object is valid or not;
+- an `$errors` property is added and can be queried with the new `isInvalid()`, `errors()`, `error()` and `addError()` methods (meaning that if you were using on of them in a `Validable` model, things will break);
+- the `$errors` codes changed to remove the `\Minz\Validable\` namespace and to change the case to snake\_case.
+
+Also, the `Validable\Check` trait has been renamed to `Validable\PropertyCheck`, and the `Form\Check` trait has been renamed to `Validable\Check`.
+The `Validable\PropertyCheck` class declares a new `getCode` method.
+
+The following Form methods must be replaced by their `Validable` equivalent:
+
+- `hasError()` to `isInvalid()`
+- `getError()` to `error()`
+
+The `@global` error namespace has been changed to `@base`.
+
+Be careful when upgrading.
+
 ## 2025-04-30 - 1.1.0
 
 ### New

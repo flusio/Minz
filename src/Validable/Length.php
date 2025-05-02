@@ -32,7 +32,7 @@ namespace Minz\Validable;
  * accept optional values.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Length extends Check
+class Length extends PropertyCheck
 {
     public ?int $min;
 
