@@ -69,7 +69,7 @@ class ResponseTest extends TestCase
 
     public function testConstructor(): void
     {
-        $view = new Output\View('rabbits/items.phtml');
+        $view = new Output\Template('rabbits/items.phtml');
         $response = new Response(200, $view);
 
         $this->assertSame(200, $response->code());
@@ -81,16 +81,16 @@ class ResponseTest extends TestCase
         ], $response->headers(true));
     }
 
-    public function testConstructorAdaptsTheContentTypeFromView(): void
+    public function testConstructorAdaptsTheContentTypeFromTemplateName(): void
     {
-        $view = new Output\View('rabbits/items.txt');
+        $view = new Output\Template('rabbits/items.txt');
         $response = new Response(200, $view);
 
         $headers = $response->headers(true);
         $this->assertSame('text/plain', $headers['Content-Type']);
     }
 
-    public function testConstructorAcceptsNoViews(): void
+    public function testConstructorAcceptsNoTemplates(): void
     {
         $response = new Response(200, null);
 
@@ -335,7 +335,7 @@ class ResponseTest extends TestCase
         $this->assertStringContainsString("Jean-Jean", $output);
     }
 
-    public function testRenderWithEmptyViewPointer(): void
+    public function testRenderWithEmptyTemplateName(): void
     {
         $response = Response::ok(null);
 

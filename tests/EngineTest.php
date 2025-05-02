@@ -77,7 +77,7 @@ class EngineTest extends TestCase
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'Rabbits#items');
         \Minz\Engine::init($router, [
-            'not_found_view_pointer' => 'not_found.phtml',
+            'not_found_template' => 'not_found.phtml',
         ]);
         $request = new \Minz\Request('GET', '/not-found');
 
@@ -85,9 +85,9 @@ class EngineTest extends TestCase
         $response = \Minz\Engine::run($request);
 
         $this->assertSame(404, $response->code());
-        /** @var \Minz\Output\View */
+        /** @var \Minz\Output\Template */
         $output = $response->output();
-        $this->assertSame('not_found.phtml', $output->pointer());
+        $this->assertSame('not_found.phtml', $output->name());
     }
 
     public function testRunReturnsErrorIfControllerFileIsMissing(): void
@@ -95,7 +95,7 @@ class EngineTest extends TestCase
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'Missing#items');
         \Minz\Engine::init($router, [
-            'internal_server_error_view_pointer' => 'internal_server_error.phtml',
+            'internal_server_error_template' => 'internal_server_error.phtml',
         ]);
         $request = new \Minz\Request('GET', '/rabbits');
 
@@ -103,9 +103,9 @@ class EngineTest extends TestCase
         $response = \Minz\Engine::run($request);
 
         $this->assertSame(500, $response->code());
-        /** @var \Minz\Output\View */
+        /** @var \Minz\Output\Template */
         $output = $response->output();
-        $this->assertSame('internal_server_error.phtml', $output->pointer());
+        $this->assertSame('internal_server_error.phtml', $output->name());
     }
 
     public function testRunReturnsErrorIfActionIsMissing(): void
@@ -113,7 +113,7 @@ class EngineTest extends TestCase
         $router = new \Minz\Router();
         $router->addRoute('GET', '/rabbits', 'Rabbits#missing');
         \Minz\Engine::init($router, [
-            'internal_server_error_view_pointer' => 'internal_server_error.phtml',
+            'internal_server_error_template' => 'internal_server_error.phtml',
         ]);
         $request = new \Minz\Request('GET', '/rabbits');
 
@@ -121,17 +121,17 @@ class EngineTest extends TestCase
         $response = \Minz\Engine::run($request);
 
         $this->assertSame(500, $response->code());
-        /** @var \Minz\Output\View */
+        /** @var \Minz\Output\Template */
         $output = $response->output();
-        $this->assertSame('internal_server_error.phtml', $output->pointer());
+        $this->assertSame('internal_server_error.phtml', $output->name());
     }
 
-    public function testRunReturnsErrorIfViewFileIsMissing(): void
+    public function testRunReturnsErrorIfTemplateFileIsMissing(): void
     {
         $router = new \Minz\Router();
-        $router->addRoute('GET', '/rabbits', 'Rabbits#missingViewFile');
+        $router->addRoute('GET', '/rabbits', 'Rabbits#missingTemplateFile');
         \Minz\Engine::init($router, [
-            'internal_server_error_view_pointer' => 'internal_server_error.phtml',
+            'internal_server_error_template' => 'internal_server_error.phtml',
         ]);
         $request = new \Minz\Request('GET', '/rabbits');
 
@@ -139,8 +139,8 @@ class EngineTest extends TestCase
         $response = \Minz\Engine::run($request);
 
         $this->assertSame(500, $response->code());
-        /** @var \Minz\Output\View */
+        /** @var \Minz\Output\Template */
         $output = $response->output();
-        $this->assertSame('internal_server_error.phtml', $output->pointer());
+        $this->assertSame('internal_server_error.phtml', $output->name());
     }
 }

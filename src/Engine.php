@@ -13,7 +13,7 @@ namespace Minz;
  * return a response to the user, based on the logic of the application's
  * actions.
  *
- * @phpstan-import-type ViewPointer from Output\View
+ * @phpstan-import-type TemplateName from Template\TemplateInterface
  * @phpstan-import-type Route from Router
  * @phpstan-import-type ResponseReturnable from Response
  */
@@ -25,8 +25,8 @@ class Engine
      * @var array{
      *     'start_session': bool,
      *     'controller_namespace': ?string,
-     *     'not_found_view_pointer': ?ViewPointer,
-     *     'internal_server_error_view_pointer': ?ViewPointer,
+     *     'not_found_template': ?TemplateName,
+     *     'internal_server_error_template': ?TemplateName,
      * }
      */
     private static array $options;
@@ -35,8 +35,8 @@ class Engine
      * @param array{
      *     'start_session'?: bool,
      *     'controller_namespace'?: ?string,
-     *     'not_found_view_pointer'?: ?ViewPointer,
-     *     'internal_server_error_view_pointer'?: ?ViewPointer,
+     *     'not_found_template'?: ?TemplateName,
+     *     'internal_server_error_template'?: ?TemplateName,
      * } $options
      */
     public static function init(Router $router, array $options = []): void
@@ -44,8 +44,8 @@ class Engine
         $clean_options = [];
         $clean_options['start_session'] = $options['start_session'] ?? false;
         $clean_options['controller_namespace'] = $options['controller_namespace'] ?? null;
-        $clean_options['not_found_view_pointer'] = $options['not_found_view_pointer'] ?? null;
-        $clean_options['internal_server_error_view_pointer'] = $options['internal_server_error_view_pointer'] ?? null;
+        $clean_options['not_found_template'] = $options['not_found_template'] ?? null;
+        $clean_options['internal_server_error_template'] = $options['internal_server_error_template'] ?? null;
         self::$options = $clean_options;
 
         self::initLogs();
@@ -62,8 +62,8 @@ class Engine
         self::$options = [
             'start_session' => false,
             'controller_namespace' => null,
-            'not_found_view_pointer' => null,
-            'internal_server_error_view_pointer' => null,
+            'not_found_template' => null,
+            'internal_server_error_template' => null,
         ];
     }
 
@@ -357,9 +357,9 @@ class Engine
 
     private static function notFoundResponse(\Exception $error): Response
     {
-        if (self::$options['not_found_view_pointer']) {
-            $output = new Output\View(
-                self::$options['not_found_view_pointer'],
+        if (self::$options['not_found_template']) {
+            $output = new Output\Template(
+                self::$options['not_found_template'],
                 ['error' => $error]
             );
         } else {
@@ -371,9 +371,9 @@ class Engine
 
     private static function internalServerErrorResponse(\Exception $error): Response
     {
-        if (self::$options['internal_server_error_view_pointer']) {
-            $output = new Output\View(
-                self::$options['internal_server_error_view_pointer'],
+        if (self::$options['internal_server_error_template']) {
+            $output = new Output\Template(
+                self::$options['internal_server_error_template'],
                 ['error' => $error]
             );
         } else {

@@ -11,7 +11,7 @@
             "Minz\\": "src/"
         },
         "files": [
-            "src/Output/view_helpers.php"
+            "src/Template/simple_template_helpers.php"
         ]
     },
     "autoload-dev": {
@@ -21,7 +21,8 @@
     },
     "require": {
         "php": ">=8.2",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "twig/twig": "^3.21"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.0",

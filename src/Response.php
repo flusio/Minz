@@ -20,14 +20,14 @@ use Minz\Output;
  * headers (except when it's not pertinent).
  *
  * An Output can be attached to a Response. The output is in charge of
- * generating the content to return to the client. There are three kind of
- * output implementing the Output interface:
+ * generating the content to return to the client. There are four different
+ * outputs implementing the Output interface:
  *
  * - \Minz\Output\File: to serve a file;
  * - \Minz\Output\Json: to render Json;
  * - \Minz\Output\Text: to render text;
- * - \Minz\Output\View: to generate more complex structures (e.g. HTML) based
- *   on a simple template system.
+ * - \Minz\Output\Template: to generate more complex structures (e.g. HTML)
+ *    based on either a simple template system, or on a Twig template system.
  *
  * For instance, to generate a text response:
  *
@@ -42,13 +42,13 @@ use Minz\Output;
  * Or to generate a HTML response:
  *
  * ```php
- * $view_output = new Output\View('pointer/to/view.phtml', [
+ * $template_output = new Output\Template('pointer/to/template.phtml', [
  *     'foo' => 'bar',
  * ]);
- * $response = new Response(200, $view_output);
+ * $response = new Response(200, $template_output);
  *
  * // Can be shortened in
- * $response = Response::ok('pointer/to/view.phtml', [
+ * $response = Response::ok('path/to/template.phtml', [
  *     'foo' => 'bar',
  * ]);
  * ```
@@ -61,7 +61,7 @@ use Minz\Output;
  * @see \Minz\Output\File
  * @see \Minz\Output\Json
  * @see \Minz\Output\Text
- * @see \Minz\Output\View
+ * @see \Minz\Output\Template
  *
  * The responses are returned to the calling script which must generate the
  * corresponding headers, cookies and content. For instance, in `public/index.php`:
@@ -108,8 +108,8 @@ use Minz\Output;
  *
  * @phpstan-import-type RouteName from Router
  * @phpstan-import-type UrlParameters from Url
- * @phpstan-import-type ViewPointer from Output\View
- * @phpstan-import-type ViewVariables from Output\View
+ * @phpstan-import-type TemplateName from Template\TemplateInterface
+ * @phpstan-import-type TemplateContext from Template\TemplateInterface
  *
  * @phpstan-type ResponseHttpCode value-of<Response::VALID_HTTP_CODES>
  * @phpstan-type ResponseHeaders array<string, ResponseHeader>
@@ -165,66 +165,66 @@ class Response
     private ?Output $output;
 
     /**
-     * Create a OK response (HTTP 200) with an optional Output\View.
+     * Create a OK response (HTTP 200) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function ok(?string $view_pointer = null, array $variables = []): Response
+    public static function ok(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(200, $view);
+        return new Response(200, $template_output);
     }
 
     /**
-     * Create a created response (HTTP 201) with an optional Output\View.
+     * Create a created response (HTTP 201) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function created(?string $view_pointer = null, array $variables = []): Response
+    public static function created(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(201, $view);
+        return new Response(201, $template_output);
     }
 
     /**
-     * Create an accepted response (HTTP 202) with an optional Output\View.
+     * Create an accepted response (HTTP 202) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function accepted(?string $view_pointer = null, array $variables = []): Response
+    public static function accepted(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(202, $view);
+        return new Response(202, $template_output);
     }
 
     /**
@@ -280,87 +280,87 @@ class Response
     }
 
     /**
-     * Create a bad request response (HTTP 400) with an optional Output\View.
+     * Create a bad request response (HTTP 400) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function badRequest(?string $view_pointer = null, array $variables = []): Response
+    public static function badRequest(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(400, $view);
+        return new Response(400, $template_output);
     }
 
     /**
-     * Create an unauthorized response (HTTP 401) with an optional Output\View.
+     * Create an unauthorized response (HTTP 401) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function unauthorized(?string $view_pointer = null, array $variables = []): Response
+    public static function unauthorized(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(401, $view);
+        return new Response(401, $template_output);
     }
 
     /**
-     * Create a not found response (HTTP 404) with an optional Output\View.
+     * Create a not found response (HTTP 404) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function notFound(?string $view_pointer = null, array $variables = []): Response
+    public static function notFound(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(404, $view);
+        return new Response(404, $template_output);
     }
 
     /**
-     * Create an internal server error response (HTTP 500) with an optional Output\View.
+     * Create an internal server error response (HTTP 500) with an optional Output\Template.
      *
-     * @see \Minz\Output\View
+     * @see \Minz\Output\Template
      *
-     * @param ?ViewPointer $view_pointer
-     * @param ViewVariables $variables
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
      *
      * @throws \Minz\Errors\OutputError
-     *     Raised if the view file doesn't exist.
+     *     Raised if the template file doesn't exist.
      */
-    public static function internalServerError(?string $view_pointer = null, array $variables = []): Response
+    public static function internalServerError(?string $name = null, array $context = []): Response
     {
-        if ($view_pointer) {
-            $view = new Output\View($view_pointer, $variables);
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
         } else {
-            $view = null;
+            $template_output = null;
         }
-        return new Response(500, $view);
+        return new Response(500, $template_output);
     }
 
     /**

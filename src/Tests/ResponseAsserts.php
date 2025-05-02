@@ -7,6 +7,7 @@
 namespace Minz\Tests;
 
 use Minz\Response;
+use Minz\Output;
 
 /**
  * Provide some assert methods to help to test the response.
@@ -19,7 +20,7 @@ use Minz\Response;
  *
  * @phpstan-import-type ResponseReturnable from Response
  *
- * @phpstan-import-type ViewPointer from \Minz\Output\View
+ * @phpstan-import-type TemplateName from \Minz\Template\TemplateInterface
  */
 trait ResponseAsserts
 {
@@ -125,18 +126,16 @@ trait ResponseAsserts
      * Assert that a Response output is set with the given pointer.
      *
      * @param ResponseReturnable $response
-     * @param ViewPointer $expected_pointer
+     * @param TemplateName $expected_name
      */
-    public function assertResponsePointer(mixed $response, string $expected_pointer): void
+    public function assertResponseTemplateName(mixed $response, string $expected_name): void
     {
         if ($response instanceof \Generator) {
             $response = $response->current();
         }
 
         $output = $response->output();
-        $this->assertNotNull($output, 'Response has no output');
-        $this->assertTrue(is_callable([$output, 'pointer']), 'Response has no pointer');
-        $pointer = $output->pointer();
-        $this->assertEquals($expected_pointer, $pointer);
+        $this->assertInstanceOf(Output\Template::class, $output, 'Response must be a Template output');
+        $this->assertEquals($expected_name, $output->name());
     }
 }

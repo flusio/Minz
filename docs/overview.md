@@ -14,24 +14,18 @@ Minz.** You’ll often have to interact with them.
 
 - **[`\Minz\Configuration`](/src/Configuration.php) loads and stores your
   configuration;**
-    - [`\Minz\Dotenv`](/src/Dotenv.php) is often used in configuration files,
-      to load environment variables;
+    - [`\Minz\Dotenv`](/src/Dotenv.php) is often used in configuration files, to load environment variables;
 - **[`\Minz\Request`](/src/Request.php) abstracts HTTP or CLI requests;**
-- **[`\Minz\Response`](/src/Response.php) abstracts HTTP or CLI responses,** it
-  embeds a [`\Minz\Output`](/src/Output.php) (interface) which is in charge of
-  rendering the content. Here is the list of available outputs:
-    - **[`\Minz\Output\View`](/src/Output/View.php) is a simple template system to render your content,**
-      often used for (but not limited to) HTML;
+- **[`\Minz\Response`](/src/Response.php) abstracts HTTP or CLI responses,** it embeds a [`\Minz\Output`](/src/Output.php) (interface) which is in charge of rendering the content. Here is the list of available outputs:
+    - **[`\Minz\Output\Template`](/src/Output/Template.php) renders content (e.g. HTML) using a template system:**
+        - [`\Minz\Template\Twig`](/src/Template/Twig.php) is [a full-featured template system](https://twig.symfony.com/);
+        - [`\Minz\Template\Simple`](/src/Template/Simple.php) is a simple template system based on PHP tags;
     - [`\Minz\Output\Json`](/src/Output/Json.php) renders Json;
     - [`\Minz\Output\Text`](/src/Output/Text.php) renders text;
     - [`\Minz\Output\File`](/src/Output/File.php) renders files;
-- **[`\Minz\Router`](/src/Router.php) is in charge of the routing of your
-  application;**
-- **[`\Minz\Url`](/src/Url.php) renders the URLs of your application, using the
-  information from the router;**
-- [`\Minz\Engine`](/src/Engine.php) does the plumbing of your application,
-  executing a controller action based on a given request and returning its
-  response;
+- **[`\Minz\Router`](/src/Router.php) is in charge of the routing of your application;**
+- **[`\Minz\Url`](/src/Url.php) renders the URLs of your application, using the information from the router;**
+- [`\Minz\Engine`](/src/Engine.php) does the plumbing of your application, executing a controller action based on a given request and returning its response;
 
 **To learn how to use these classes, [read the “getting started” guide.](/docs/getting_started.md)**
 

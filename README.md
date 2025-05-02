@@ -11,7 +11,7 @@ What I like in Minz is:
 - it grows ONLY when I need it;
 - it's easy to perform integration tests;
 - it provides a common interface for both Web and CLI requests;
-- it has very few dependencies (only one at the moment, i.e. PHPMailer);
+- it has very few dependencies (only two at the moment, i.e. PHPMailer and Twig);
 - I learnt a LOT by coding it and it was quite fun.
 
 ## Install

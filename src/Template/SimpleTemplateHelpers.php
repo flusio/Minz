@@ -4,18 +4,19 @@
 // Copyright 2020-2025 Marien Fressinaud
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-namespace Minz\Output;
+namespace Minz\Template;
 
 /**
- * The ViewHelpers class defines functions to be used inside View files.
+ * The SimpleTemplateHelpers class defines functions to be used inside Simple
+ * template files.
  *
- * They are redeclared as functions with no namespaces in the view_helpers.php
- * file so we don't have to declare the namespaces in views.
+ * They are redeclared as functions with no namespaces in the simple_template_helpers.php
+ * file so we don't have to declare the namespaces in the templates.
  *
  * @phpstan-import-type RouteName from \Minz\Router
  * @phpstan-import-type UrlParameters from \Minz\Url
  */
-class ViewHelpers
+class SimpleTemplateHelpers
 {
     /**
      * Alias for htmlspecialchars.
@@ -32,7 +33,7 @@ class ViewHelpers
     }
 
     /**
-     * Return a protected relative URL (safe to display in views).
+     * Return a protected relative URL (safe to display in templates).
      *
      * @see \Minz\Url::for
      *
@@ -45,7 +46,7 @@ class ViewHelpers
     }
 
     /**
-     * Return a protected absolute URL (safe to display in views).
+     * Return a protected absolute URL (safe to display in templates).
      *
      * @see \Minz\Url::absoluteFor
      *
