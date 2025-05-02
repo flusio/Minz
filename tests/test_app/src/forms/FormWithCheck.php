@@ -5,7 +5,7 @@ namespace AppTest\forms;
 use Minz\Form;
 
 /**
- * @phpstan-extends Form<\stdClass>
+ * @phpstan-extends Form<null>
  */
 class FormWithCheck extends Form
 {

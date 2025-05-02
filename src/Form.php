@@ -91,7 +91,7 @@ namespace Minz;
  * You can run special checks that are validated on `$form->validate()` with
  * the Form\Check attribute.
  *
- * @template T of object
+ * @template T of ?object
  *
  * @phpstan-type FieldConfiguration array{
  *     'type': string,
@@ -107,12 +107,12 @@ class Form
     /** @var array<string, string[]> */
     protected array $errors = [];
 
-    /** @var ?T */
+    /** @var T */
     protected ?object $model = null;
 
     /**
      * @param array<string, mixed> $default_values
-     * @param ?T $model
+     * @param T $model
      */
     public function __construct(array $default_values = [], ?object $model = null)
     {
@@ -321,7 +321,7 @@ class Form
      * @throws Errors\LogicException
      *     Raised if the model is not set.
      */
-    public function getModel(): object
+    public function getModel(): ?object
     {
         if (!$this->model) {
             throw new Errors\LogicException('Model is not set');
