@@ -54,26 +54,6 @@ Minz.** You’ll often have to interact with them.
       methods to (un)lock a model;
 - **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the
   migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
-- **[`\Minz\Validable`](/src/Validable.php) a trait to validate the models
-  properties values.** It is used alongside with `Check`s:
-    - [`\Minz\Validable\Check`](/src/Validable/Check.php) the base class
-      extended by the other classes;
-    - [`\Minz\Validable\Comparison`](/src/Validable/Comparison.php) allows to
-      compare the values;
-    - [`\Minz\Validable\Email`](/src/Validable/Email.php) allows to check email
-      addresses;
-    - [`\Minz\Validable\Format`](/src/Validable/Format.php) allows to check the
-      format of a string;
-    - [`\Minz\Validable\Inclusion`](/src/Validable/Inclusion.php) allows to
-      check that a value is included in a given set;
-    - [`\Minz\Validable\Length`](/src/Validable/Length.php) allows to check the
-      min and/or max length of a string;
-    - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check
-      that a property is present (not null nor an empty string);
-    - [`\Minz\Validable\Unique`](/src/Validable/Unique.php) allows to check
-      that a value is unique in database.
-    - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL
-      addresses.
 - [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message to be translated.
 
 ## Emails and mailers
@@ -82,12 +62,22 @@ Minz.** You’ll often have to interact with them.
     - [`\Minz\Mailer\Email`](/src/Mailer/Email.php) is a wrapper around [the PHPMailer class](https://github.com/PHPMailer/PHPMailer/);
     - [`\Minz\Mailer\Job`](/src/Mailer/Job.php) allows to send emails asynchronously.
 
-## Forms
+## Forms and validations
 
 - **[`\Minz\Form`](/src/Form.php) provides an easy way to handle forms.** It is used alongside with:
     - **[`\Minz\Form\Field`](/src/Form/Field.php) to declare fields in the forms;**
     - **[`\Minz\Form\Csrf`](/src/Form/Csrf.php) to protect against CSRF attacks in the forms;**
-    - [`\Minz\Form\Check`](/src/Form/Check.php) to declare custom checks in the forms;
+- **[`\Minz\Validable`](/src/Validable.php) a trait to validate objects' properties values** (often used in models and forms). It is used alongside with `PropertyCheck`s and `Check`s:
+    - [`\Minz\Validable\PropertyCheck`](/src/Validable/PropertyCheck.php) the base class extended by the other check classes applying to properties;
+    - [`\Minz\Validable\Comparison`](/src/Validable/Comparison.php) allows to compare the values;
+    - [`\Minz\Validable\Email`](/src/Validable/Email.php) allows to check email addresses;
+    - [`\Minz\Validable\Format`](/src/Validable/Format.php) allows to check the format of a string;
+    - [`\Minz\Validable\Inclusion`](/src/Validable/Inclusion.php) allows to check that a value is included in a given set;
+    - [`\Minz\Validable\Length`](/src/Validable/Length.php) allows to check the min and/or max length of a string;
+    - [`\Minz\Validable\Presence`](/src/Validable/Presence.php) allows to check that a property is present (not null nor an empty string);
+    - [`\Minz\Validable\Unique`](/src/Validable/Unique.php) allows to check that a value is unique in database;
+    - [`\Minz\Validable\Url`](/src/Validable/Url.php) allows to check URL addresses;
+    - [`\Minz\Validable\Check`](/src/Validable/Check.php) allows to declare custom checks.
 - [`\Minz\Csrf`](/src/Csrf.php) protects you from [Cross-Site Request Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery);
 
 ## Errors

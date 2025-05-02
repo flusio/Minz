@@ -3,6 +3,7 @@
 namespace AppTest\forms;
 
 use Minz\Form;
+use Minz\Validable;
 
 /**
  * @phpstan-extends Form<null>
@@ -12,11 +13,11 @@ class FormWithCheck extends Form
     #[Form\Field]
     public string $name;
 
-    #[Form\Check]
+    #[Validable\Check]
     public function checkName(): void
     {
         if ($this->name !== 'Bugs') {
-            $this->addError('name', 'Name must be equal to "Bugs"');
+            $this->addError('name', 'checkName', 'Name must be equal to "Bugs"');
         }
     }
 }

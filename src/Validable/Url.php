@@ -25,7 +25,7 @@ namespace Minz\Validable;
  * accept optional values.
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class Url extends Check
+class Url extends PropertyCheck
 {
     /** @var string[] */
     public array $schemes;
