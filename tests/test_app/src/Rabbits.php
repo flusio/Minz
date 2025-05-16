@@ -23,7 +23,7 @@ class Rabbits
 
     public function show(Request $request): Response
     {
-        $rabbit_number = 'Rabbit #' . $request->param('id');
+        $rabbit_number = 'Rabbit #' . $request->params->getString('id');
         return Response::ok('rabbits/show.phtml', [
             'rabbit' => $rabbit_number,
         ]);
@@ -41,13 +41,13 @@ class Rabbits
 
     public function beforeAndAfterHandled(Request $request): Response
     {
-        return Response::text(200, $request->param('text', ''));
+        return Response::text(200, $request->params->getString('text', ''));
     }
 
     #[Controller\BeforeAction(only: ['beforeAndAfterHandled'])]
     public function setBeforeActionTextContent(Request $request): void
     {
-        $request->setParam('text', 'The text is set in before action');
+        $request->params->set('text', 'The text is set in before action');
     }
 
     #[Controller\AfterAction(only: ['beforeAndAfterHandled'])]

@@ -186,7 +186,7 @@ $request = new \Minz\Request($http_method, $http_uri, $http_parameters, $http_he
 
 // The second argument is the default value to return. If it wasn't given, the
 // method would return `null` when the `name` parameter is missing.
-$name = $request->param('name', 'World');
+$name = $request->params->getString('name', 'World');
 echo "Hello {$name}!";
 ```
 
@@ -204,7 +204,7 @@ Internally, it does essentially what we saw above.
 
 $request = \Minz\Request::initFromGlobals();
 
-$name = $request->param('name', 'World');
+$name = $request->params->getString('name', 'World');
 echo "Hello {$name}!";
 ```
 
@@ -228,7 +228,7 @@ it to return a `text` response:
 
 $request = \Minz\Request::initFromGlobals();
 
-$name = $request->param('name', 'World');
+$name = $request->params->getString('name', 'World');
 
 $response = \Minz\Response::text(200, "Hello {$name}!");
 
@@ -257,7 +257,7 @@ client:
 
 $request = \Minz\Request::initFromGlobals();
 
-$name = $request->param('name', 'World');
+$name = $request->params->getString('name', 'World');
 
 $response = \Minz\Response::text(200, "Hello {$name}!");
 
@@ -302,7 +302,7 @@ class Home
     {
         // the code of the action is simply what we wrote earlier in the index
         // page
-        $name = $request->param('name', 'World');
+        $name = $request->params->getString('name', 'World');
         $response = \Minz\Response::text(200, "Hello {$name}!");
 
         // and it returns a $response
