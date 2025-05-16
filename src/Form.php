@@ -122,8 +122,29 @@ namespace Minz;
  *         }
  *     }
  *
+ * Sometimes, you may need to access the request to perform additionnal checks.
+ * You can access the request by using the Form\OnHandleRequest attribute on a
+ * form method. The method will then be called at the end of `handleRequest()`.
+ *
+ *     use Minz\Form;
+ *     use Minz\Request;
+ *
+ *     class MyForm extends Form
+ *     {
+ *         private string $content_type = '';
+ *
+ *         #[Form\OnHandleRequest]
+ *         public function rememberContentType(Request $request): void
+ *         {
+ *             $this->content_type = $request->header('HTTP_CONTENT_TYPE', '');
+ *         }
+ *     }
+ *
  * You can handle CSRF validation with the Form\Csrf trait.
  *
+ * @see \Minz\Form\Csrf
+ * @see \Minz\Form\Field
+ * @see \Minz\Form\OnHandleRequest
  * @see \Minz\Validable
  *
  * @template T of ?object
@@ -259,6 +280,19 @@ class Form
             }
 
             $this->set($field_name, $value);
+        }
+
+        $class_reflection = new \ReflectionClass($this);
+        $methods = $class_reflection->getMethods();
+
+        foreach ($methods as $method) {
+            $attributes = $method->getAttributes(Form\OnHandleRequest::class);
+
+            if (empty($attributes)) {
+                continue;
+            }
+
+            $method->invokeArgs($this, [$request]);
         }
     }
 

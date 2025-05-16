@@ -67,6 +67,7 @@ Minz.** You’ll often have to interact with them.
 - **[`\Minz\Form`](/src/Form.php) provides an easy way to handle forms.** It is used alongside with:
     - **[`\Minz\Form\Field`](/src/Form/Field.php) to declare fields in the forms;**
     - **[`\Minz\Form\Csrf`](/src/Form/Csrf.php) to protect against CSRF attacks in the forms;**
+    - [`\Minz\Form\OnHandleRequest`](/src/Form/OnHandleRequest.php) is an attribute to declare form methods to execute when handling a request;
 - **[`\Minz\Validable`](/src/Validable.php) a trait to validate objects' properties values** (often used in models and forms). It is used alongside with `PropertyCheck`s and `Check`s:
     - [`\Minz\Validable\PropertyCheck`](/src/Validable/PropertyCheck.php) the base class extended by the other check classes applying to properties;
     - [`\Minz\Validable\Comparison`](/src/Validable/Comparison.php) allows to compare the values;
