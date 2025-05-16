@@ -19,8 +19,8 @@ namespace Minz;
  * @see \Minz\Response
  *
  * A request is represented by a method (e.g. `GET`, `POST`), a path (e.g.
- * `/foo`) and some parameters and headers. It’s one of the first object to
- * initialize in an application. For instance, in `public/index.php`:
+ * `/foo`) and some parameters, headers, cookies, etc. It’s one of the first
+ * object to initialize in an application. For instance, in `public/index.php`:
  *
  * ```php
  * $request = \Minz\Request::initFromGlobals();
@@ -57,37 +57,34 @@ namespace Minz;
  * You can get the parameters of a request very simply:
  *
  * ```php
- * $foo = $request->param('foo');
- * $bar = $request->param('bar', 'a default value');
+ * $foo = $request->parameters->getString('foo');
+ * $bar = $request->parameters->getString('bar', 'a default value');
  * ```
  *
  * You also can automatically cast parameters to the desire types:
  *
  * ```php
- * $boolean = $request->paramBoolean('boolean-param');
- * $integer = $request->paramInteger('integer-param');
- * $datetime = $request->paramDatetime('datetime-param');
- * $array = $request->paramArray('array-param');
- * $json = $request->paramJson('json-param');
- * $file = $request->paramFile('file-param');
+ * $boolean = $request->parameters->getBoolean('boolean-param');
+ * $integer = $request->parameters->getInteger('integer-param');
+ * $datetime = $request->parameters->getDatetime('datetime-param');
+ * $array = $request->parameters->getArray('array-param');
+ * $json = $request->parameters->getJson('json-param');
+ * $file = $request->parameters->getFile('file-param');
  * ```
  *
- * Headers and cookies can be retrieved in a similar way (except that there are
- * no cast-methods):
+ * Headers, cookies and server information can be retrieved in a similar way:
  *
  * ```php
- * $accept_header = $request->header('Accept');
- * $my_cookie = $request->cookie('my_cookie');
+ * $accept_header = $request->headers->getString('Accept');
+ * $my_cookie = $request->cookies->getString('my_cookie');
+ * $request_uri = $request->server->getString('REQUEST_URI');
  * ```
  *
  * The Request object provides a special parameter, prefixed by an underscore (_):
  * "_action_pointer" which is the current Router pointer.
  *
  * @phpstan-type RequestMethod value-of<Request::VALID_METHODS>
- *
- * @phpstan-type RequestParameters array<string, mixed>
- *
- * @phpstan-type RequestHeaders array<string, mixed>
+ * @phpstan-import-type Parameters from ParameterBag
  */
 class Request
 {
@@ -101,17 +98,19 @@ class Request
 
     private string $self_uri;
 
-    /** @var RequestParameters */
-    private array $parameters;
+    public readonly ParameterBag $parameters;
 
-    /** @var RequestHeaders */
-    private array $headers;
+    public readonly ParameterBag $headers;
+
+    public readonly ParameterBag $cookies;
+
+    public readonly ParameterBag $server;
 
     /**
      * Create a Request reading the global variables.
      *
      * @throws \Minz\Errors\RequestError
-     *     Raised if the REQUEST_METHOD variable is invalid.
+     *     Raised if the REQUEST_METHOD or REQUEST_URI variables are invalid.
      */
     public static function initFromGlobals(): Request
     {
@@ -147,9 +146,14 @@ class Request
             $http_headers = [];
         }
 
-        $http_headers['COOKIE'] = $_COOKIE;
-
-        return new Request($http_method, $http_uri, $http_parameters, $http_headers);
+        return new Request(
+            $http_method,
+            $http_uri,
+            parameters: $http_parameters,
+            headers: $http_headers,
+            cookies: $_COOKIE,
+            server: $_SERVER,
+        );
     }
 
     /**
@@ -183,7 +187,12 @@ class Request
 
         $parameters['bin'] = $argv[0];
 
-        return new \Minz\Request('CLI', $request_uri, $parameters);
+        return new \Minz\Request(
+            'CLI',
+            $request_uri,
+            parameters: $parameters,
+            server: $_SERVER,
+        );
     }
 
     /**
@@ -206,32 +215,39 @@ class Request
      *     For HTTP requests, its value usually comes from `$_SERVER['REQUEST_URI']`.
      *     CLI must respect this format as well and build the path by itself (cf.
      *     example above)
-     * @param RequestParameters $parameters
+     * @param Parameters $parameters
      *     The parameters of the request where keys are the names of the parameters.
-     *     The parameters can be retrieved with the `param*()` methods.
      *     For HTTP requests, its value usually is a merge of `$_GET`, `$_POST`
      *     and `$_FILE` global variables.
      *     CLI must build the array by itself (cf. example above)
-     * @param RequestHeaders $headers
+     * @param Parameters $headers
      *     The headers of the request where keys are the names of the headers.
-     *     Cookies must be associated to the `COOKIE` key. Headers can be
-     *     retrieved with the `header()` method, while cookies are retrieved
-     *     with the `cookie()` one.
-     *     For HTTP requests, its value usually is a merge of `getallheaders()`
-     *     and `$_COOKIE` global variables.
-     *     CLI requests usually don’t have headers.
+     *     For HTTP requests, its value usually comes from `getallheaders()`.
+     *     CLI requests don’t have headers.
+     * @param Parameters $cookies
+     *     The cookies of the request where keys are the names of the cookies.
+     *     For HTTP requests, its value usually comes from the `$_COOKIE`
+     *     global variable. CLI requests don’t have cookies.
+     * @param Parameters $server
+     *     The information of the server running the request. Its value usually
+     *     comes from the `$_SERVER` global variable.
      *
      * @throws \Minz\Errors\RequestError
-     *     Raised if the method is invalid, if uri is empty or invalid, or if
-     *     parameters or headers aren't arrays.
+     *     Raised if the uri is empty or invalid.
      *
      * @see \Minz\Configuration::$url_options
      * @see https://developer.mozilla.org/docs/Web/HTTP/Methods
      * @see https://developer.mozilla.org/docs/Web/HTTP/Headers
      * @see https://developer.mozilla.org/docs/Web/HTTP/Overview#requests
      */
-    public function __construct(string $method, string $uri, array $parameters = [], array $headers = [])
-    {
+    public function __construct(
+        string $method,
+        string $uri,
+        array $parameters = [],
+        array $headers = [],
+        array $cookies = [],
+        array $server = [],
+    ) {
         if (!$uri) {
             throw new Errors\RequestError('URI cannot be empty.');
         }
@@ -299,8 +315,11 @@ class Request
         // same server, and because #fragment shouldn't be sent to the server
         // (so we shoudn't know about it).
         $this->self_uri = $self_uri;
-        $this->parameters = $parameters;
-        $this->headers = $headers;
+
+        $this->parameters = new ParameterBag($parameters);
+        $this->headers = new ParameterBag($headers, case_sensitive: false);
+        $this->cookies = new ParameterBag($cookies);
+        $this->server = new ParameterBag($server);
     }
 
     /**
@@ -321,260 +340,9 @@ class Request
         return $this->self_uri;
     }
 
-    public function setParam(string $name, mixed $value): void
+    public function ip(): string
     {
-        $this->parameters[$name] = $value;
-    }
-
-    public function hasParam(string $name): bool
-    {
-        return isset($this->parameters[$name]);
-    }
-
-    /**
-     * @template T of ?string
-     *
-     * @param T $default
-     *
-     * @return string|T
-     *
-     * @see Request::paramString
-     */
-    public function param(string $name, ?string $default = null): mixed
-    {
-        return $this->paramString($name, $default);
-    }
-
-    /**
-     * @template T of ?string
-     *
-     * @param T $default
-     *
-     * @return string|T
-     */
-    public function paramString(string $name, ?string $default = null): mixed
-    {
-        if (isset($this->parameters[$name])) {
-            $value = $this->parameters[$name];
-
-            if (
-                !is_bool($value) &&
-                !is_float($value) &&
-                !is_integer($value) &&
-                !is_string($value)
-            ) {
-                return $default;
-            }
-
-            return strval($value);
-        } else {
-            return $default;
-        }
-    }
-
-    /**
-     * Return a parameter value as a boolean.
-     */
-    public function paramBoolean(string $name, bool $default = false): bool
-    {
-        if (isset($this->parameters[$name])) {
-            return filter_var($this->parameters[$name], FILTER_VALIDATE_BOOLEAN);
-        } else {
-            return $default;
-        }
-    }
-
-    /**
-     * Return a parameter value as an integer.
-     *
-     * @template T of ?int
-     *
-     * @param T $default
-     *
-     * @return int|T
-     */
-    public function paramInteger(string $name, ?int $default = null): ?int
-    {
-        if (isset($this->parameters[$name])) {
-            $value = $this->parameters[$name];
-
-            if (!is_float($value) && !is_integer($value) && !is_string($value)) {
-                return $default;
-            }
-
-            return intval($value);
-        } else {
-            return $default;
-        }
-    }
-
-    /**
-     * Return a parameter value as a DateTimeImmutable.
-     *
-     * @template T of ?\DateTimeImmutable
-     *
-     * @param T $default
-     *
-     * @return \DateTimeImmutable|T
-     */
-    public function paramDatetime(
-        string $name,
-        ?\DateTimeImmutable $default = null,
-        string $format = 'Y-m-d\\TH:i'
-    ): ?\DateTimeImmutable {
-        if (isset($this->parameters[$name])) {
-            $value = $this->parameters[$name];
-
-            if (!is_string($value)) {
-                return $default;
-            }
-
-            $datetime = \DateTimeImmutable::createFromFormat($format, $value);
-
-            if ($datetime === false) {
-                return $default;
-            }
-
-            return $datetime;
-        } else {
-            return $default;
-        }
-    }
-
-    /**
-     * Return a parameter value as an array.
-     *
-     * If the parameter isn’t an array, it’s placed into one.
-     *
-     * The default value is merged with the parameter value.
-     *
-     * @param mixed[] $default
-     *
-     * @return mixed[]
-     */
-    public function paramArray(string $name, array $default = []): array
-    {
-        if (isset($this->parameters[$name])) {
-            $value = $this->parameters[$name];
-            if (!is_array($value)) {
-                $value = [$value];
-            }
-
-            return array_merge($default, $value);
-        } else {
-            return $default;
-        }
-    }
-
-    /**
-     * Return a parameter value as a Json array.
-     *
-     * If the value is equal to true, false or null, it returns the value in
-     * an array.
-     *
-     * If the parameter cannot be parsed as Json, default value is returned.
-     *
-     * @template T of mixed[]|null
-     *
-     * @param T $default
-     *
-     * @return mixed[]|T
-     */
-    public function paramJson(string $name, mixed $default = null): ?array
-    {
-        if (!isset($this->parameters[$name])) {
-            return $default;
-        }
-
-        $value = $this->parameters[$name];
-
-        if (!is_string($value)) {
-            return $default;
-        }
-
-        $json_value = json_decode($value, true);
-
-        if ($json_value === null && $value !== 'null') {
-            return $default;
-        }
-
-        if (!is_array($json_value)) {
-            $json_value = [$json_value];
-        }
-
-        return $json_value;
-    }
-
-    /**
-     * Return a parameter value as a \Minz\File.
-     *
-     * The parameter must be an array containing at least a `tmp_name` and an
-     * `error` keys, or a null value will be returned.
-     *
-     * @see https://www.php.net/manual/features.file-upload.post-method.php
-     */
-    public function paramFile(string $name): ?\Minz\File
-    {
-        if (!isset($this->parameters[$name])) {
-            return null;
-        }
-
-        $parameter = $this->parameters[$name];
-
-        if (!is_array($parameter)) {
-            return null;
-        }
-
-        $tmp_name = $parameter['tmp_name'] ?? '';
-        $error = $parameter['error'] ?? -1;
-        $name = $parameter['name'] ?? '';
-
-        if (!is_string($tmp_name) || !is_int($error) || !is_string($name)) {
-            return null;
-        }
-
-        $file_info = [
-            'tmp_name' => $tmp_name,
-            'error' => $error,
-            'name' => $name,
-        ];
-
-        if (isset($parameter['is_uploaded_file']) && is_bool($parameter['is_uploaded_file'])) {
-            $file_info['is_uploaded_file'] = $parameter['is_uploaded_file'];
-        };
-
-        try {
-            return new File($file_info);
-        } catch (Errors\RuntimeException $e) {
-            return null;
-        }
-    }
-
-    public function header(string $name, mixed $default = null): mixed
-    {
-        if (isset($this->headers[$name])) {
-            return $this->headers[$name];
-        } else {
-            return $default;
-        }
-    }
-
-    /**
-     * Return the value of a cookie.
-     *
-     * Cookies must be passed during Request initialization as $headers['COOKIE'].
-     */
-    public function cookie(string $name, mixed $default = null): mixed
-    {
-        if (
-            isset($this->headers['COOKIE']) &&
-            is_array($this->headers['COOKIE']) &&
-            isset($this->headers['COOKIE'][$name])
-        ) {
-            return $this->headers['COOKIE'][$name];
-        } else {
-            return $default;
-        }
+        return $this->server->getString('REMOTE_ADDR', '');
     }
 
     /**
@@ -586,11 +354,7 @@ class Request
     {
         // No Accept header implies the user agent accepts any media type (cf.
         // the RFC 7231)
-        $accept_header = $this->header('Accept', '*/*');
-
-        if (!is_string($accept_header)) {
-            return false;
-        }
+        $accept_header = $this->headers->getString('Accept', '*/*');
 
         $accept_medias = explode(',', $accept_header);
 

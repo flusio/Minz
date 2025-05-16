@@ -39,7 +39,7 @@ class EngineTest extends TestCase
         $response = \Minz\Engine::run($request);
 
         $this->assertSame(200, $response->code(), 'Rabbit #42');
-        $this->assertSame('42', $request->param('id'));
+        $this->assertSame('42', $request->parameters->getString('id'));
     }
 
     public function testRunWithBeforeAndAfterHandlers(): void

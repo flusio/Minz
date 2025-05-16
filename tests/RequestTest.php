@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class RequestTest extends TestCase
 {
-    use Tests\FilesHelper;
-
     public function testInitFromGlobals(): void
     {
         $_SERVER['REQUEST_METHOD'] = 'get';
@@ -33,10 +31,12 @@ class RequestTest extends TestCase
         $this->assertSame('GET', $request->method());
         $this->assertSame('/path', $request->path());
         $this->assertSame('/path', $request->selfUri());
-        $this->assertSame('bar', $request->param('foo'));
-        $this->assertSame('egg', $request->param('spam'));
-        $this->assertSame('file', $request->param('some'));
-        $this->assertSame('cookie', $request->cookie('a'));
+        $this->assertSame('bar', $request->parameters->get('foo'));
+        $this->assertSame('egg', $request->parameters->get('spam'));
+        $this->assertSame('file', $request->parameters->get('some'));
+        $this->assertSame('cookie', $request->cookies->get('a'));
+        $this->assertSame('get', $request->server->get('REQUEST_METHOD'));
+        $this->assertSame('/path', $request->server->get('REQUEST_URI'));
     }
 
     public function testInitFromGlobalsFailsIfRequestMethodIsInvalid(): void
@@ -77,10 +77,10 @@ class RequestTest extends TestCase
         $this->assertSame('CLI', $request->method());
         $this->assertSame('/users/create', $request->path());
         $this->assertSame('/users/create', $request->selfUri());
-        $this->assertSame('./cli', $request->param('bin'));
-        $this->assertSame('bar', $request->param('foo'));
-        $this->assertSame('qux', $request->param('foo-baz'));
-        $this->assertTrue($request->paramBoolean('spam'));
+        $this->assertSame('./cli', $request->parameters->get('bin'));
+        $this->assertSame('bar', $request->parameters->get('foo'));
+        $this->assertSame('qux', $request->parameters->get('foo-baz'));
+        $this->assertTrue($request->parameters->getBoolean('spam'));
     }
 
     public function testInitFromCliWhenNoArguments(): void
@@ -93,7 +93,7 @@ class RequestTest extends TestCase
 
         $this->assertSame('CLI', $request->method());
         $this->assertSame('/help', $request->path());
-        $this->assertSame('./cli', $request->param('bin'));
+        $this->assertSame('./cli', $request->parameters->get('bin'));
     }
 
     public function testConstructorFailsIfUriIsEmpty(): void
@@ -163,283 +163,16 @@ class RequestTest extends TestCase
         $this->assertSame($expected_uri, $self_uri);
     }
 
-    public function testHasParamWithExistingParam(): void
+    public function testIp(): void
     {
-        $request = new Request('GET', '/', [
-            'foo' => 'bar'
+        $expected_ip = '127.0.0.1';
+        $request = new Request('GET', '/', server: [
+            'REMOTE_ADDR' => $expected_ip,
         ]);
 
-        $result = $request->hasParam('foo');
+        $ip = $request->ip();
 
-        $this->assertTrue($result);
-    }
-
-    public function testHasParamWithMissingParam(): void
-    {
-        $request = new Request('GET', '/', [
-        ]);
-
-        $result = $request->hasParam('foo');
-
-        $this->assertFalse($result);
-    }
-
-    public function testParam(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 'bar',
-            'baz' => 42,
-            'spam' => true,
-        ]);
-
-        $foo = $request->param('foo');
-        $baz = $request->param('baz');
-        $spam = $request->param('spam');
-
-        $this->assertSame('bar', $foo);
-        $this->assertSame('42', $baz);
-        $this->assertSame('1', $spam);
-    }
-
-    public function testParamWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', []);
-
-        $foo = $request->param('foo', 'bar');
-
-        $this->assertSame('bar', $foo);
-    }
-
-    public function testParamBoolean(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 'true'
-        ]);
-
-        $foo = $request->paramBoolean('foo');
-
-        $this->assertTrue($foo);
-    }
-
-    public function testParamBooleanWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', []);
-
-        $foo = $request->paramBoolean('foo', true);
-
-        $this->assertTrue($foo);
-    }
-
-    public function testParamInteger(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => '42'
-        ]);
-
-        $foo = $request->paramInteger('foo');
-
-        $this->assertSame(42, $foo);
-    }
-
-    public function testParamIntegerWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', []);
-
-        $foo = $request->paramInteger('foo', 42);
-
-        $this->assertSame(42, $foo);
-    }
-
-    public function testParamDatetime(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => '2024-03-07T16:00'
-        ]);
-
-        $foo = $request->paramDatetime('foo');
-
-        $this->assertInstanceOf(\DateTimeImmutable::class, $foo);
-        $this->assertSame('1709827200', $foo->format('U'));
-    }
-
-    public function testParamDatetimeWithCustomFormat(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => '2024-03-07'
-        ]);
-
-        $foo = $request->paramDatetime('foo', format: 'Y-m-d');
-
-        $this->assertInstanceOf(\DateTimeImmutable::class, $foo);
-        $this->assertSame('2024-03-07', $foo->format('Y-m-d'));
-    }
-
-    public function testParamDatetimeWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', [
-        ]);
-        $default_value = new \DateTimeImmutable('2024-03-07');
-
-        $foo = $request->paramDatetime('foo', default: $default_value);
-
-        $this->assertInstanceOf(\DateTimeImmutable::class, $foo);
-        $this->assertSame('2024-03-07', $foo->format('Y-m-d'));
-    }
-
-    public function testParamArray(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => ['bar' => 'baz'],
-        ]);
-
-        $foo = $request->paramArray('foo');
-
-        $this->assertSame([
-            'bar' => 'baz',
-        ], $foo);
-    }
-
-    public function testParamArrayWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', []);
-
-        $foo = $request->paramArray('foo', ['spam' => 'egg']);
-
-        $this->assertSame(['spam' => 'egg'], $foo);
-    }
-
-    public function testParamArrayWithDefaultValueMergesValues(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => ['bar' => 'baz'],
-        ]);
-
-        $foo = $request->paramArray('foo', ['spam' => 'egg']);
-
-        $this->assertSame([
-            'spam' => 'egg',
-            'bar' => 'baz',
-        ], $foo);
-    }
-
-    public function testParamArrayWithNonArrayValue(): void
-    {
-        // here, we set foo as a simple string (i.e. bar)
-        $request = new Request('GET', '/', [
-            'foo' => 'bar',
-        ]);
-
-        $foo = $request->paramArray('foo');
-
-        // but paramArray is always returning an array
-        $this->assertSame(['bar'], $foo);
-    }
-
-    public function testParamJson(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => '{"bar": "baz"}',
-        ]);
-
-        $foo = $request->paramJson('foo');
-
-        $this->assertSame([
-            'bar' => 'baz',
-        ], $foo);
-    }
-
-    public function testParamJsonWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', []);
-
-        $foo = $request->paramJson('foo', ['bar' => 'baz']);
-
-        $this->assertSame([
-            'bar' => 'baz',
-        ], $foo);
-    }
-
-    public function testParamJsonWithNonArrayJson(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 'null',
-        ]);
-
-        $foo = $request->paramJson('foo');
-
-        $this->assertSame([null], $foo);
-    }
-
-    public function testParamJsonNonStringValue(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 42,
-        ]);
-
-        $foo = $request->paramJson('foo');
-
-        $this->assertNull($foo);
-    }
-
-    public function testParamJsonWithInvalidJson(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 'bar',
-        ]);
-
-        $foo = $request->paramJson('foo');
-
-        $this->assertNull($foo);
-    }
-
-    public function testParamFile(): void
-    {
-        $file_filepath = Configuration::$app_path . '/dotenv';
-        $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $request = new Request('GET', '/', [
-            'foo' => [
-                'tmp_name' => $tmp_filepath,
-                'error' => UPLOAD_ERR_OK,
-            ],
-        ]);
-
-        /** @var File $foo */
-        $foo = $request->paramFile('foo');
-
-        $this->assertSame($tmp_filepath, $foo->filepath);
-        $this->assertNull($foo->error);
-    }
-
-    public function testParamFileReturnsNullIfFileInvalid(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 'bar',
-        ]);
-
-        $foo = $request->paramFile('foo');
-
-        $this->assertNull($foo);
-    }
-
-    public function testParamFileReturnsNullIfParamIsMissing(): void
-    {
-        $request = new Request('GET', '/', []);
-
-        $foo = $request->paramFile('foo');
-
-        $this->assertNull($foo);
-    }
-
-    public function testSetParam(): void
-    {
-        $request = new Request('GET', '/', [
-            'foo' => 'bar'
-        ]);
-
-        $request->setParam('foo', 'baz');
-
-        $foo = $request->param('foo');
-        $this->assertSame('baz', $foo);
+        $this->assertSame($expected_ip, $ip);
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('isAcceptingProvider')]
@@ -462,48 +195,6 @@ class RequestTest extends TestCase
         $is_accepting = $request->isAccepting('text/html');
 
         $this->assertTrue($is_accepting);
-    }
-
-    public function testHeader(): void
-    {
-        $request = new Request('GET', '/', [], [
-            'Content-Type' => 'text/plain',
-        ]);
-
-        $protocol = $request->header('Content-Type');
-
-        $this->assertSame('text/plain', $protocol);
-    }
-
-    public function testHeaderWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', [], []);
-
-        $protocol = $request->header('Content-Type', 'text/html');
-
-        $this->assertSame('text/html', $protocol);
-    }
-
-    public function testCookie(): void
-    {
-        $request = new Request('GET', '/', [], [
-            'COOKIE' => [
-                'foo' => 'bar',
-            ],
-        ]);
-
-        $foo = $request->cookie('foo');
-
-        $this->assertSame('bar', $foo);
-    }
-
-    public function testCookieWithDefaultValue(): void
-    {
-        $request = new Request('GET', '/', [], []);
-
-        $foo = $request->cookie('foo', 'baz');
-
-        $this->assertSame('baz', $foo);
     }
 
     /**

@@ -103,7 +103,7 @@ class Controller
 
         yield $response;
 
-        $apply_seeds = $request->paramBoolean('seed', false);
+        $apply_seeds = $request->parameters->getBoolean('seed');
         $code = $response->code();
 
         if ($apply_seeds && $code >= 200 && $code < 300) {
@@ -253,8 +253,7 @@ class Controller
             $migrator->setVersion($migration_version);
         }
 
-        /** @var int */
-        $steps = $request->paramInteger('steps', 1);
+        $steps = $request->parameters->getInteger('steps', 1);
         $results = $migrator->rollback($steps);
         $new_version = $migrator->version();
 
@@ -385,8 +384,7 @@ class Controller
     {
         $migrations_path = static::migrationsPath();
 
-        /** @var string */
-        $name = $request->param('name', '');
+        $name = $request->parameters->getString('name', '');
         $name = preg_replace('/[^a-zA-Z0-9]/', '', $name);
 
         if (!$name) {

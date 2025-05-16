@@ -164,9 +164,9 @@ your application configuration.
 
 Minz provides a class to abstract the HTTP requests: `\Minz\Request`. It
 contains the parameters (e.g. `GET` and `POST` parameters), as well as the
-headers. You have to initialize the request only once in your index file, then
-it will be passed to the different Minz components. **Abstracting the requests
-makes it a lot easier to write tests.**
+headers, cookies and server information. You have to initialize the request
+only once in your index file, then it will be passed to the different Minz
+components. **Abstracting the requests makes it a lot easier to write tests.**
 
 For now, I’ll just show you how to use it to change the word “World” by a
 parameter passed via a `GET` parameter. Add the following lines after the
@@ -179,14 +179,13 @@ environment initialization:
 
 $http_method = strtoupper($_SERVER['REQUEST_METHOD']); // e.g. 'GET' or 'POST'
 $http_uri = $_SERVER['REQUEST_URI']; // e.g. '/test'
-$http_parameters = array_merge($_GET, $_POST);
-$http_headers = getallheaders();
+$http_parameters = $_GET;
 
-$request = new \Minz\Request($http_method, $http_uri, $http_parameters, $http_headers);
+$request = new \Minz\Request($http_method, $http_uri, $http_parameters);
 
 // The second argument is the default value to return. If it wasn't given, the
 // method would return `null` when the `name` parameter is missing.
-$name = $request->param('name', 'World');
+$name = $request->parameters->getString('name', 'World');
 echo "Hello {$name}!";
 ```
 
@@ -204,7 +203,7 @@ Internally, it does essentially what we saw above.
 
 $request = \Minz\Request::initFromGlobals();
 
-$name = $request->param('name', 'World');
+$name = $request->parameters->getString('name', 'World');
 echo "Hello {$name}!";
 ```
 
@@ -228,7 +227,7 @@ it to return a `text` response:
 
 $request = \Minz\Request::initFromGlobals();
 
-$name = $request->param('name', 'World');
+$name = $request->parameters->getString('name', 'World');
 
 $response = \Minz\Response::text(200, "Hello {$name}!");
 
@@ -257,7 +256,7 @@ client:
 
 $request = \Minz\Request::initFromGlobals();
 
-$name = $request->param('name', 'World');
+$name = $request->parameters->getString('name', 'World');
 
 $response = \Minz\Response::text(200, "Hello {$name}!");
 
@@ -302,7 +301,7 @@ class Home
     {
         // the code of the action is simply what we wrote earlier in the index
         // page
-        $name = $request->param('name', 'World');
+        $name = $request->parameters->getString('name', 'World');
         $response = \Minz\Response::text(200, "Hello {$name}!");
 
         // and it returns a $response

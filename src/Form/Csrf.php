@@ -106,12 +106,10 @@ trait Csrf
     #[OnHandleRequest]
     public function rememberCsrfOrigin(\Minz\Request $request): void
     {
-        /** @var ?string */
-        $origin = $request->header('Origin');
+        $origin = $request->headers->getString('Origin');
 
         if ($origin === null) {
-            /** @var ?string */
-            $referer = $request->header('Referer');
+            $referer = $request->headers->getString('Referer');
 
             if ($referer === null) {
                 return;

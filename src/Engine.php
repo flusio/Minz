@@ -190,7 +190,7 @@ class Engine
         }
 
         foreach ($parameters as $param_name => $param_value) {
-            $request->setParam($param_name, $param_value);
+            $request->parameters->set($param_name, $param_value);
         }
 
         try {
