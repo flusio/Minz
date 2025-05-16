@@ -12,10 +12,12 @@ class Random
      * Return a random cryptographically secure string containing characters in
      * range 0-9a-f.
      *
+     * @see https://paragonie.com/blog/2015/07/how-safely-generate-random-strings-and-integers-in-php
+     *
      * @throws Errors\LogicException
      *     If the length is less than 1
      *
-     * @see https://paragonie.com/blog/2015/07/how-safely-generate-random-strings-and-integers-in-php
+     * @return non-empty-string
      */
     public static function hex(int $length): string
     {
@@ -39,6 +41,8 @@ class Random
      * the current timestamp in milliseconds and last 20 bits are random.
      *
      * Please note the result is returned as a string.
+     *
+     * @return non-empty-string
      */
     public static function timebased(?\DateTimeInterface $datetime = null): string
     {

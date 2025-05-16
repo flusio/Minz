@@ -5,107 +5,107 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 /**
- * These functions are meant to be used inside View files.
+ * These functions are meant to be used inside Simple template files.
  *
- * They are declared in global namespace so we don't have to declare the
- * namespaces in views.
+ * They are declared in the global namespace so we don't have to declare the
+ * namespaces in templates.
  */
 
 if (!function_exists('protect')) {
     /**
-     * @see \Minz\Output\ViewHelpers::protect
+     * @see \Minz\Template\SimpleTemplateHelpers::protect
      */
     function protect(?string $variable): string
     {
-        return \Minz\Output\ViewHelpers::protect($variable);
+        return \Minz\Template\SimpleTemplateHelpers::protect($variable);
     }
 }
 
 if (!function_exists('url')) {
     /**
-     * @see \Minz\Output\ViewHelpers::url
+     * @see \Minz\Template\SimpleTemplateHelpers::url
      *
      * @param non-empty-string $action_pointer_or_name
      * @param array<string, mixed> $parameters
      */
     function url(string $action_pointer_or_name, array $parameters = []): string
     {
-        return \Minz\Output\ViewHelpers::url($action_pointer_or_name, $parameters);
+        return \Minz\Template\SimpleTemplateHelpers::url($action_pointer_or_name, $parameters);
     }
 }
 
 if (!function_exists('url_full')) {
     /**
-     * @see \Minz\Output\ViewHelpers::urlFull
+     * @see \Minz\Template\SimpleTemplateHelpers::urlFull
      *
      * @param non-empty-string $action_pointer_or_name
      * @param array<string, mixed> $parameters
      */
     function url_full(string $action_pointer_or_name, array $parameters = []): string
     {
-        return \Minz\Output\ViewHelpers::urlFull($action_pointer_or_name, $parameters);
+        return \Minz\Template\SimpleTemplateHelpers::urlFull($action_pointer_or_name, $parameters);
     }
 }
 
 if (!function_exists('url_static')) {
     /**
-     * @see \Minz\Output\ViewHelpers::urlStatic
+     * @see \Minz\Template\SimpleTemplateHelpers::urlStatic
      */
     function url_static(string $filename): string
     {
-        return \Minz\Output\ViewHelpers::urlStatic($filename);
+        return \Minz\Template\SimpleTemplateHelpers::urlStatic($filename);
     }
 }
 
 if (!function_exists('url_full_static')) {
     /**
-     * @see \Minz\Output\ViewHelpers::urlFullStatic
+     * @see \Minz\Template\SimpleTemplateHelpers::urlFullStatic
      */
     function url_full_static(string $filename): string
     {
-        return \Minz\Output\ViewHelpers::urlFullStatic($filename);
+        return \Minz\Template\SimpleTemplateHelpers::urlFullStatic($filename);
     }
 }
 
 if (!function_exists('url_public')) {
     /**
-     * @see \Minz\Output\ViewHelpers::urlPublic
+     * @see \Minz\Template\SimpleTemplateHelpers::urlPublic
      */
     function url_public(string $filename): string
     {
-        return \Minz\Output\ViewHelpers::urlPublic($filename);
+        return \Minz\Template\SimpleTemplateHelpers::urlPublic($filename);
     }
 }
 
 if (!function_exists('url_full_public')) {
     /**
-     * @see \Minz\Output\ViewHelpers::urlFullPublic
+     * @see \Minz\Template\SimpleTemplateHelpers::urlFullPublic
      */
     function url_full_public(string $filename): string
     {
-        return \Minz\Output\ViewHelpers::urlFullPublic($filename);
+        return \Minz\Template\SimpleTemplateHelpers::urlFullPublic($filename);
     }
 }
 
 if (!function_exists('_d')) {
     /**
-     * @see \Minz\Output\ViewHelpers::formatDate
+     * @see \Minz\Template\SimpleTemplateHelpers::formatDate
      */
     function _d(\DateTimeInterface $date, string $format = 'EEEE d MMMM', ?string $locale = null): string
     {
-        return \Minz\Output\ViewHelpers::formatDate($date, $format, $locale);
+        return \Minz\Template\SimpleTemplateHelpers::formatDate($date, $format, $locale);
     }
 }
 
 if (!function_exists('_f')) {
     /**
-     * @see \Minz\Output\ViewHelpers::formatGettext
+     * @see \Minz\Template\SimpleTemplateHelpers::formatGettext
      *
      * @param bool|float|int|string|null ...$args
      */
     function _f(string $message, mixed ...$args): string
     {
-        return \Minz\Output\ViewHelpers::formatGettext($message, ...$args);
+        return \Minz\Template\SimpleTemplateHelpers::formatGettext($message, ...$args);
     }
 }
 
@@ -121,12 +121,12 @@ if (!function_exists('_n')) {
 
 if (!function_exists('_nf')) {
     /**
-     * @see \Minz\Output\ViewHelpers::formatNgettext
+     * @see \Minz\Template\SimpleTemplateHelpers::formatNgettext
      *
      * @param bool|float|int|string|null ...$args
      */
     function _nf(string $message1, string $message2, int $n, mixed ...$args): string
     {
-        return \Minz\Output\ViewHelpers::formatNgettext($message1, $message2, $n, ...$args);
+        return \Minz\Template\SimpleTemplateHelpers::formatNgettext($message1, $message2, $n, ...$args);
     }
 }

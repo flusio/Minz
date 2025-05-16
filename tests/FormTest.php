@@ -88,12 +88,32 @@ class FormTest extends TestCase
 
     public function testValidate(): void
     {
+        $form = new forms\Rabbit();
         $request = new \Minz\Request('GET', '/', [
             'name' => ' Bugs ',
             'friend_id' => 1,
-            'csrf' => \Minz\Csrf::generate(),
+            'csrf_token' => $form->csrfToken(),
+        ], [
+            'HTTP_ORIGIN' => \Minz\Url::baseUrl(),
         ]);
+        $form->handleRequest($request);
+
+        $is_valid = $form->validate();
+
+        $this->assertTrue($is_valid);
+        $this->assertEquals([], $form->errors(format: false));
+    }
+
+    public function testValidateWithCsrfRefererInsteadOfOrigin(): void
+    {
         $form = new forms\Rabbit();
+        $request = new \Minz\Request('GET', '/', [
+            'name' => ' Bugs ',
+            'friend_id' => 1,
+            'csrf_token' => $form->csrfToken(),
+        ], [
+            'HTTP_REFERER' => \Minz\Url::baseUrl() . '/foo?bar=baz',
+        ]);
         $form->handleRequest($request);
 
         $is_valid = $form->validate();
@@ -125,14 +145,38 @@ class FormTest extends TestCase
         ], $form->errors(format: false));
     }
 
-    public function testValidateWithInvalidCsrf(): void
+    public function testValidateWithInvalidCsrfToken(): void
     {
+        $form = new forms\Rabbit();
         $request = new \Minz\Request('GET', '/', [
             'name' => ' Bugs ',
             'friend_id' => 1,
-            'csrf' => 'not the token',
+            'csrf_token' => 'not the token',
+        ], [
+            'HTTP_ORIGIN' => \Minz\Url::baseUrl(),
         ]);
+        $form->handleRequest($request);
+
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            '@base' => [
+                ['csrf', 'The security token is invalid. Please try to submit the form again.'],
+            ],
+        ], $form->errors(format: false));
+    }
+
+    public function testValidateWithInvalidCsrfOrigin(): void
+    {
         $form = new forms\Rabbit();
+        $request = new \Minz\Request('GET', '/', [
+            'name' => ' Bugs ',
+            'friend_id' => 1,
+            'csrf_token' => $form->csrfToken(),
+        ], [
+            'HTTP_ORIGIN' => 'https://not-the-origin.example.org',
+        ]);
         $form->handleRequest($request);
 
         $is_valid = $form->validate();
