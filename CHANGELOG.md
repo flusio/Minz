@@ -31,10 +31,12 @@ Changes of the `Field` attribute:
 - the `trim` argument has been removed, you must change it by `transform: 'trim'`
 - the `bind_model` argument has been renamed to `bind`
 
-Changes of the `Csrf` trait:
+The CSRF protections have also largely step up:
 
-- the error is now added to the `@base` namespace instead of `@global`
-- the error code is now `csrf` instead of the full class name
+- the `Csrf` class have been rewritten and moved to `Form\CsrfToken`, it is discouraged to use it alone
+- the `Form\Csrf` trait now checks for the `Origin` (or `Referer`) of the request
+- the `Form\Csrf` trait provides more methods: `rememberCsrfOrigin`, `csrfToken`, `csrfSessionId` and `csrfTokenName`
+- the `Form\Csrf` trait error namespace is now `@base` instead of `@global`, and code is `csrf` instead of the full class name
 
 ## 2025-04-30 - 1.1.0
 
