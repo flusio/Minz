@@ -11,8 +11,7 @@ namespace Minz;
  * of matching user request path with patterns.
  *
  * @phpstan-import-type RequestMethod from Request
- *
- * @phpstan-import-type RequestParameters from Request
+ * @phpstan-import-type Parameters from ParameterBag
  *
  * @phpstan-type Routes array<RoutePattern, RoutePointer>
  *
@@ -120,7 +119,7 @@ class Router
      * @throws \Minz\Errors\RoutingError if method is invalid
      * @throws \Minz\Errors\RouteNotFoundError if no patterns match with the path
      *
-     * @return array{RoutePointer, RequestParameters}
+     * @return array{RoutePointer, Parameters}
      */
     public function match(string $method, string $path): array
     {
@@ -183,7 +182,7 @@ class Router
      * Return an URI by its name. It is generated with the given parameters.
      *
      * @param RouteName $name
-     * @param RequestParameters $parameters
+     * @param Parameters $parameters
      *
      * @throws \Minz\Errors\RoutingError if required parameters are missing
      * @throws \Minz\Errors\RouteNotFoundError if name matches with no route
@@ -205,7 +204,7 @@ class Router
      *
      * @param RequestMethod $method
      * @param RoutePointer $action_pointer
-     * @param RequestParameters $parameters
+     * @param Parameters $parameters
      *
      * @throws \Minz\Errors\RoutingError if method is invalid
      * @throws \Minz\Errors\RoutingError if required parameters are missing
@@ -275,7 +274,7 @@ class Router
      *
      * @param RoutePattern $pattern
      *
-     * @return RequestParameters
+     * @return Parameters
      */
     private function extractParameters(string $path, string $pattern): array
     {
@@ -316,7 +315,7 @@ class Router
      * added as a query string (e.g. `?id=value`).
      *
      * @param RoutePattern $pattern
-     * @param RequestParameters $parameters
+     * @param Parameters $parameters
      *
      * @throws \Minz\Errors\RoutingError if required parameters are missing
      */
