@@ -76,7 +76,7 @@ namespace Minz;
  * no cast-methods):
  *
  * ```php
- * $accept_header = $request->header('HTTP_ACCEPT');
+ * $accept_header = $request->header('Accept');
  * $my_cookie = $request->cookie('my_cookie');
  * ```
  *
@@ -140,9 +140,14 @@ class Request
             $_FILES,
             ['@input' => @file_get_contents('php://input')],
         );
-        $http_headers = array_merge($_SERVER, [
-            'COOKIE' => $_COOKIE,
-        ]);
+
+        if (function_exists('getallheaders')) {
+            $http_headers = \getallheaders();
+        } else {
+            $http_headers = [];
+        }
+
+        $http_headers['COOKIE'] = $_COOKIE;
 
         return new Request($http_method, $http_uri, $http_parameters, $http_headers);
     }
@@ -212,8 +217,8 @@ class Request
      *     Cookies must be associated to the `COOKIE` key. Headers can be
      *     retrieved with the `header()` method, while cookies are retrieved
      *     with the `cookie()` one.
-     *     For HTTP requests, its value usually is a merge of `$_SERVER` and
-     *     `$_COOKIE` global variables.
+     *     For HTTP requests, its value usually is a merge of `getallheaders()`
+     *     and `$_COOKIE` global variables.
      *     CLI requests usually don’t have headers.
      *
      * @throws \Minz\Errors\RequestError
@@ -581,7 +586,7 @@ class Request
     {
         // No Accept header implies the user agent accepts any media type (cf.
         // the RFC 7231)
-        $accept_header = $this->header('HTTP_ACCEPT', '*/*');
+        $accept_header = $this->header('Accept', '*/*');
 
         if (!is_string($accept_header)) {
             return false;

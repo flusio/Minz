@@ -136,7 +136,7 @@ namespace Minz;
  *         #[Form\OnHandleRequest]
  *         public function rememberContentType(Request $request): void
  *         {
- *             $this->content_type = $request->header('HTTP_CONTENT_TYPE', '');
+ *             $this->content_type = $request->header('Content-Type', '');
  *         }
  *     }
  *

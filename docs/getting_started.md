@@ -180,7 +180,7 @@ environment initialization:
 $http_method = strtoupper($_SERVER['REQUEST_METHOD']); // e.g. 'GET' or 'POST'
 $http_uri = $_SERVER['REQUEST_URI']; // e.g. '/test'
 $http_parameters = array_merge($_GET, $_POST);
-$http_headers = $_SERVER;
+$http_headers = getallheaders();
 
 $request = new \Minz\Request($http_method, $http_uri, $http_parameters, $http_headers);
 

@@ -107,11 +107,11 @@ trait Csrf
     public function rememberCsrfOrigin(\Minz\Request $request): void
     {
         /** @var ?string */
-        $origin = $request->header('HTTP_ORIGIN');
+        $origin = $request->header('Origin');
 
         if ($origin === null) {
             /** @var ?string */
-            $referer = $request->header('HTTP_REFERER');
+            $referer = $request->header('Referer');
 
             if ($referer === null) {
                 return;

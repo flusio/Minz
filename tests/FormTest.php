@@ -94,7 +94,7 @@ class FormTest extends TestCase
             'friend_id' => 1,
             'csrf_token' => $form->csrfToken(),
         ], [
-            'HTTP_ORIGIN' => \Minz\Url::baseUrl(),
+            'Origin' => \Minz\Url::baseUrl(),
         ]);
         $form->handleRequest($request);
 
@@ -112,7 +112,7 @@ class FormTest extends TestCase
             'friend_id' => 1,
             'csrf_token' => $form->csrfToken(),
         ], [
-            'HTTP_REFERER' => \Minz\Url::baseUrl() . '/foo?bar=baz',
+            'Referer' => \Minz\Url::baseUrl() . '/foo?bar=baz',
         ]);
         $form->handleRequest($request);
 
@@ -153,7 +153,7 @@ class FormTest extends TestCase
             'friend_id' => 1,
             'csrf_token' => 'not the token',
         ], [
-            'HTTP_ORIGIN' => \Minz\Url::baseUrl(),
+            'Origin' => \Minz\Url::baseUrl(),
         ]);
         $form->handleRequest($request);
 
@@ -175,7 +175,7 @@ class FormTest extends TestCase
             'friend_id' => 1,
             'csrf_token' => $form->csrfToken(),
         ], [
-            'HTTP_ORIGIN' => 'https://not-the-origin.example.org',
+            'Origin' => 'https://not-the-origin.example.org',
         ]);
         $form->handleRequest($request);
 

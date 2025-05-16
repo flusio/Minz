@@ -4,6 +4,14 @@
 
 ### Breaking changes
 
+This is a pretty big release.
+Here are listed all the changes in a comprehensive way.
+Take your time to upgrade!
+
+The request headers are now set using the `getallheaders()` PHP function in `Request::initFromGlobals()`.
+For instance, `HTTP_CONTENT_TYPE` must now be fetched using the `Content-Type` key.
+You should fix all your calls to `$request->header(...)`.
+
 The `Form` and `Validable` classes have been extensively redesigned so they work better together.
 `Form` now uses the `Validable` trait so the `validate` method is provided by the latter.
 However, this broke how the `Validable` trait worked previously.

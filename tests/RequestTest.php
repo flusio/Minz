@@ -446,7 +446,7 @@ class RequestTest extends TestCase
     public function testIsAccepting(string $header, string $media, bool $expected): void
     {
         $request = new Request('GET', '/', [], [
-            'HTTP_ACCEPT' => $header,
+            'Accept' => $header,
         ]);
 
         $is_accepting = $request->isAccepting($media);
@@ -467,21 +467,21 @@ class RequestTest extends TestCase
     public function testHeader(): void
     {
         $request = new Request('GET', '/', [], [
-            'SERVER_PROTOCOL' => 'HTTP/1.1',
+            'Content-Type' => 'text/plain',
         ]);
 
-        $protocol = $request->header('SERVER_PROTOCOL');
+        $protocol = $request->header('Content-Type');
 
-        $this->assertSame('HTTP/1.1', $protocol);
+        $this->assertSame('text/plain', $protocol);
     }
 
     public function testHeaderWithDefaultValue(): void
     {
         $request = new Request('GET', '/', [], []);
 
-        $protocol = $request->header('SERVER_PROTOCOL', 'foo');
+        $protocol = $request->header('Content-Type', 'text/html');
 
-        $this->assertSame('foo', $protocol);
+        $this->assertSame('text/html', $protocol);
     }
 
     public function testCookie(): void
