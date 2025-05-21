@@ -90,14 +90,9 @@ class Controller
 
         $this->is_watching = true;
 
-        /** @var int */
-        $stop_after = $request->paramInteger('stop-after', 0);
-
-        /** @var int */
-        $sleep_duration = $request->paramInteger('sleep-duration', 3);
-
-        /** @var string */
-        $queue = $request->param('queue', 'all');
+        $stop_after = $request->parameters->getInteger('stop-after', 0);
+        $sleep_duration = $request->parameters->getInteger('sleep-duration', 3);
+        $queue = $request->parameters->getString('queue', 'all');
         $queue = rtrim($queue, '0..9');
 
         yield Response::text(200, "[Job worker ({$queue}) started]");
@@ -153,8 +148,7 @@ class Controller
      */
     public function run(Request $request): Response
     {
-        /** @var int */
-        $job_id = $request->paramInteger('id', 0);
+        $job_id = $request->parameters->getInteger('id', 0);
 
         // Load is similar to find, except that it returns a Job as its final
         // class. For instance, if $job_id corresponds to a Job with the name
@@ -258,8 +252,7 @@ class Controller
      */
     public function show(Request $request): Response
     {
-        /** @var int */
-        $job_id = $request->paramInteger('id', 0);
+        $job_id = $request->parameters->getInteger('id', 0);
         $job = Job::find($job_id);
 
         if (!$job) {
@@ -321,8 +314,7 @@ class Controller
      */
     public function unfail(Request $request): Response
     {
-        /** @var int */
-        $job_id = $request->paramInteger('id', 0);
+        $job_id = $request->parameters->getInteger('id', 0);
         $job = Job::find($job_id);
 
         if (!$job) {
@@ -351,8 +343,7 @@ class Controller
      */
     public function unlock(Request $request): Response
     {
-        /** @var int */
-        $job_id = $request->paramInteger('id', 0);
+        $job_id = $request->parameters->getInteger('id', 0);
         $job = Job::find($job_id);
 
         if (!$job) {

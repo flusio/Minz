@@ -264,18 +264,18 @@ class Form
         $fields_schema = $this->fieldsSchema();
         foreach ($fields_schema as $field_name => $field_schema) {
             if ($field_schema['type'] === 'bool') {
-                $value = $request->paramBoolean($field_name);
+                $value = $request->parameters->getBoolean($field_name);
             } elseif ($field_schema['type'] === 'int') {
-                $value = $request->paramInteger($field_name);
+                $value = $request->parameters->getInteger($field_name);
             } elseif ($field_schema['type'] === 'DateTimeImmutable') {
-                $value = $request->paramDatetime($field_name, format: $field_schema['format']);
+                $value = $request->parameters->getDatetime($field_name, format: $field_schema['format']);
             } elseif ($field_schema['type'] === 'array') {
-                $value = $request->paramArray($field_name);
+                $value = $request->parameters->getArray($field_name);
             } else {
-                $value = $request->param($field_name);
+                $value = $request->parameters->getString($field_name);
             }
 
-            if ($value === null && !$request->hasParam($field_name)) {
+            if ($value === null && !$request->parameters->has($field_name)) {
                 continue;
             }
 
