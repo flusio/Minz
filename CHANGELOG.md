@@ -8,11 +8,15 @@ This is a pretty big release.
 Here are listed all the changes in a comprehensive way.
 Take your time to upgrade!
 
-The request headers are now set using the `getallheaders()` PHP function in `Request::initFromGlobals()`.
-For instance, `HTTP_CONTENT_TYPE` must now be fetched using the `Content-Type` key.
-You should fix all your calls to `$request->header(...)`.
+The `Request` class has been refactored:
 
-The Router has been refactored:
+- Parameters must be retrieved with the `$request->parameters->get*()` methods.
+- Headers must be retrieved with the `$request->headers->get*()` methods.
+- Cookies must be retrieved with the `$request->cookied->get*()` methods.
+- The server information must be retrieved with the `$request->server->get*()` methods.
+- The headers are now set using the `getallheaders()` PHP function in `Request::initFromGlobals()`. For instance, `HTTP_CONTENT_TYPE` must now be fetched using the `Content-Type` key.
+
+The `Router` class has been refactored:
 
 - routes all have a name. If it's not specified, the name defaults to the action value.
 - incidentally, the `uriByPointer()` has been removed since it's now useless.
