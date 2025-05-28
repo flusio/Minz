@@ -399,27 +399,11 @@ class Form
         }
 
         $model_errors = $this->model->errors(false);
-        $fields_schema = $this->fieldsSchema();
 
-        $this->copyModelErrors($model_errors, '@base');
-
-        foreach ($fields_schema as $field_name => $field_schema) {
-            if ($field_schema['bind'] === false) {
-                continue;
+        foreach ($model_errors as $field_name => $field_errors) {
+            foreach ($field_errors as $field_error) {
+                $this->addError($field_name, $field_error[0], $field_error[1]);
             }
-
-            $this->copyModelErrors($model_errors, $field_name);
-        }
-    }
-
-    /**
-     * @param array<string, ValidableError[]> $model_errors
-     */
-    private function copyModelErrors(array $model_errors, string $field_name): void
-    {
-        $field_errors = $model_errors[$field_name] ?? [];
-        foreach ($field_errors as $field_error) {
-            $this->addError($field_name, $field_error[0], $field_error[1]);
         }
     }
 }
