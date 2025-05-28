@@ -5,9 +5,6 @@ namespace AppTest\forms;
 use Minz\Form;
 use Minz\Validable;
 
-/**
- * @phpstan-extends Form<null>
- */
 class FormWithCheck extends Form
 {
     #[Form\Field]

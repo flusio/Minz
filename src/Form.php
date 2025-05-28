@@ -147,7 +147,7 @@ namespace Minz;
  * @see \Minz\Form\OnHandleRequest
  * @see \Minz\Validable
  *
- * @template T of ?object
+ * @template T of object = \stdClass
  *
  * @phpstan-type FieldSchema array{
  *     'type': string,
@@ -162,7 +162,7 @@ class Form
 {
     use Validable;
 
-    /** @var T */
+    /** @var ?T */
     protected ?object $model = null;
 
     /**
@@ -176,7 +176,7 @@ class Form
      * If both default_values and model are passed, the latter has the priority.
      *
      * @param array<string, mixed> $default_values
-     * @param T $model
+     * @param ?T $model
      */
     public function __construct(array $default_values = [], ?object $model = null)
     {
@@ -368,7 +368,7 @@ class Form
      *
      * @return T
      */
-    public function model(): ?object
+    public function model(): object
     {
         if (!$this->model) {
             throw new Errors\LogicException('Model is not set');
