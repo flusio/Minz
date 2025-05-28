@@ -116,9 +116,7 @@ class UrlTest extends TestCase
     public function testForFailsIfActionPointerDoesNotExist(): void
     {
         $this->expectException(Errors\UrlError::class);
-        $this->expectExceptionMessage(
-            'rabbits#list action pointer or route name does not exist in the router.'
-        );
+        $this->expectExceptionMessage('rabbits#list route does not exist in the router.');
 
         $router = new Router();
         Engine::init($router);

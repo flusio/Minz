@@ -23,12 +23,15 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->addRoute('GET', '/rabbits', 'rabbits#list');
+        $router->addRoute('GET', '/rabbits', 'rabbits#list', 'rabbits');
 
         $routes = $router->routes();
         $this->assertSame([
-            'GET' => [
-                '/rabbits' => 'rabbits#list',
+            'rabbits' => [
+                'name' => 'rabbits',
+                'method' => 'GET',
+                'pattern' => '/rabbits',
+                'action' => 'rabbits#list',
             ],
         ], $routes);
     }
@@ -37,12 +40,15 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->addRoute('CLI', '/rabbits', 'rabbits#list');
+        $router->addRoute('CLI', '/rabbits', 'rabbits#list', 'rabbits');
 
         $routes = $router->routes();
         $this->assertSame([
-            'CLI' => [
-                '/rabbits' => 'rabbits#list',
+            'rabbits' => [
+                'name' => 'rabbits',
+                'method' => 'CLI',
+                'pattern' => '/rabbits',
+                'action' => 'rabbits#list',
             ],
         ], $routes);
     }
@@ -60,7 +66,7 @@ class RouterTest extends TestCase
     public function testAddRouteFailsIfToDoesntContainHash(): void
     {
         $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage('Route "action_pointer" must contain a hash (#).');
+        $this->expectExceptionMessage('Route "action" must contain a hash (#).');
 
         $router = new Router();
 
@@ -71,7 +77,7 @@ class RouterTest extends TestCase
     {
         $this->expectException(Errors\RoutingError::class);
         $this->expectExceptionMessage(
-            'Route "action_pointer" must contain at most one hash (#).'
+            'Route "action" must contain at most one hash (#).'
         );
 
         $router = new Router();
@@ -98,15 +104,10 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        list(
-            $action_pointer,
-            $parameters
-        ) = $router->match('GET', '/rabbits');
+        list($route, $parameters) = $router->match('GET', '/rabbits');
 
-        $this->assertSame('rabbits#list', $action_pointer);
-        $this->assertSame([
-            '_action_pointer' => 'rabbits#list',
-        ], $parameters);
+        $this->assertSame('rabbits#list', $route['name']);
+        $this->assertSame([], $parameters);
     }
 
     public function testMatchWithTrailingSlashes(): void
@@ -114,15 +115,10 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        list(
-            $action_pointer,
-            $parameters,
-        ) = $router->match('GET', '/rabbits//');
+        list($route, $parameters) = $router->match('GET', '/rabbits//');
 
-        $this->assertSame('rabbits#list', $action_pointer);
-        $this->assertSame([
-            '_action_pointer' => 'rabbits#list',
-        ], $parameters);
+        $this->assertSame('rabbits#list', $route['name']);
+        $this->assertSame([], $parameters);
     }
 
     public function testMatchWithParam(): void
@@ -130,16 +126,10 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits/:id', 'rabbits#get');
 
-        list(
-            $action_pointer,
-            $parameters
-        ) = $router->match('GET', '/rabbits/42');
+        list($route, $parameters) = $router->match('GET', '/rabbits/42');
 
-        $this->assertSame('rabbits#get', $action_pointer);
-        $this->assertSame([
-            'id' => '42',
-            '_action_pointer' => 'rabbits#get',
-        ], $parameters);
+        $this->assertSame('rabbits#get', $route['name']);
+        $this->assertSame(['id' => '42'], $parameters);
     }
 
     public function testMatchWithWildcard(): void
@@ -148,15 +138,12 @@ class RouterTest extends TestCase
         $router->addRoute('GET', '/assets/*', 'assets#serve');
 
         list(
-            $action_pointer,
+            $route,
             $parameters
         ) = $router->match('GET', '/assets/path/to/an/asset.css');
 
-        $this->assertSame('assets#serve', $action_pointer);
-        $this->assertSame([
-            '*' => 'path/to/an/asset.css',
-            '_action_pointer' => 'assets#serve',
-        ], $parameters);
+        $this->assertSame('assets#serve', $route['name']);
+        $this->assertSame(['*' => 'path/to/an/asset.css'], $parameters);
     }
 
     public function testMatchFailsIfPatternIsLongerThanPath(): void
@@ -238,80 +225,22 @@ class RouterTest extends TestCase
         $this->assertEquals([], $allowed_methods);
     }
 
-    public function testUriByPointer(): void
-    {
-        $router = new Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#list');
-
-        $uri = $router->uriByPointer('GET', 'rabbits#list');
-
-        $this->assertSame('/rabbits', $uri);
-    }
-
-    public function testUriByPointerWithParams(): void
-    {
-        $router = new Router();
-        $router->addRoute('GET', '/rabbits/:id', 'rabbits#details');
-
-        $uri = $router->uriByPointer('GET', 'rabbits#details', ['id' => 42]);
-
-        $this->assertSame('/rabbits/42', $uri);
-    }
-
-    public function testUriWithAdditionalParameters(): void
-    {
-        $router = new Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#details');
-
-        $uri = $router->uriByPointer('GET', 'rabbits#details', ['id' => 42]);
-
-        $this->assertSame('/rabbits?id=42', $uri);
-    }
-
-    public function testUriByPointerFailsIfParameterIsMissing(): void
-    {
-        $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage('Required `id` parameter is missing.');
-
-        $router = new Router();
-        $router->addRoute('GET', '/rabbits/:id', 'rabbits#details');
-
-        $uri = $router->uriByPointer('GET', 'rabbits#details');
-    }
-
-    public function testUriByPointerFailsIfActionPointerNotRegistered(): void
-    {
-        $this->expectException(Errors\RouteNotFoundError::class);
-        $this->expectExceptionMessage(
-            'Action pointer "GET rabbits#list" doesn’t match any route.'
-        );
-
-        $router = new Router();
-
-        $router->uriByPointer('GET', 'rabbits#list');
-    }
-
-    #[\PHPUnit\Framework\Attributes\DataProvider('invalidMethodProvider')]
-    public function testUriByPointerFailsIfMethodIsInvalid(string $invalid_method): void
-    {
-        $this->expectException(Errors\RoutingError::class);
-        $this->expectExceptionMessage(
-            "{$invalid_method} method is invalid (GET, POST, PATCH, PUT, DELETE, OPTIONS, CLI)."
-        );
-
-        $router = new Router();
-        $router->addRoute('GET', '/rabbits', 'rabbits#list');
-
-        // @phpstan-ignore-next-line
-        $router->uriByPointer($invalid_method, 'rabbits#list');
-    }
-
     public function testUriByName(): void
     {
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list', 'rabbits');
 
         $uri = $router->uriByName('rabbits');
+
+        $this->assertSame('/rabbits', $uri);
+    }
+
+    public function testUriByNameWhenRouteHasNoName(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits', 'rabbits#list');
+
+        $uri = $router->uriByName('rabbits#list');
 
         $this->assertSame('/rabbits', $uri);
     }
@@ -350,9 +279,7 @@ class RouterTest extends TestCase
     public function testUriByNameFailsIfNameNotRegistered(): void
     {
         $this->expectException(Errors\RouteNotFoundError::class);
-        $this->expectExceptionMessage(
-            'Route named "rabbits" doesn’t match any route.'
-        );
+        $this->expectExceptionMessage('Route named "rabbits" doesn’t match any route.');
 
         $router = new Router();
 

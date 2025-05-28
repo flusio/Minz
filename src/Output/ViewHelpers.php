@@ -12,8 +12,7 @@ namespace Minz\Output;
  * They are redeclared as functions with no namespaces in the view_helpers.php
  * file so we don't have to declare the namespaces in views.
  *
- * @phpstan-import-type UrlPointer from \Minz\Url
- *
+ * @phpstan-import-type RouteName from \Minz\Router
  * @phpstan-import-type UrlParameters from \Minz\Url
  */
 class ViewHelpers
@@ -37,12 +36,12 @@ class ViewHelpers
      *
      * @see \Minz\Url::for
      *
-     * @param UrlPointer $pointer
+     * @param RouteName $name
      * @param UrlParameters $parameters
      */
-    public static function url(string $pointer, array $parameters = []): string
+    public static function url(string $name, array $parameters = []): string
     {
-        return self::protect(\Minz\Url::for($pointer, $parameters));
+        return self::protect(\Minz\Url::for($name, $parameters));
     }
 
     /**
@@ -50,12 +49,12 @@ class ViewHelpers
      *
      * @see \Minz\Url::absoluteFor
      *
-     * @param UrlPointer $pointer
+     * @param RouteName $name
      * @param UrlParameters $parameters
      */
-    public static function urlFull(string $pointer, array $parameters = []): string
+    public static function urlFull(string $name, array $parameters = []): string
     {
-        return self::protect(\Minz\Url::absoluteFor($pointer, $parameters));
+        return self::protect(\Minz\Url::absoluteFor($name, $parameters));
     }
 
     /**

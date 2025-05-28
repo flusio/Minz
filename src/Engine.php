@@ -14,7 +14,7 @@ namespace Minz;
  * actions.
  *
  * @phpstan-import-type ViewPointer from Output\View
- *
+ * @phpstan-import-type Route from Router
  * @phpstan-import-type ResponseReturnable from Response
  */
 class Engine
@@ -182,19 +182,17 @@ class Engine
 
         try {
             list(
-                $route_pointer,
+                $route,
                 $parameters
             ) = self::$router->match($request->method(), $request->path());
         } catch (Errors\RouteNotFoundError $e) {
             return self::notFoundResponse($e);
         }
 
-        foreach ($parameters as $param_name => $param_value) {
-            $request->parameters->set($param_name, $param_value);
-        }
+        $request->setRoute($route, $parameters);
 
         try {
-            return self::executeRoutePointer($route_pointer, $request);
+            return self::executeRequest($request);
         } catch (\Exception $e) {
             Log::error((string)$e);
             return self::internalServerErrorResponse($e);
@@ -204,11 +202,12 @@ class Engine
     /**
      * @return ResponseReturnable
      */
-    private static function executeRoutePointer(string $route_pointer, Request $request): mixed
+    private static function executeRequest(Request $request): mixed
     {
         $namespace = self::$options['controller_namespace'];
 
-        list($controller_name, $action_name) = explode('#', $route_pointer);
+        $route = $request->route();
+        list($controller_name, $action_name) = explode('#', $route['action']);
         $controller_name = str_replace('/', '\\', $controller_name);
 
         if ($namespace === null) {

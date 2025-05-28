@@ -106,22 +106,15 @@ use Minz\Output;
  * \Minz\Response::sendToCli($response);
  * ```
  *
- * @phpstan-import-type UrlPointer from Url
- *
+ * @phpstan-import-type RouteName from Router
  * @phpstan-import-type UrlParameters from Url
- *
  * @phpstan-import-type ViewPointer from Output\View
- *
  * @phpstan-import-type ViewVariables from Output\View
  *
  * @phpstan-type ResponseHttpCode value-of<Response::VALID_HTTP_CODES>
- *
  * @phpstan-type ResponseHeaders array<string, ResponseHeader>
- *
  * @phpstan-type ResponseHeader string|array<string, string>
- *
  * @phpstan-type ResponseCookies array<string, ResponseCookie>
- *
  * @phpstan-type ResponseCookie array{
  *     'name': string,
  *     'value': string,
@@ -134,7 +127,6 @@ use Minz\Output;
  *         'domain'?: string,
  *     },
  * }
- *
  * @phpstan-type CookieOptions array{
  *     'expires'?: int,
  *     'path'?: string,
@@ -143,9 +135,7 @@ use Minz\Output;
  *     'samesite'?: 'Strict'|'Lax'|'None',
  *     'domain'?: string,
  * }
- *
  * @phpstan-type ResponseGenerator \Generator<int, Response, void, void>
- *
  * @phpstan-type ResponseReturnable Response|ResponseGenerator
  */
 class Response
@@ -280,12 +270,12 @@ class Response
      * $response = \Minz\Response::redirect('home');
      * ```
      *
-     * @param UrlPointer $pointer
+     * @param RouteName $name
      * @param UrlParameters $parameters
      */
-    public static function redirect(string $pointer, array $parameters = []): Response
+    public static function redirect(string $name, array $parameters = []): Response
     {
-        $url = Url::for($pointer, $parameters);
+        $url = Url::for($name, $parameters);
         return self::found($url);
     }
 

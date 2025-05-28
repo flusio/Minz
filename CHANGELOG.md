@@ -12,6 +12,14 @@ The request headers are now set using the `getallheaders()` PHP function in `Req
 For instance, `HTTP_CONTENT_TYPE` must now be fetched using the `Content-Type` key.
 You should fix all your calls to `$request->header(...)`.
 
+The Router has been refactored:
+
+- routes all have a name. If it's not specified, the name defaults to the action value.
+- incidentally, the `uriByPointer()` has been removed since it's now useless.
+- the `routes()` method returns the list of Routes with all the information (name, method, pattern and action)
+- `match()` now returns a Route and no longer returns an `_action_pointer` parameter.
+- incidentally, `Request` no longer has an `_action_pointer` parameter. It has been replaced by the `route()` method which returns more information.
+
 The `Form` and `Validable` classes have been extensively redesigned so they work better together.
 `Form` now uses the `Validable` trait so the `validate` method is provided by the latter.
 However, this broke how the `Validable` trait worked previously.

@@ -9,30 +9,23 @@ namespace Minz;
 /**
  * The Url class provides helper functions to build internal URLs.
  *
- * @phpstan-import-type RoutePointer from Router
+ * @phpstan-type UrlParameters array<string, mixed>
  *
  * @phpstan-import-type RouteName from Router
- *
- * @phpstan-type UrlPointer RoutePointer|RouteName
- *
- * @phpstan-type UrlParameters array<string, mixed>
  */
 class Url
 {
     /**
-     * Return the relative URL corresponding to an action.
+     * Return the relative URL corresponding to a route name.
      *
-     * @param UrlPointer $pointer
+     * @param RouteName $name
      * @param UrlParameters $parameters
      *
      * @throws \Minz\Errors\UrlError
-     *     If router has not been registered
-     * @throws \Minz\Errors\UrlError
-     *     If the action pointer has not be added to the router
-     * @throws \Minz\Errors\UrlError
-     *     If required parameter is missing
+     *     Raised if the router has not been registered, if the name doesn't
+     *     exist, or if a required parameter is missing.
      */
-    public static function for(string $pointer, array $parameters = []): string
+    public static function for(string $name, array $parameters = []): string
     {
         $router = Engine::router();
 
@@ -43,47 +36,28 @@ class Url
         }
 
         try {
-            $uri = $router->uriByName($pointer, $parameters);
+            $uri = $router->uriByName($name, $parameters);
             return self::path() . $uri;
         } catch (Errors\RouteNotFoundError $e) {
-            // Do nothing on purpose
+            throw new Errors\UrlError("{$name} route does not exist in the router.");
         } catch (Errors\RoutingError $e) {
             throw new Errors\UrlError($e->getMessage());
         }
-
-        $methods = Request::VALID_METHODS;
-        foreach ($methods as $method) {
-            try {
-                $uri = $router->uriByPointer($method, $pointer, $parameters);
-                return self::path() . $uri;
-            } catch (Errors\RouteNotFoundError $e) {
-                // Do nothing on purpose
-            } catch (Errors\RoutingError $e) {
-                throw new Errors\UrlError($e->getMessage());
-            }
-        }
-
-        throw new Errors\UrlError(
-            "{$pointer} action pointer or route name does not exist in the router."
-        );
     }
 
     /**
-     * Return the absolute URL corresponding to an action.
+     * Return the absolute URL corresponding to a route name.
      *
-     * @param UrlPointer $pointer
+     * @param RouteName $name
      * @param UrlParameters $parameters
      *
      * @throws \Minz\Errors\UrlError
-     *     If router has not been registered
-     * @throws \Minz\Errors\UrlError
-     *     If the action pointer has not be added to the router
-     * @throws \Minz\Errors\UrlError
-     *     If required parameter is missing
+     *     Raised if the router has not been registered, if the name doesn't
+     *     exist, or if a required parameter is missing.
      */
-    public static function absoluteFor(string $pointer, array $parameters = []): string
+    public static function absoluteFor(string $name, array $parameters = []): string
     {
-        $relative_url = self::for($pointer, $parameters);
+        $relative_url = self::for($name, $parameters);
         return self::baseUrl() . $relative_url;
     }
 

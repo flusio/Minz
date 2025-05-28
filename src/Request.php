@@ -84,6 +84,8 @@ namespace Minz;
  * "_action_pointer" which is the current Router pointer.
  *
  * @phpstan-type RequestMethod value-of<Request::VALID_METHODS>
+ *
+ * @phpstan-import-type Route from Router
  * @phpstan-import-type Parameters from ParameterBag
  */
 class Request
@@ -97,6 +99,9 @@ class Request
     private string $path;
 
     private string $self_uri;
+
+    /** @var Route */
+    private array $route;
 
     public readonly ParameterBag $parameters;
 
@@ -343,6 +348,27 @@ class Request
     public function ip(): string
     {
         return $this->server->getString('REMOTE_ADDR', '');
+    }
+
+    /**
+     * @return Route
+     */
+    public function route(): array
+    {
+        return $this->route;
+    }
+
+    /**
+     * @param Route $route
+     * @param Parameters $parameters
+     */
+    public function setRoute(array $route, array $parameters = []): void
+    {
+        $this->route = $route;
+
+        foreach ($parameters as $name => $value) {
+            $this->parameters->set($name, $value);
+        }
     }
 
     /**
