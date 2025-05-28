@@ -75,15 +75,16 @@ class FormTest extends TestCase
     public function testFormatWithDatetime(): void
     {
         $request = new \Minz\Request('GET', '/', [
-            'param_datetime' => '2024-03-07',
+            'default_field_datetime' => '2024-03-07T12:00',
+            'custom_field_datetime' => '2024-03-07',
         ]);
         $form = new forms\FormWithDatetime();
         $form->handleRequest($request);
 
-        $formatted_datetime = $form->format('param_datetime');
-
-        $this->assertInstanceOf(\DateTimeImmutable::class, $form->param_datetime);
-        $this->assertSame('2024-03-07', $formatted_datetime);
+        $formatted_default_datetime = $form->format('default_field_datetime');
+        $this->assertSame('2024-03-07T12:00', $formatted_default_datetime);
+        $formatted_custom_datetime = $form->format('custom_field_datetime');
+        $this->assertSame('2024-03-07', $formatted_custom_datetime);
     }
 
     public function testValidate(): void

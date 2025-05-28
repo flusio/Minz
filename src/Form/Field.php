@@ -64,7 +64,7 @@ namespace Minz\Form;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Field
 {
-    public const DATETIME_FORMAT = 'Y-m-dTH:i';
+    public const DATETIME_FORMAT = 'Y-m-d\TH:i';
 
     public function __construct(
         /** @var callable-string */
