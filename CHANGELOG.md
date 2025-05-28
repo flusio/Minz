@@ -1,10 +1,10 @@
 # Changelog of Minz
 
-## unreleased
+## 2025-05-28 - 2.0.0
 
 ### Breaking changes
 
-This is a pretty big release.
+This is a big release.
 Here are listed all the changes in a comprehensive way.
 Take your time to upgrade!
 
@@ -69,6 +69,28 @@ There are several consequences to this:
 - The Engine options `not_found_view_pointer` and `internal_server_error_view_pointer` have been renamed to `not_found_template` and `internal_server_error_template`
 - The `ViewPointer` and `ViewVariables` PHPStan types have been moved to `Template\TemplateInterface` and renamed to `ViewName` and `ViewContext`
 - If the template name ends with `.twig`, the output will use Twig templating system to render the view.
+
+### New
+
+- Add Twig as a new template system ([ce1f441](https://github.com/flusio/Minz/commit/ce1f441))
+- Add `BeforeAction` and `AfterAction` controller handlers ([541aeef](https://github.com/flusio/Minz/commit/541aeef))
+- Allow `OPTIONS` as Request method ([31b4fac](https://github.com/flusio/Minz/commit/31b4fac))
+
+### Bug fixes
+
+- Fix the default `Form\Field` datetime format ([24532aa](https://github.com/flusio/Minz/commit/24532aa))
+
+### Improvements
+
+- Redesign Request parameters, headers and cookies ([78e43fb](https://github.com/flusio/Minz/commit/78e43fb))
+- Redesign the Form and the Validable classes ([d076330](https://github.com/flusio/Minz/commit/d076330), [7634289](https://github.com/flusio/Minz/commit/7634289), [1b093ff](https://github.com/flusio/Minz/commit/1b093ff), [27f78cf](https://github.com/flusio/Minz/commit/27f78cf), [306711d](https://github.com/flusio/Minz/commit/306711d))
+- Redesign the CSRF protections ([4925599](https://github.com/flusio/Minz/commit/4925599))
+- Redesign the Router class ([d0cc0b6](https://github.com/flusio/Minz/commit/d0cc0b6), [4e03104](https://github.com/flusio/Minz/commit/4e03104))
+- Initialize Request headers with `getallheaders()` ([99aefb8](https://github.com/flusio/Minz/commit/99aefb8))
+
+### Technical
+
+- Update the dependencies ([3922acb](https://github.com/flusio/Minz/commit/3922acb), [e9e04a1](https://github.com/flusio/Minz/commit/e9e04a1))
 
 ## 2025-04-30 - 1.1.0
 
