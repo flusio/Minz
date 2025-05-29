@@ -28,9 +28,8 @@ use Minz\Response;
  * ```
  *
  * @phpstan-import-type RequestMethod from Request
- * @phpstan-import-type RequestParameters from Request
- * @phpstan-import-type RequestHeaders from Request
  * @phpstan-import-type ResponseReturnable from Response
+ * @phpstan-import-type Parameters from ParameterBag
  *
  * @phpstan-ignore-next-line trait.unused
  */
@@ -73,23 +72,31 @@ trait ApplicationHelper
      * @see \Minz\Request
      *
      * @param RequestMethod $method
-     * @param RequestParameters $parameters
-     * @param RequestHeaders $headers
+     * @param Parameters $parameters
+     * @param Parameters $headers
+     * @param Parameters $cookies
+     * @param Parameters $server
      *
      * @return ResponseReturnable
      *
      * @throws Errors\RuntimeException
      *     Raised if the Application class doesn't exist.
      */
-    public function appRun(string $method, string $uri, array $parameters = [], array $headers = []): mixed
-    {
+    public function appRun(
+        string $method,
+        string $uri,
+        array $parameters = [],
+        array $headers = [],
+        array $cookies = [],
+        array $server = [],
+    ): mixed {
         if (!self::$application) {
             $app_name = \Minz\Configuration::$app_name;
             $application_class_name = "\\{$app_name}\\Application";
             throw new Errors\RuntimeException("{$application_class_name} doesn't exist, or run() is not callable.");
         }
 
-        $request = new Request($method, $uri, $parameters, $headers);
+        $request = new Request($method, $uri, $parameters, $headers, $cookies, $server);
         return self::$application->run($request);
     }
 }
