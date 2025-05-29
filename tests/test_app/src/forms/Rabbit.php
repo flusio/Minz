@@ -23,7 +23,7 @@ class Rabbit extends Form
         return trim($name);
     }
 
-    protected function csrfSessionId(): string
+    public function csrfSessionId(): string
     {
         return '42';
     }

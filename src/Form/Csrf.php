@@ -182,7 +182,7 @@ trait Csrf
      *
      * @return non-empty-string
      */
-    protected function csrfSessionId(): string
+    public function csrfSessionId(): string
     {
         if (!isset($_SESSION['_csrf_session_id'])) {
             $_SESSION['_csrf_session_id'] = \Minz\Random::hex(32);
@@ -204,7 +204,7 @@ trait Csrf
      *
      * @return non-empty-string
      */
-    protected function csrfTokenName(): string
+    public function csrfTokenName(): string
     {
         return static::class;
     }
@@ -216,7 +216,7 @@ trait Csrf
      *
      * @return non-empty-string
      */
-    protected function csrfErrorMessage(): string
+    public function csrfErrorMessage(): string
     {
         return 'The security token is invalid. Please try to submit the form again.';
     }
