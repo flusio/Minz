@@ -1,5 +1,17 @@
 # Changelog of Minz
 
+## 2025-05-29 - 2.0.1
+
+### Improvements
+
+- Set default Origin in `ApplicationHelper::appRun` ([5e8f60c](https://github.com/flusio/Minz/commit/5e8f60c))
+- Provide a CsrfHelper to generate CSRF tokens during tests ([31f5489](https://github.com/flusio/Minz/commit/31f5489))
+- Change the visibility of Csrf methods to public ([31bad4a](https://github.com/flusio/Minz/commit/31bad4a))
+
+### Bug fixes
+
+- Allow to declare cookies and server information in `ApplicationHelper::appRun` ([3f7345a](https://github.com/flusio/Minz/commit/3f7345a))
+
 ## 2025-05-28 - 2.0.0
 
 ### Breaking changes
