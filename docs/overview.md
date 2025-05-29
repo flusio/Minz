@@ -113,18 +113,11 @@ Minz.** You’ll often have to interact with them.
 
 Finally, Minz provides a bunch of helpers and assertions for [PHPUnit](https://phpunit.readthedocs.io/):
 
-- **[`\Minz\Tests\ApplicationHelper`](/src/Tests/ApplicationHelper.php) allows
-  you to execute a request against your application and get its response in a
-  single line of code;**
-- **[`\Minz\Tests\InitializerHelper`](/src/Tests/InitializerHelper.php)
-  reinitializes the database, session and mailer before each tests;**
-- **[`\Minz\Tests\ResponseAsserts`](/src/Tests/ResponseAsserts.php) provides a
-  bunch of assertions to test the response of your application;**
-- [`\Minz\Tests\TimeHelper`](/src/Tests/TimeHelper.php) freezes the time, on
-  the condition that you use the Time class;
-- [`\Minz\Tests\Mailer`](/src/Tests/Mailer.php) catches emails sent by the
-  mailer and allows you to test them with the assertions provided by
-  [`\Minz\Tests\MailerAsserts`](/src/Tests/MailerAsserts.php);
-- [`\Minz\Tests\FilesHelper`](/src/Tests/FilesHelper.php) provides a method to
-  copy files in a temporary directory in order to simulate an upload to your
-  application.
+- **[`\Minz\Tests\ApplicationHelper`](/src/Tests/ApplicationHelper.php) allows you to execute a request against your application and get its response in a single line of code;**
+- **[`\Minz\Tests\InitializerHelper`](/src/Tests/InitializerHelper.php) reinitializes the database, session and mailer before each tests;**
+- **[`\Minz\Tests\ResponseAsserts`](/src/Tests/ResponseAsserts.php) provides a bunch of assertions to test the response of your application;**
+- [`\Minz\Tests\CsrfHelper`](/src/Tests/CsrfHelper.php) helps to generate valid CSRF tokens during tests;
+- [`\Minz\Tests\TimeHelper`](/src/Tests/TimeHelper.php) freezes the time, on the condition that you use the Time class;
+- [`\Minz\Tests\Mailer`](/src/Tests/Mailer.php) catches emails sent by the mailer and allows you to test them with the assertions provided by
+  [`\Minz\Tests\MailerAsserts`](/src/Tests/MailerAsserts.php) provides assertions to tests emails;
+- [`\Minz\Tests\FilesHelper`](/src/Tests/FilesHelper.php) provides a method to copy files in a temporary directory in order to simulate an upload to your application.
