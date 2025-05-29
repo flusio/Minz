@@ -96,6 +96,12 @@ trait ApplicationHelper
             throw new Errors\RuntimeException("{$application_class_name} doesn't exist, or run() is not callable.");
         }
 
+        // Make sure the POST request are "same origin" if Origin is not
+        // specified. This facilitates tests with CSRF checks.
+        if ($method === 'POST' && !isset($headers['Origin'])) {
+            $headers['Origin'] = \Minz\Url::baseUrl();
+        }
+
         $request = new Request($method, $uri, $parameters, $headers, $cookies, $server);
         return self::$application->run($request);
     }
