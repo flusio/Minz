@@ -102,7 +102,14 @@ trait ApplicationHelper
             $headers['Origin'] = \Minz\Url::baseUrl();
         }
 
-        $request = new Request($method, $uri, $parameters, $headers, $cookies, $server);
+        $query = parse_url($uri, PHP_URL_QUERY);
+        $app_parameters = [];
+        if ($query) {
+            parse_str($query, $app_parameters);
+        }
+        $app_parameters = array_merge($app_parameters, $parameters);
+
+        $request = new Request($method, $uri, $app_parameters, $headers, $cookies, $server);
         return self::$application->run($request);
     }
 }
