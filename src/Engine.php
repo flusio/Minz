@@ -251,7 +251,7 @@ class Engine
 
                 $does_handler_apply = array_filter(
                     $error_handlers,
-                    function ($error_handler) use ($error): bool {
+                    function (Controller\ErrorHandler $error_handler) use ($error): bool {
                         return is_a($error, $error_handler->class_error, true);
                     }
                 );

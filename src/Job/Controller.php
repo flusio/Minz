@@ -266,7 +266,7 @@ class Controller
         $date_format = \Minz\Database\Column::DATETIME_FORMAT;
 
         if ($job->args) {
-            $args = array_map(function ($arg): string {
+            $args = array_map(function (mixed $arg): string {
                 return var_export($arg, true);
             }, $job->args);
 

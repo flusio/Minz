@@ -50,7 +50,7 @@ trait MailerAsserts
      */
     public function assertEmailEqualsTo(PHPMailer\PHPMailer $mailer, array $to): void
     {
-        $to_addresses = array_map(function ($address_array) {
+        $to_addresses = array_map(function (array $address_array) {
             return $address_array[0];
         }, $mailer->getToAddresses());
         $this->assertEquals($to, $to_addresses);
@@ -61,7 +61,7 @@ trait MailerAsserts
      */
     public function assertEmailContainsTo(PHPMailer\PHPMailer $mailer, string $to): void
     {
-        $to_addresses = array_map(function ($address_array) {
+        $to_addresses = array_map(function (array $address_array) {
             return $address_array[0];
         }, $mailer->getToAddresses());
         $this->assertContains($to, $to_addresses);
