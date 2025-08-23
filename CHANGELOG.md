@@ -1,5 +1,15 @@
 # Changelog of Minz
 
+## 2025-08-23 - 2.0.2
+
+### Improvements
+
+- Allow to pass parameters via the appRun URI ([6d48add](https://github.com/flusio/Minz/commit/6d48add))
+
+### Technical
+
+- Update the dependencies ([dd3955c](https://github.com/flusio/Minz/commit/dd3955c), [f698143](https://github.com/flusio/Minz/commit/f698143), [96ea093](https://github.com/flusio/Minz/commit/96ea093))
+
 ## 2025-05-29 - 2.0.1
 
 ### Improvements
