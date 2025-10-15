@@ -1,5 +1,13 @@
 # Changelog of Minz
 
+## 2025-10-15 - 2.0.3
+
+### Technical
+
+- Update the dependencies ([83cc9a5](https://github.com/flusio/Minz/commit/83cc9a5), [d135073](https://github.com/flusio/Minz/commit/d135073))
+- Ignore exporting some folders/files on git archive ([4d9967d](https://github.com/flusio/Minz/commit/4d9967d))
+- Adapt assertEmailContainsReplyTo for PHPMailer 6.11 ([8d71917](https://github.com/flusio/Minz/commit/8d71917))
+
 ## 2025-08-23 - 2.0.2
 
 ### Improvements
