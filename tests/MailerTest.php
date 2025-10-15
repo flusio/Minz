@@ -29,6 +29,7 @@ class MailerTest extends TestCase
             ]
         );
         $email->setSubject('The subject');
+        $email->addReplyTo('mary@doe.com');
 
         $this->assertEmailsCount(0);
 
@@ -41,6 +42,7 @@ class MailerTest extends TestCase
         $this->assertEmailSubject($email_sent, 'The subject');
         $this->assertEmailEqualsTo($email_sent, ['joe@doe.com']);
         $this->assertEmailContainsBody($email_sent, 'Pompom');
+        $this->assertEmailContainsReplyTo($email_sent, 'mary@doe.com');
     }
 
     public function testSendClearAddressesBetweenTwoSend(): void

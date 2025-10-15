@@ -72,7 +72,10 @@ trait MailerAsserts
      */
     public function assertEmailContainsReplyTo(PHPMailer\PHPMailer $mailer, string $reply_to): void
     {
-        $this->assertArrayHasKey($reply_to, $mailer->getReplyToAddresses());
+        $reply_to_addresses = array_map(function (array $address_array) {
+            return $address_array[0];
+        }, $mailer->getReplyToAddresses());
+        $this->assertContains($reply_to, $reply_to_addresses);
     }
 
     /**
