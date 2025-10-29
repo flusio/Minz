@@ -8,6 +8,7 @@ use Minz\Database;
 class Friend
 {
     use Database\Recordable;
+    use Database\Resource;
 
     #[Database\Column]
     public int $id;

@@ -8,6 +8,7 @@ use Minz\Database;
 class Rabbit
 {
     use Database\Recordable;
+    use Database\Resource;
 
     #[Database\Column]
     public string $id;

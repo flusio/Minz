@@ -31,23 +31,15 @@ Minz.** You’ll often have to interact with them.
 
 ## Models and database
 
-- **[`\Minz\Database`](/src/Database.php) abstracts the connection to the
-  database,** it acts as a wrapper around the PHP [\PDO class](https://www.php.net/manual/book.pdo.php).
-- **[`\Minz\Database\Recordable`](/src/Database/Recordable.php) provides useful
-  methods to manipulate the models in the database.** It is usable together with
-  the following classes:
-    - [`\Minz\Database\Table`](/src/Database/Table.php) to define the database
-      table of the model;
-    - [`\Minz\Database\Column`](/src/Database/Column.php) to define the
-      database columns of the model;
-    - [`\Minz\Database\Factory`](/src/Database/Factory.php) to easily create
-      models with default values during the tests;
-    - [`\Minz\Database\Helper`](/src/Database/Helper.php) which provides useful
-      methods to the Recordable trait;
-    - [`\Minz\Database\Lockable`](/src/Database/Lockable.php) provides some
-      methods to (un)lock a model;
-- **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the
-  migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
+- **[`\Minz\Database`](/src/Database.php) abstracts the connection to the database,** it acts as a wrapper around the PHP [\PDO class](https://www.php.net/manual/book.pdo.php).
+- **[`\Minz\Database\Recordable`](/src/Database/Recordable.php) provides useful methods to manipulate the models in the database.** It is usable together with the following classes:
+    - [`\Minz\Database\Table`](/src/Database/Table.php) to define the database table of the model;
+    - [`\Minz\Database\Column`](/src/Database/Column.php) to define the database columns of the model;
+    - [`\Minz\Database\Resource`](/src/Database/Resource.php) which provides methods to load easily the model with a Request parameter;
+    - [`\Minz\Database\Factory`](/src/Database/Factory.php) to easily create models with default values during the tests;
+    - [`\Minz\Database\Helper`](/src/Database/Helper.php) which provides useful methods to the Recordable trait;
+    - [`\Minz\Database\Lockable`](/src/Database/Lockable.php) provides some methods to (un)lock a model;
+- **[`\Minz\Migration\Migrator`](/src/Migration/Migrator.php) manages the migrations of your data,** it is used with [`\Minz\Migration\Controller`](/src/Migration/Controller.php);
 - [`\Minz\Translatable`](/src/Translatable.php) to mark a `Validable` message to be translated.
 
 ## Emails and mailers
