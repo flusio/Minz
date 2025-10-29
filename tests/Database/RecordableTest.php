@@ -329,6 +329,30 @@ class RecordableTest extends TestCase
         $this->assertSame('24 rue du Clapier', $friend->address);
     }
 
+    public function testRequire(): void
+    {
+        /** @var int $id */
+        $id = models\Friend::create([
+            'name' => 'Alix',
+        ]);
+
+        $friend = models\Friend::require($id);
+
+        $this->assertSame('Alix', $friend->name);
+    }
+
+    public function testRequireWithUnknownId(): void
+    {
+        $this->expectException(Errors\MissingRecordError::class);
+        $this->expectExceptionMessage("AppTest\\models\\Friend model #42 does not exist");
+
+        models\Friend::create([
+            'name' => 'Alix',
+        ]);
+
+        models\Friend::require(42);
+    }
+
     public function testTake(): void
     {
         /** @var int $id */
@@ -602,8 +626,8 @@ class RecordableTest extends TestCase
 
     public function testReloadFailsIfTheModelHasBeenDeleted(): void
     {
-        $this->expectException(Errors\RuntimeException::class);
-        $this->expectExceptionMessage("AppTest\\models\\Friend model #1 no longer exists");
+        $this->expectException(Errors\MissingRecordError::class);
+        $this->expectExceptionMessage("AppTest\\models\\Friend model #1 does not exist");
 
         $friend = new models\Friend();
         $friend->name = 'Alix';

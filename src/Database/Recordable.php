@@ -182,6 +182,26 @@ trait Recordable
     }
 
     /**
+     * Return a model by its primary key value and fail if it doesn't exist.
+     *
+     * @param ModelPrimaryKey $pk_value
+     *
+     * @throws Errors\MissingRecordError
+     *     If the model doesn't exist.
+     */
+    public static function require(mixed $pk_value): self
+    {
+        $model = self::find($pk_value);
+
+        if ($model === null) {
+            $class = self::class;
+            throw new Errors\MissingRecordError("{$class} model #{$pk_value} does not exist");
+        }
+
+        return $model;
+    }
+
+    /**
      * Return the nth model if it exists.
      */
     public static function take(int $n = 0): ?self
@@ -514,7 +534,7 @@ trait Recordable
      *
      * @throws Errors\LogicException
      *     If the model is not persisted.
-     * @throws Errors\RuntimeException
+     * @throws Errors\MissingRecordError
      *     If the model no longer exists.
      */
     public function reload(): self
@@ -527,14 +547,7 @@ trait Recordable
         }
 
         $pk_value = $this->$pk_column;
-        $model = self::find($pk_value);
-
-        if ($model === null) {
-            $class = self::class;
-            throw new Errors\RuntimeException("{$class} model #{$pk_value} no longer exists");
-        }
-
-        return $model;
+        return self::require($pk_value);
     }
 
     /**
