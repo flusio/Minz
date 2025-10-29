@@ -122,6 +122,41 @@ namespace Minz;
  *         }
  *     }
  *
+ * Form constructor accepts an `$options` parameter. It allows to pass
+ * additional context from the controller to your form.
+ *
+ *     public function new(Request $request): Response
+ *     {
+ *         $user = // load the logged-in user
+ *
+ *         $form = new forms\Article(options: [
+ *             'user' => $user,
+ *         ]);
+ *
+ *         return Response::ok('articles/new.phtml', [
+ *             'form' => $form,
+ *         ]);
+ *     }
+ *
+ * The options can be used in the form with `$this->options` (of ParameterBag
+ * class):
+ *
+ *     use Minz\Form;
+ *
+ *     class Article extends Form
+ *     {
+ *         // ...
+ *
+ *         #[Form\Field]
+ *         public string $category = '';
+ *
+ *         public function availableCategories(): array
+ *         {
+ *             $user = $this->options->get('user');
+ *             return Category::listByUser($user);
+ *         }
+ *     }
+ *
  * Sometimes, you may need to access the request to perform additionnal checks.
  * You can access the request by using the Form\OnHandleRequest attribute on a
  * form method. The method will then be called at the end of `handleRequest()`.
@@ -157,6 +192,7 @@ namespace Minz;
  * }
  *
  * @phpstan-import-type ValidableError from Validable
+ * @phpstan-import-type Parameters from ParameterBag
  */
 class Form
 {
@@ -164,6 +200,8 @@ class Form
 
     /** @var ?T */
     protected ?object $model = null;
+
+    public readonly ParameterBag $options;
 
     /**
      * Initialize a form.
@@ -177,12 +215,18 @@ class Form
      *
      * @param array<string, mixed> $default_values
      * @param ?T $model
+     * @param Parameters $options
      */
-    public function __construct(array $default_values = [], ?object $model = null)
-    {
+    public function __construct(
+        array $default_values = [],
+        ?object $model = null,
+        array $options = [],
+    ) {
         if ($model) {
             $this->model = clone $model;
         }
+
+        $this->options = new ParameterBag($options);
 
         $fields_schema = $this->fieldsSchema();
         foreach ($fields_schema as $field_name => $field_schema) {

@@ -32,6 +32,15 @@ class FormTest extends TestCase
         $this->assertSame('Bugs', $form->name);
     }
 
+    public function testConstructWithOptions(): void
+    {
+        $form = new forms\Rabbit(options: [
+            'foo' => 'bar',
+        ]);
+
+        $this->assertSame('bar', $form->options->get('foo'));
+    }
+
     public function testHandleRequest(): void
     {
         $request = new \Minz\Request('GET', '/', [
