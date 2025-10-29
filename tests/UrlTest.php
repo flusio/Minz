@@ -105,10 +105,8 @@ class UrlTest extends TestCase
 
     public function testForFailsIfRouterIsNotRegistered(): void
     {
-        $this->expectException(Errors\UrlError::class);
-        $this->expectExceptionMessage(
-            'You must init the Engine with a Router before calling this method.'
-        );
+        $this->expectException(Errors\LogicException::class);
+        $this->expectExceptionMessage('The Engine must be initialized with a router.');
 
         Url::for('rabbits#list');
     }

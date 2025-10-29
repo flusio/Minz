@@ -21,19 +21,14 @@ class Url
      * @param RouteName $name
      * @param UrlParameters $parameters
      *
+     * @throws \Minz\Errors\LogicException
+     *     Raised if the router has not been registered.
      * @throws \Minz\Errors\UrlError
-     *     Raised if the router has not been registered, if the name doesn't
-     *     exist, or if a required parameter is missing.
+     *     Raised if the name doesn't exist, or if a required parameter is missing.
      */
     public static function for(string $name, array $parameters = []): string
     {
         $router = Engine::router();
-
-        if (!$router) {
-            throw new Errors\UrlError(
-                'You must init the Engine with a Router before calling this method.'
-            );
-        }
 
         try {
             $uri = $router->uriByName($name, $parameters);

@@ -67,8 +67,16 @@ class Engine
         ];
     }
 
-    public static function router(): ?Router
+    /**
+     * @throws \Minz\Errors\LogicException
+     *     Raised if the router has not been registered.
+     */
+    public static function router(): Router
     {
+        if (self::$router === null) {
+            throw new Errors\LogicException('The Engine must be initialized with a router.');
+        }
+
         return self::$router;
     }
 
