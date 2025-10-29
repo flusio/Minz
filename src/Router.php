@@ -182,6 +182,29 @@ class Router
     }
 
     /**
+     * Return whether the URI is redirectable or not.
+     *
+     * A URI is redirectable if it can be handled by a GET route within the
+     * router. The URI can either be a URL containing the application domain,
+     * or an absolute path.
+     */
+    public function isRedirectable(string $uri): bool
+    {
+        $base_url = \Minz\Url::baseUrl();
+
+        if (str_starts_with($uri, $base_url)) {
+            $uri = substr($uri, strlen($base_url));
+        }
+
+        if (str_starts_with($uri, '/')) {
+            $allowed_methods = $this->allowedMethodsForPath($uri);
+            return in_array('GET', $allowed_methods);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Return an URI by its name. It is generated with the given parameters.
      *
      * @param RouteName $name

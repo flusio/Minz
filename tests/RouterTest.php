@@ -225,6 +225,45 @@ class RouterTest extends TestCase
         $this->assertEquals([], $allowed_methods);
     }
 
+    public function testIsRedirectableWithSupportedPath(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits/new', 'rabbits#new');
+
+        $is_redirectable = $router->isRedirectable('/rabbits/new');
+
+        $this->assertTrue($is_redirectable);
+    }
+
+    public function testIsRedirectableWithNotSupportedPath(): void
+    {
+        $router = new Router();
+
+        $is_redirectable = $router->isRedirectable('/rabbits/new');
+
+        $this->assertFalse($is_redirectable);
+    }
+
+    public function testIsRedirectableWithSupportedUrl(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits/new', 'rabbits#new');
+
+        $is_redirectable = $router->isRedirectable('http://localhost/rabbits/new');
+
+        $this->assertTrue($is_redirectable);
+    }
+
+    public function testIsRedirectableWithNotSupportedUrl(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits/new', 'rabbits#new');
+
+        $is_redirectable = $router->isRedirectable('http://bad.example.com/rabbits/new');
+
+        $this->assertFalse($is_redirectable);
+    }
+
     public function testUriByName(): void
     {
         $router = new Router();
