@@ -282,6 +282,13 @@ class ResponseTest extends TestCase
         $this->assertSame(401, $response->code());
     }
 
+    public function testForbidden(): void
+    {
+        $response = Response::forbidden();
+
+        $this->assertSame(403, $response->code());
+    }
+
     public function testNotFound(): void
     {
         $response = Response::notFound();

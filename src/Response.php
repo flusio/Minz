@@ -322,6 +322,27 @@ class Response
     }
 
     /**
+     * Create a forbidden response (HTTP 403) with an optional Output\Template.
+     *
+     * @see \Minz\Output\Template
+     *
+     * @param ?TemplateName $name
+     * @param TemplateContext $context
+     *
+     * @throws \Minz\Errors\OutputError
+     *     Raised if the template file doesn't exist.
+     */
+    public static function forbidden(?string $name = null, array $context = []): Response
+    {
+        if ($name) {
+            $template_output = new Output\Template($name, $context);
+        } else {
+            $template_output = null;
+        }
+        return new Response(403, $template_output);
+    }
+
+    /**
      * Create a not found response (HTTP 404) with an optional Output\Template.
      *
      * @see \Minz\Output\Template
