@@ -21,7 +21,7 @@
     },
     "require": {
         "php": ">=8.2",
-        "phpmailer/phpmailer": "^6.9",
+        "phpmailer/phpmailer": "^7.0",
         "twig/twig": "^3.21"
     },
     "require-dev": {
