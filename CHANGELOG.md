@@ -1,5 +1,24 @@
 # Changelog of Minz
 
+## 2025-10-31 - 2.1.0
+
+### Features
+
+- Add a `Database\Resource` trait ([5cc1b36](https://github.com/flusio/Minz/commit/5cc1b36))
+- Add a `Recordable::require` method ([3fb2c4e](https://github.com/flusio/Minz/commit/3fb2c4e))
+- Add a `Router::isRedirectable` method ([5e49da2](https://github.com/flusio/Minz/commit/5e49da2))
+- Add a `Response::forbidden` method ([c333f97](https://github.com/flusio/Minz/commit/c333f97))
+- Allow to pass options to Forms ([a666245](https://github.com/flusio/Minz/commit/a666245))
+
+### Improvements
+
+- Always return a router in `Engine::router` ([8f603bc](https://github.com/flusio/Minz/commit/8f603bc))
+
+### Technical
+
+- Upgrade to PHPMailer 7.0 ([eafda35](https://github.com/flusio/Minz/commit/eafda35))
+- Update the dependencies ([f535a5f](https://github.com/flusio/Minz/commit/f535a5f))
+
 ## 2025-10-15 - 2.0.3
 
 ### Technical
