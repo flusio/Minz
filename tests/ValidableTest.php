@@ -8,9 +8,12 @@ namespace Minz;
 
 use PHPUnit\Framework\TestCase;
 use AppTest\models;
+use AppTest\forms;
 
 class ValidableTest extends TestCase
 {
+    use Tests\FilesHelper;
+
     public function testValidate(): void
     {
         $model = new models\ValidableModel();
@@ -269,6 +272,94 @@ class ValidableTest extends TestCase
                 ['unique', '"alix@example.org" is already taken.'],
             ]
         ], $model->errors(format: false));
+    }
+
+    public function testValidateFailsIfFileIsTooLarge(): void
+    {
+        $form = new forms\FormWithFile();
+        $file_filepath = Configuration::$app_path . '/data/empty.pdf';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'file.txt',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+        $form->file = $file;
+
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            'file' => [
+                ['file.max_size', 'File cannot exceed 1KB.'],
+            ]
+        ], $form->errors(format: false));
+    }
+
+    public function testValidateFailsIfFileIsNotUploadedCorrectly(): void
+    {
+        $form = new forms\FormWithFile();
+        $file_filepath = Configuration::$app_path . '/public/file.txt';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'file.txt',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_CANT_WRITE,
+        ]);
+        $form->file = $file;
+
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            'file' => [
+                ['file', 'File cannot be uploaded (error 7).'],
+            ]
+        ], $form->errors(format: false));
+    }
+
+    public function testValidateFailsIfFileExtensionIsIncorrect(): void
+    {
+        $form = new forms\FormWithFile();
+        $file_filepath = Configuration::$app_path . '/public/file.txt';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'file.sql',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+        $form->file = $file;
+
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            'file' => [
+                ['file.type', 'File type must be: TXT.'],
+            ]
+        ], $form->errors(format: false));
+    }
+
+    public function testValidateFailsIfFileMimetypeIsIncorrect(): void
+    {
+        $form = new forms\FormWithFile();
+        $file_filepath = Configuration::$app_path . '/data/unsupported.html';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'file.txt',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+        $form->file = $file;
+
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertEquals([
+            'file' => [
+                ['file.type', 'File type must be: TXT.'],
+            ]
+        ], $form->errors(format: false));
     }
 
     public function testValidateFailsWithMultipleErrors(): void
