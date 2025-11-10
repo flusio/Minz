@@ -12,6 +12,8 @@ use PHPUnit\Framework\TestCase;
 
 class FormTest extends TestCase
 {
+    use Tests\FilesHelper;
+
     public function testConstructWithDefaultValues(): void
     {
         $form = new forms\Rabbit([
@@ -79,6 +81,26 @@ class FormTest extends TestCase
         $form->handleRequest($request);
 
         $this->assertFalse($form->param_bool);
+    }
+
+    public function testHandleRequestWithFile(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $request = new \Minz\Request('GET', '/', [
+            'file' => [
+                'name' => '',
+                'tmp_name' => $tmp_filepath,
+                'error' => UPLOAD_ERR_OK,
+            ],
+        ]);
+        $form = new forms\FormWithFile();
+
+        $form->handleRequest($request);
+
+        $file_content = $form->file->content();
+        $this->assertNotFalse($file_content);
+        $this->assertStringContainsString('FOO=bar', $file_content);
     }
 
     public function testFormatWithDatetime(): void
