@@ -76,6 +76,193 @@ class FileTest extends TestCase
         $this->assertFalse($content);
     }
 
+    public function testExtension(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'empty.pdf',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $extension = $file->extension();
+
+        // Note that the extension is extracted from the name and not tmp_name.
+        $this->assertSame('pdf', $extension);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('errorsProvider')]
+    public function testExtensionReturnsNothingIfInError(int $error): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'empty.pdf',
+            'tmp_name' => $tmp_filepath,
+            'error' => $error,
+        ]);
+
+        $extension = $file->extension();
+
+        $this->assertSame('', $extension);
+    }
+
+    public function testIsExtensionReturnsTrue(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'empty.pdf',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $is_extension = $file->isExtension(['pdf']);
+
+        $this->assertTrue($is_extension);
+    }
+
+    public function testIsExtensionReturnsFalse(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => 'empty.pdf',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $is_extension = $file->isExtension(['png']);
+
+        $this->assertFalse($is_extension);
+    }
+
+    public function testSize(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => '',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+        $expected_file_size = filesize($tmp_filepath);
+
+        $size = $file->size();
+
+        $this->assertSame($expected_file_size, $size);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('errorsProvider')]
+    public function testSizeReturnsZeroIfInError(int $error): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => '',
+            'tmp_name' => $tmp_filepath,
+            'error' => $error,
+        ]);
+
+        $size = $file->size();
+
+        $this->assertSame(0, $size);
+    }
+
+    public function testSizeReturnsZeroIfFileCannotBeRead(): void
+    {
+        $file = new File([
+            'name' => '',
+            'tmp_name' => 'not_a_file_path',
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $size = $file->size();
+
+        $this->assertSame(0, $size);
+    }
+
+    public function testType(): void
+    {
+        $file_filepath = Configuration::$app_path . '/data/empty.pdf';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => '',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $type = $file->type();
+
+        $this->assertSame('application/pdf', $type);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('errorsProvider')]
+    public function testTypeReturnsNothingIfInError(int $error): void
+    {
+        $file_filepath = Configuration::$app_path . '/data/empty.pdf';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => '',
+            'tmp_name' => $tmp_filepath,
+            'error' => $error,
+        ]);
+
+        $type = $file->type();
+
+        $this->assertSame('', $type);
+    }
+
+    public function testTypeReturnsNothingIfFileCannotBeRead(): void
+    {
+        $file = new File([
+            'name' => '',
+            'tmp_name' => 'not_a_file_path',
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $type = $file->type();
+
+        $this->assertSame('', $type);
+    }
+
+    public function testIsType(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => '',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $result = $file->isType([
+            'text/plain',
+            'text/html',
+        ]);
+
+        $this->assertTrue($result);
+    }
+
+    public function testIsTypeReturnsFalseIfWrongType(): void
+    {
+        $file_filepath = Configuration::$app_path . '/dotenv';
+        $tmp_filepath = $this->tmpCopyFile($file_filepath);
+        $file = new File([
+            'name' => '',
+            'tmp_name' => $tmp_filepath,
+            'error' => UPLOAD_ERR_OK,
+        ]);
+
+        $result = $file->isType([
+            'text/html',
+            'image/jpeg',
+        ]);
+
+        $this->assertFalse($result);
+    }
+
     public function testMove(): void
     {
         $file_filepath = Configuration::$app_path . '/dotenv';
@@ -180,42 +367,6 @@ class FileTest extends TestCase
         ]);
 
         $result = $file->isTooLarge();
-
-        $this->assertFalse($result);
-    }
-
-    public function testIsType(): void
-    {
-        $file_filepath = Configuration::$app_path . '/dotenv';
-        $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $file = new File([
-            'name' => '',
-            'tmp_name' => $tmp_filepath,
-            'error' => UPLOAD_ERR_OK,
-        ]);
-
-        $result = $file->isType([
-            'text/plain',
-            'text/html',
-        ]);
-
-        $this->assertTrue($result);
-    }
-
-    public function testIsTypeReturnsFalseIfWrongType(): void
-    {
-        $file_filepath = Configuration::$app_path . '/dotenv';
-        $tmp_filepath = $this->tmpCopyFile($file_filepath);
-        $file = new File([
-            'name' => '',
-            'tmp_name' => $tmp_filepath,
-            'error' => UPLOAD_ERR_OK,
-        ]);
-
-        $result = $file->isType([
-            'text/html',
-            'image/jpeg',
-        ]);
 
         $this->assertFalse($result);
     }

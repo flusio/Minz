@@ -59,16 +59,89 @@ class File
 
     /**
      * Return the content of the file, or false if there is an error.
-     *
-     * @return string|false
      */
-    public function content(): mixed
+    public function content(): string|false
     {
         if ($this->error) {
             return false;
         }
 
         return @file_get_contents($this->filepath);
+    }
+
+    /**
+     * Return the extension of the file.
+     *
+     * It returns an empty string if the file is in error.
+     */
+    public function extension(): string
+    {
+        if ($this->error) {
+            return '';
+        }
+
+        $basename = basename($this->source_name);
+        return strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * Return whether the file extension is one of given extensions.
+     *
+     * @param string[] $extensions
+     */
+    public function isExtension(array $extensions): bool
+    {
+        return in_array($this->extension(), $extensions);
+    }
+
+    /**
+     * Return the size of the file.
+     *
+     * It returns 0 if the file is in error.
+     */
+    public function size(): int
+    {
+        if ($this->error) {
+            return 0;
+        }
+
+        $size = @filesize($this->filepath);
+
+        if ($size === false) {
+            return 0;
+        }
+
+        return $size;
+    }
+
+    /**
+     * Return the mime type of the file.
+     *
+     * It returns an empty string if the file is in error.
+     */
+    public function type(): string
+    {
+        if ($this->error) {
+            return '';
+        }
+
+        $type = @mime_content_type($this->filepath);
+
+        if ($type === false) {
+            return '';
+        }
+
+        return $type;
+    }
+
+    /**
+     * Return whether the file is one of the given types.
+     *
+     * @param string[] $mime_types
+     */
+    public function isType(array $mime_types): bool
+    {
+        return in_array($this->type(), $mime_types);
     }
 
     /**
@@ -105,16 +178,5 @@ class File
             $this->error === UPLOAD_ERR_INI_SIZE ||
             $this->error === UPLOAD_ERR_FORM_SIZE
         );
-    }
-
-    /**
-     * Return whether the file is one of the given types.
-     *
-     * @param string[] $mime_types
-     */
-    public function isType(array $mime_types): bool
-    {
-        $current_mime_type = mime_content_type($this->filepath);
-        return in_array($current_mime_type, $mime_types);
     }
 }
