@@ -353,6 +353,33 @@ class RecordableTest extends TestCase
         models\Friend::require(42);
     }
 
+    public function testRequireBy(): void
+    {
+        models\Friend::create([
+            'name' => 'Alix',
+        ]);
+
+        $friend = models\Friend::requireBy([
+            'name' => 'Alix',
+        ]);
+
+        $this->assertSame('Alix', $friend->name);
+    }
+
+    public function testRequireByWithNoMatchingCriteria(): void
+    {
+        $this->expectException(Errors\MissingRecordError::class);
+        $this->expectExceptionMessage("No AppTest\\models\\Friend model matching criteria");
+
+        models\Friend::create([
+            'name' => 'Alix',
+        ]);
+
+        models\Friend::requireBy([
+            'name' => 'Benedict',
+        ]);
+    }
+
     public function testTake(): void
     {
         /** @var int $id */

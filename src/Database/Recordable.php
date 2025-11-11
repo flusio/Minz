@@ -202,6 +202,26 @@ trait Recordable
     }
 
     /**
+     * Return a model by criteria and fail if it doesn't exist.
+     *
+     * @param DatabaseCriteria $criteria
+     *
+     * @throws Errors\MissingRecordError
+     *     If the model doesn't exist.
+     */
+    public static function requireBy(array $criteria): self
+    {
+        $model = self::findBy($criteria);
+
+        if ($model === null) {
+            $class = self::class;
+            throw new Errors\MissingRecordError("No {$class} model matching criteria");
+        }
+
+        return $model;
+    }
+
+    /**
      * Return the nth model if it exists.
      */
     public static function take(int $n = 0): ?self
