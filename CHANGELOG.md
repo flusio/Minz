@@ -1,5 +1,14 @@
 # Changelog of Minz
 
+## 2025-11-11 - 2.2.0
+
+### Features
+
+- Allow Minz File as part of Forms ([d090bf4](https://github.com/flusio/Minz/commit/d090bf4))
+- Add a `Validable\File` class to validate File attributes ([bacb6dc](https://github.com/flusio/Minz/commit/bacb6dc))
+- Add more methods to the File class ([10f9533](https://github.com/flusio/Minz/commit/10f9533))
+- Add a `Recordable::requireBy` method ([d5717b2](https://github.com/flusio/Minz/commit/d5717b2))
+
 ## 2025-10-31 - 2.1.0
 
 ### Features
