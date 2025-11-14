@@ -264,6 +264,26 @@ class RouterTest extends TestCase
         $this->assertFalse($is_redirectable);
     }
 
+    public function testIsRedirectableWithQueryPart(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits/new', 'rabbits#new');
+
+        $is_redirectable = $router->isRedirectable('/rabbits/new?foo=bar');
+
+        $this->assertTrue($is_redirectable);
+    }
+
+    public function testIsRedirectableWithFragmentPart(): void
+    {
+        $router = new Router();
+        $router->addRoute('GET', '/rabbits/new', 'rabbits#new');
+
+        $is_redirectable = $router->isRedirectable('/rabbits/new#foo');
+
+        $this->assertTrue($is_redirectable);
+    }
+
     public function testUriByName(): void
     {
         $router = new Router();

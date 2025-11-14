@@ -187,6 +187,8 @@ class Router
      * A URI is redirectable if it can be handled by a GET route within the
      * router. The URI can either be a URL containing the application domain,
      * or an absolute path.
+     *
+     * The ?query and #fragment parts, if any, are ignored.
      */
     public function isRedirectable(string $uri): bool
     {
@@ -196,12 +198,22 @@ class Router
             $uri = substr($uri, strlen($base_url));
         }
 
-        if (str_starts_with($uri, '/')) {
-            $allowed_methods = $this->allowedMethodsForPath($uri);
-            return in_array('GET', $allowed_methods);
-        } else {
+        if (!str_starts_with($uri, '/')) {
             return false;
         }
+
+        $position_hash = strpos($uri, '#');
+        if ($position_hash !== false) {
+            $uri = substr($uri, 0, $position_hash);
+        }
+
+        $position_query = strpos($uri, '?');
+        if ($position_query !== false) {
+            $uri = substr($uri, 0, $position_query);
+        }
+
+        $allowed_methods = $this->allowedMethodsForPath($uri);
+        return in_array('GET', $allowed_methods);
     }
 
     /**
