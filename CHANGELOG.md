@@ -1,5 +1,9 @@
 # Changelog of Minz
 
+## 2025-11-14 - 2.2.1
+
+- Support query and fragment parts in `Router::isRedirectable` ([a72d2ec](https://github.com/flusio/Minz/commit/a72d2ec))
+
 ## 2025-11-11 - 2.2.0
 
 ### Features
