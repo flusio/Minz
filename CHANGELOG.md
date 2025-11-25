@@ -1,6 +1,14 @@
 # Changelog of Minz
 
+## 2025-11-25 - 2.3.0
+
+### Tests
+
+- Don't reset database in InitializerHelper ([a9c3ae2](https://github.com/flusio/Minz/commit/a9c3ae2))
+
 ## 2025-11-14 - 2.2.1
+
+### Bug fixes
 
 - Support query and fragment parts in `Router::isRedirectable` ([a72d2ec](https://github.com/flusio/Minz/commit/a72d2ec))
 
