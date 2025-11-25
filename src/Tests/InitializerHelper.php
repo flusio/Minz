@@ -16,26 +16,6 @@ use Minz\Errors;
  */
 trait InitializerHelper
 {
-    #[\PHPUnit\Framework\Attributes\BeforeClass]
-    public static function initDatabase(): void
-    {
-        if (!\Minz\Configuration::$database) {
-            return;
-        }
-
-        $schema_path = \Minz\Configuration::$schema_path;
-        $schema = @file_get_contents($schema_path);
-
-        if ($schema === false) {
-            throw new Errors\RuntimeException("SQL schema under {$schema_path} cannot be read.");
-        }
-
-        \Minz\Database::reset();
-
-        $database = \Minz\Database::get();
-        $database->exec($schema);
-    }
-
     #[\PHPUnit\Framework\Attributes\Before]
     public function beginDatabaseTransaction(): void
     {
