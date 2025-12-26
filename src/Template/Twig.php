@@ -50,7 +50,17 @@ class Twig implements TemplateInterface
      */
     public static function addExtension(\Twig\Extension\ExtensionInterface $extension): void
     {
-        self::twig()->addExtension($extension);
+        $twig = self::twig();
+
+        if ($extension instanceof \Twig\Extension\AttributeExtension) {
+            $extension_class = $extension->getClass();
+        } else {
+            $extension_class = $extension::class;
+        }
+
+        if (!$twig->hasExtension($extension_class)) {
+            self::twig()->addExtension($extension);
+        }
     }
 
     /**

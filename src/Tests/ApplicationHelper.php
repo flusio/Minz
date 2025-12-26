@@ -51,10 +51,6 @@ trait ApplicationHelper
     #[\PHPUnit\Framework\Attributes\BeforeClass]
     public static function loadApplication(): void
     {
-        // This avoids to register extensions multiple times (normally done in
-        // the Application class constructor) as it would fail.
-        \Minz\Template\Twig::reset();
-
         $app_name = \Minz\Configuration::$app_name;
         $application_class_name = "\\{$app_name}\\Application";
         try {
