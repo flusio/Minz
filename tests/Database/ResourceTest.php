@@ -63,6 +63,21 @@ class ResourceTest extends TestCase
         $this->assertNull($friend);
     }
 
+    public function testLoadFromRequestWithInvalidParameterType(): void
+    {
+        /** @var int $id */
+        $id = models\Friend::create([
+            'name' => 'Alix',
+        ]);
+        $request = new Request('GET', '/', parameters: [
+            'id' => 'foo',
+        ]);
+
+        $friend = models\Friend::loadFromRequest($request);
+
+        $this->assertNull($friend);
+    }
+
     public function testRequireFromRequest(): void
     {
         /** @var int $id */
@@ -81,7 +96,7 @@ class ResourceTest extends TestCase
     public function testRequireFromRequestWithUnknownId(): void
     {
         $this->expectException(Errors\MissingRecordError::class);
-        $this->expectExceptionMessage("AppTest\\models\\Friend model #42 does not exist");
+        $this->expectExceptionMessage("No AppTest\\models\\Friend model matching 'id' request parameter");
 
         /** @var int $id */
         $id = models\Friend::create([
@@ -89,6 +104,22 @@ class ResourceTest extends TestCase
         ]);
         $request = new Request('GET', '/', parameters: [
             'id' => 42,
+        ]);
+
+        models\Friend::requireFromRequest($request);
+    }
+
+    public function testRequireFromRequestWithInvalidParameterType(): void
+    {
+        $this->expectException(Errors\MissingRecordError::class);
+        $this->expectExceptionMessage("No AppTest\\models\\Friend model matching 'id' request parameter");
+
+        /** @var int $id */
+        $id = models\Friend::create([
+            'name' => 'Alix',
+        ]);
+        $request = new Request('GET', '/', parameters: [
+            'id' => 'foo',
         ]);
 
         models\Friend::requireFromRequest($request);

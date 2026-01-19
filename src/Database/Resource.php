@@ -6,6 +6,7 @@
 
 namespace Minz\Database;
 
+use Minz\Errors;
 use Minz\Request;
 
 /**
@@ -53,7 +54,23 @@ trait Resource
      */
     public static function loadFromRequest(Request $request, string $parameter = 'id'): ?self
     {
-        $pk_value = $request->parameters->getString($parameter, '');
+        $pk_column = self::primaryKeyColumn();
+        $column_declarations = self::databaseColumns();
+        $pk_column_declaration = $column_declarations[$pk_column];
+        $pk_type = $pk_column_declaration['type'];
+
+        if ($pk_type === 'int') {
+            $pk_value = $request->parameters->getInteger($parameter);
+        } elseif ($pk_type === 'string') {
+            $pk_value = $request->parameters->getString($parameter);
+        } else {
+            $pk_value = null;
+        }
+
+        if ($pk_value === null) {
+            return null;
+        }
+
         return self::find($pk_value);
     }
 
@@ -61,12 +78,18 @@ trait Resource
      * Return a Recordable model by using a request parameter as primary key
      * value, or fail if none is found.
      *
-     * @throws \Minz\Errors\MissingRecordError
+     * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
      */
     public static function requireFromRequest(Request $request, string $parameter = 'id'): self
     {
-        $pk_value = $request->parameters->getString($parameter, '');
-        return self::require($pk_value);
+        $model = self::loadFromRequest($request, $parameter);
+
+        if ($model === null) {
+            $class = self::class;
+            throw new Errors\MissingRecordError("No {$class} model matching '{$parameter}' request parameter.");
+        }
+
+        return $model;
     }
 }
