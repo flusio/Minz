@@ -1,5 +1,20 @@
 # Changelog of Minz
 
+## 2026-01-21 - 2.3.1
+
+### Features
+
+- Make sure to not add Twig extensions multiple times ([0b4dd3a](https://github.com/flusio/Minz/commit/0b4dd3a))
+
+### Bug fixes
+
+- Reset Twig instance during tests ([fe0f648](https://github.com/flusio/Minz/commit/fe0f648))
+- Handle wrong parameter type in Resource methods ([4011e92](https://github.com/flusio/Minz/commit/4011e92))
+
+### Maintenance
+
+- Update the dependencies ([4dbcba1](https://github.com/flusio/Minz/commit/4dbcba1), [50b0165](https://github.com/flusio/Minz/commit/50b0165))
+
 ## 2025-11-25 - 2.3.0
 
 ### Tests
