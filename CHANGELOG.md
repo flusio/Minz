@@ -1,5 +1,12 @@
 # Changelog of Minz
 
+## 2026-03-09 - 2.3.2
+
+### Maintenance
+
+- Update the dependencies ([70180ce](https://github.com/flusio/Minz/commit/70180ce))
+- Update the copyright year in file headers ([2930e92](https://github.com/flusio/Minz/commit/2930e92))
+
 ## 2026-01-21 - 2.3.1
 
 ### Features
