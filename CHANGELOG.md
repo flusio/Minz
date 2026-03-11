@@ -1,5 +1,11 @@
 # Changelog of Minz
 
+## 2026-03-11 - 2.3.3
+
+### Bug fixes
+
+- Use current locale to format dates ([19e6f98](https://github.com/flusio/Minz/commit/19e6f98))
+
 ## 2026-03-09 - 2.3.2
 
 ### Maintenance
