@@ -94,6 +94,20 @@ class TwigExtension
         string $format = 'EEEE d MMMM',
         ?string $locale = null
     ): string {
+        if ($locale === null) {
+            $default_locale = setlocale(LC_ALL, '0');
+
+            if ($default_locale !== false) {
+                $dot_position = strpos($default_locale, '.');
+
+                if ($dot_position !== false) {
+                    $locale = substr($default_locale, 0, $dot_position);
+                } else {
+                    $locale = $default_locale;
+                }
+            }
+        }
+
         $formatter = new \IntlDateFormatter(
             $locale,
             \IntlDateFormatter::FULL,
