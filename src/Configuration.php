@@ -86,7 +86,7 @@ namespace Minz;
  *     'username': ?string,
  *     'password': ?string,
  *     'options': mixed[],
- *     'type': 'sqlite'|'pgsql',
+ *     'type': value-of<self::VALID_DATABASE_TYPES>,
  *     'host': ?string,
  *     'port': ?int,
  *     'dbname': ?string,
@@ -94,7 +94,7 @@ namespace Minz;
  * }
  *
  * @phpstan-type ConfigurationMailer array{
- *     'type': 'mail'|'smtp'|'test',
+ *     'type': value-of<self::VALID_MAILER_TYPES>,
  *     'from': string,
  *     'debug': int,
  *     'smtp'?: array{
@@ -102,10 +102,10 @@ namespace Minz;
  *         'host': string,
  *         'port': int,
  *         'auth': bool,
- *         'auth_type': 'CRAM-MD5'|'LOGIN'|'PLAIN'|'XOAUTH2'|'',
+ *         'auth_type': value-of<self::VALID_MAILER_AUTH_TYPE>,
  *         'username': string,
  *         'password': string,
- *         'secure': 'ssl'|'tls'|'',
+ *         'secure': value-of<self::VALID_MAILER_SECURE>,
  *     },
  * }
  *
@@ -125,6 +125,10 @@ class Configuration
     private const VALID_DATABASE_TYPES = ['sqlite', 'pgsql'];
 
     private const VALID_MAILER_TYPES = ['mail', 'smtp', 'test'];
+
+    private const VALID_MAILER_AUTH_TYPE = ['CRAM-MD5', 'LOGIN', 'PLAIN', 'XOAUTH2', ''];
+
+    private const VALID_MAILER_SECURE = ['ssl', 'tls', ''];
 
     private const VALID_JOBS_ADAPTERS = ['database', 'test'];
 
@@ -452,6 +456,10 @@ class Configuration
             );
         }
 
+        if (!is_string($path)) {
+            $path = '/';
+        }
+
         if (!is_int($port)) {
             $port = $protocol === 'https' ? 443 : 80;
         }
@@ -501,28 +509,38 @@ class Configuration
         $info_from_dsn = self::extractDsnInfo($dsn);
         $database = array_merge($database, $info_from_dsn);
 
-        $type = $database['type'] ?? '';
+        $database_params = new ParameterBag($database);
+
+        $type = $database_params->getString('type', '');
 
         if (!in_array($type, self::VALID_DATABASE_TYPES, true)) {
             throw new Errors\ConfigurationError(
-                "{$database['type']} database is not supported."
+                "{$type} database is not supported."
             );
         }
 
+        $username = $database_params->getString('username');
+        $password = $database_params->getString('password');
+        $options = $database_params->getArray('options');
+        $host = $database_params->getString('host');
+        $port = $database_params->getInteger('port');
+        $dbname = $database_params->getString('dbname');
+        $path = $database_params->getString('path');
+
         if ($type === 'pgsql') {
-            if (!isset($database['host'])) {
+            if ($host === null) {
                 throw new Errors\ConfigurationError(
                     'pgsql connection requires a `host` key, check your dsn string.'
                 );
             }
 
-            if (!isset($database['port'])) {
+            if ($port === null) {
                 throw new Errors\ConfigurationError(
                     'pgsql connection requires a `port` key, check your dsn string.'
                 );
             }
 
-            if (!isset($database['dbname'])) {
+            if ($dbname === null) {
                 throw new Errors\ConfigurationError(
                     'pgsql connection requires a `dbname` key, check your dsn string.'
                 );
@@ -532,13 +550,13 @@ class Configuration
         return [
             'dsn' => $dsn,
             'type' => $type,
-            'username' => $database['username'] ?? null,
-            'password' => $database['password'] ?? null,
-            'options' => $database['options'] ?? [],
-            'host' => $database['host'] ?? null,
-            'port' => $database['port'] ?? null,
-            'dbname' => $database['dbname'] ?? null,
-            'path' => $database['path'] ?? null,
+            'username' => $username,
+            'password' => $password,
+            'options' => $options,
+            'host' => $host,
+            'port' => $port,
+            'dbname' => $dbname,
+            'path' => $path,
         ];
     }
 
@@ -593,9 +611,15 @@ class Configuration
             );
         }
 
-        $type = $mailer['type'] ?? '';
+        $mailer = array_filter($mailer, function ($key): bool {
+            return is_string($key);
+        }, mode: ARRAY_FILTER_USE_KEY);
 
-        if (!is_string($type) || !$type) {
+        $mailer_params = new ParameterBag($mailer);
+
+        $type = $mailer_params->getString('type');
+
+        if (!$type) {
             $type = 'mail';
         }
 
@@ -605,20 +629,32 @@ class Configuration
 
         $clean_mailer = [
             'type' => $type,
-            'from' => $mailer['from'] ?? 'root@localhost',
+            'from' => $mailer_params->getString('from', 'root@localhost'),
             'debug' => $environment === 'development' ? 2 : 0,
         ];
 
         if ($type === 'smtp') {
+            $smtp_params = new ParameterBag($mailer_params->getArray('smtp'));
+
+            $auth_type = $smtp_params->getString('auth_type', '');
+            if (!in_array($auth_type, self::VALID_MAILER_AUTH_TYPE)) {
+                $auth_type = '';
+            }
+
+            $secure = $smtp_params->getString('secure', '');
+            if (!in_array($secure, self::VALID_MAILER_SECURE)) {
+                $secure = '';
+            }
+
             $clean_mailer['smtp'] = [
-                'domain' => $mailer['smtp']['domain'] ?? '',
-                'host' => $mailer['smtp']['host'] ?? 'localhost',
-                'port' => $mailer['smtp']['port'] ?? 25,
-                'auth' => $mailer['smtp']['auth'] ?? false,
-                'auth_type' => $mailer['smtp']['auth_type'] ?? '',
-                'username' => $mailer['smtp']['username'] ?? '',
-                'password' => $mailer['smtp']['password'] ?? '',
-                'secure' => $mailer['smtp']['secure'] ?? '',
+                'domain' => $smtp_params->getString('domain', ''),
+                'host' => $smtp_params->getString('host', 'localhost'),
+                'port' => $smtp_params->getInteger('port', 25),
+                'auth' => $smtp_params->getBoolean('auth'),
+                'auth_type' => $auth_type,
+                'username' => $smtp_params->getString('username', ''),
+                'password' => $smtp_params->getString('password', ''),
+                'secure' => $secure,
             ];
         }
 

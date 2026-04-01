@@ -11,13 +11,13 @@ namespace Minz;
  */
 class ParameterBag
 {
-    /** @var array<string, mixed> */
+    /** @var Parameters */
     protected array $parameters = [];
 
     protected bool $case_sensitive = true;
 
     /**
-     * @param array<string, mixed> $parameters
+     * @param Parameters $parameters
      */
     public function __construct(
         array $parameters = [],

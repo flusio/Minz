@@ -329,6 +329,8 @@ class Router
     {
         $uri_elements = [];
 
+        $parameter_bag = new ParameterBag($parameters);
+
         $pattern_elements = explode('/', $pattern);
         foreach ($pattern_elements as $pattern_element) {
             if (!$pattern_element) {
@@ -344,7 +346,10 @@ class Router
                     );
                 }
 
-                $uri_elements[] = $parameters[$variable];
+                $uri_elements[] = $parameter_bag->getString($variable, '');
+
+                // Remove the parameter from the list as the unused parameters
+                // are added to the query string later.
                 unset($parameters[$variable]);
             } else {
                 $uri_elements[] = $pattern_element;
