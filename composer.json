@@ -19,6 +19,11 @@
             "AppTest\\": "tests/test_app/src/"
         }
     },
+    "config": {
+        "platform": {
+          "php": "8.2"
+        }
+    },
     "require": {
         "php": ">=8.2",
         "phpmailer/phpmailer": "^7.0",
