@@ -84,12 +84,15 @@ class Twig implements TemplateInterface
     {
         if (!self::$twig_instance) {
             $app_path = \Minz\Configuration::$app_path;
+            $environment = \Minz\Configuration::$environment;
             $views_path = "{$app_path}/src/views";
             $loader = new \Twig\Loader\FilesystemLoader($views_path);
 
             self::$twig_instance = new \Twig\Environment($loader, [
+                'auto_reload' => $environment !== 'production',
                 'cache' => \Minz\Configuration::$tmp_path . '/twig',
                 'strict_variables' => true,
+                'use_yield' => true,
             ]);
 
             $extension = new \Twig\Extension\AttributeExtension(TwigExtension::class);
