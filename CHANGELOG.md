@@ -1,5 +1,17 @@
 # Changelog of Minz
 
+## 2026-04-22 - 2.3.4
+
+### Bug fixes
+
+- Enable Twig autoreload in development ([91c95b4](https://github.com/flusio/Minz/commit/91c95b4))
+
+### Maintenance
+
+- Enable tests on PHP 8.5 ([0378858](https://github.com/flusio/Minz/commit/0378858))
+- Update the dependencies ([6c46016](https://github.com/flusio/Minz/commit/6c46016), [6bec7cf](https://github.com/flusio/Minz/commit/6bec7cf))
+- Fix PHPStan errors ([6ab33b4](https://github.com/flusio/Minz/commit/6ab33b4))
+
 ## 2026-03-11 - 2.3.3
 
 ### Bug fixes
