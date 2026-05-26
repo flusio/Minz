@@ -1,5 +1,11 @@
 # Changelog of Minz
 
+## 2026-05-26 - 2.3.5
+
+### Security/maintenance
+
+- Update the dependencies ([943e7d9](https://github.com/flusio/Minz/commit/943e7d9), [09cef86](https://github.com/flusio/Minz/commit/09cef86)): in particular, Twig has been updated to [3.26.0](https://github.com/twigphp/Twig/releases/tag/v3.26.0) which fixes a lot of security issues (mainly related to the sandbox)
+
 ## 2026-04-22 - 2.3.4
 
 ### Bug fixes
