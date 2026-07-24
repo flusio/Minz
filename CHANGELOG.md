@@ -1,5 +1,11 @@
 # Changelog of Minz
 
+## 2026-07-24 - 2.3.6
+
+### Security/maintenance
+
+- Update the dependencies ([1e480af](https://github.com/flusio/Minz/commit/1e480af))
+
 ## 2026-05-26 - 2.3.5
 
 ### Security/maintenance
