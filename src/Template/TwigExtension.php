@@ -95,7 +95,7 @@ class TwigExtension
         ?string $locale = null
     ): string {
         if ($locale === null) {
-            $default_locale = setlocale(LC_ALL, '0');
+            $default_locale = setlocale(LC_TIME, '0');
 
             if ($default_locale !== false) {
                 $dot_position = strpos($default_locale, '.');
