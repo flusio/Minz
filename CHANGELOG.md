@@ -1,5 +1,15 @@
 # Changelog of Minz
 
+## 2026-10-28 - 2.3.7
+
+### Bug fixes
+
+- Use `LC_TIME` locale to format dates ([334af86](https://github.com/flusio/Minz/commit/334af86))
+
+### Maintenance
+
+- Update the dependencies ([19e38d9](https://github.com/flusio/Minz/commit/19e38d9))
+
 ## 2026-07-24 - 2.3.6
 
 ### Security/maintenance
