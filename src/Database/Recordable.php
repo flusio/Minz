@@ -98,7 +98,7 @@ trait Recordable
     /**
      * Return a list of all the models from the database.
      *
-     * @return self[]
+     * @return static[]
      */
     public static function listAll(?string $order_by = null): array
     {
@@ -110,7 +110,7 @@ trait Recordable
      *
      * @param DatabaseCriteria $criteria
      *
-     * @return self[]
+     * @return static[]
      */
     public static function listBy(array $criteria, ?string $order_by = null): array
     {
@@ -143,7 +143,7 @@ trait Recordable
      *
      * @param ModelPrimaryKey $pk_value
      */
-    public static function find(mixed $pk_value): ?self
+    public static function find(mixed $pk_value): ?static
     {
         $pk_column = self::primaryKeyColumn();
         return self::findBy([$pk_column => $pk_value]);
@@ -156,7 +156,7 @@ trait Recordable
      *
      * @param DatabaseCriteria $criteria
      */
-    public static function findBy(array $criteria): ?self
+    public static function findBy(array $criteria): ?static
     {
         $table_name = self::tableName();
         list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
@@ -191,7 +191,7 @@ trait Recordable
      * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
      */
-    public static function require(mixed $pk_value): self
+    public static function require(mixed $pk_value): static
     {
         $model = self::find($pk_value);
 
@@ -211,7 +211,7 @@ trait Recordable
      * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
      */
-    public static function requireBy(array $criteria): self
+    public static function requireBy(array $criteria): static
     {
         $model = self::findBy($criteria);
 
@@ -226,7 +226,7 @@ trait Recordable
     /**
      * Return the nth model if it exists.
      */
-    public static function take(int $n = 0): ?self
+    public static function take(int $n = 0): ?static
     {
         $table_name = self::tableName();
         list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, []);
@@ -401,7 +401,7 @@ trait Recordable
      * @param DatabaseCriteria $criteria
      * @param ModelValues $values_for_create
      */
-    public static function findOrCreateBy(array $criteria, array $values_for_create = []): self
+    public static function findOrCreateBy(array $criteria, array $values_for_create = []): static
     {
         $model = self::findBy($criteria);
 
@@ -417,7 +417,7 @@ trait Recordable
             $class_name = $inheritance->resolveClass(static::class, $values[$inheritance->column] ?? null);
 
             if ($class_name !== static::class) {
-                /** @var self */
+                /** @var static */
                 return $class_name::findOrCreateBy($criteria, $values_for_create);
             }
         }
@@ -612,7 +612,7 @@ trait Recordable
      * @throws Errors\MissingRecordError
      *     If the model no longer exists.
      */
-    public function reload(): self
+    public function reload(): static
     {
         $pk_column = self::primaryKeyColumn();
 
@@ -735,7 +735,7 @@ trait Recordable
      *
      * @param DatabaseValuesUnsafe $row
      */
-    public static function fromDatabaseRow(array $row): self
+    public static function fromDatabaseRow(array $row): static
     {
         $inheritance = Inheritance::fromClass(static::class);
 
@@ -743,7 +743,7 @@ trait Recordable
             $class_name = $inheritance->resolveClass(static::class, $row[$inheritance->column] ?? null);
 
             if ($class_name !== static::class) {
-                /** @var self */
+                /** @var static */
                 return $class_name::fromDatabaseRow($row);
             }
 
@@ -769,7 +769,7 @@ trait Recordable
      *
      * @param DatabaseValuesUnsafe[] $rows
      *
-     * @return self[]
+     * @return static[]
      */
     public static function fromDatabaseRows(array $rows): array
     {

@@ -52,7 +52,7 @@ trait Resource
      * Return a Recordable model by using a request parameter as primary key
      * value, if any.
      */
-    public static function loadFromRequest(Request $request, string $parameter = 'id'): ?self
+    public static function loadFromRequest(Request $request, string $parameter = 'id'): ?static
     {
         $pk_column = self::primaryKeyColumn();
         $column_declarations = self::databaseColumns();
@@ -81,7 +81,7 @@ trait Resource
      * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
      */
-    public static function requireFromRequest(Request $request, string $parameter = 'id'): self
+    public static function requireFromRequest(Request $request, string $parameter = 'id'): static
     {
         $model = self::loadFromRequest($request, $parameter);
 
