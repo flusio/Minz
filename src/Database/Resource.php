@@ -51,6 +51,8 @@ trait Resource
     /**
      * Return a Recordable model by using a request parameter as primary key
      * value, if any.
+     *
+     * @phpstan-impure
      */
     public static function loadFromRequest(Request $request, string $parameter = 'id'): ?static
     {
@@ -80,6 +82,8 @@ trait Resource
      *
      * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
+     *
+     * @phpstan-impure
      */
     public static function requireFromRequest(Request $request, string $parameter = 'id'): static
     {

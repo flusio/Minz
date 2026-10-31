@@ -51,6 +51,8 @@ trait Lockable
     /**
      * Lock the model during a certain time (default is 1 hour) and return
      * whether the operation was successful or not.
+     *
+     * @phpstan-impure
      */
     public function lock(?\DateTimeImmutable $lock_timeout = null): bool
     {
@@ -93,6 +95,8 @@ trait Lockable
      * Unlock the model and return whether the operation was successful or not.
      *
      * If the model wasn't locked, the method returns true.
+     *
+     * @phpstan-impure
      */
     public function unlock(): bool
     {

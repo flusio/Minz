@@ -210,6 +210,8 @@ class Migrator
      * raised in a migration, its result is set to the exception message.
      *
      * @return array<MigrationVersion, MigrationResult>
+     *
+     * @phpstan-impure
      */
     public function migrate(): array
     {
@@ -272,6 +274,8 @@ class Migrator
      * in a rollback, its result is set to the exception message.
      *
      * @return array<MigrationVersion, MigrationResult>
+     *
+     * @phpstan-impure
      */
     public function rollback(int $max_steps): array
     {

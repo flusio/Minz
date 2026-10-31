@@ -99,6 +99,8 @@ trait Recordable
      * Return a list of all the models from the database.
      *
      * @return static[]
+     *
+     * @phpstan-impure
      */
     public static function listAll(?string $order_by = null): array
     {
@@ -111,6 +113,8 @@ trait Recordable
      * @param DatabaseCriteria $criteria
      *
      * @return static[]
+     *
+     * @phpstan-impure
      */
     public static function listBy(array $criteria, ?string $order_by = null): array
     {
@@ -142,6 +146,8 @@ trait Recordable
      * Return a model by its primary key value.
      *
      * @param ModelPrimaryKey $pk_value
+     *
+     * @phpstan-impure
      */
     public static function find(mixed $pk_value): ?static
     {
@@ -155,6 +161,8 @@ trait Recordable
      * If several models match the criteria, only the first is returned.
      *
      * @param DatabaseCriteria $criteria
+     *
+     * @phpstan-impure
      */
     public static function findBy(array $criteria): ?static
     {
@@ -190,6 +198,8 @@ trait Recordable
      *
      * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
+     *
+     * @phpstan-impure
      */
     public static function require(mixed $pk_value): static
     {
@@ -210,6 +220,8 @@ trait Recordable
      *
      * @throws Errors\MissingRecordError
      *     If the model doesn't exist.
+     *
+     * @phpstan-impure
      */
     public static function requireBy(array $criteria): static
     {
@@ -225,6 +237,8 @@ trait Recordable
 
     /**
      * Return the nth model if it exists.
+     *
+     * @phpstan-impure
      */
     public static function take(int $n = 0): ?static
     {
@@ -260,6 +274,8 @@ trait Recordable
      * Return whether a model exists in database or not, using a primary key value.
      *
      * @param ModelPrimaryKey $pk_value
+     *
+     * @phpstan-impure
      */
     public static function exists(mixed $pk_value): bool
     {
@@ -271,6 +287,8 @@ trait Recordable
      * Return whether a model exists in database or not, using criteria.
      *
      * @param DatabaseCriteria $criteria
+     *
+     * @phpstan-impure
      */
     public static function existsBy(array $criteria): bool
     {
@@ -296,6 +314,8 @@ trait Recordable
 
     /**
      * Return the number of models in database.
+     *
+     * @phpstan-impure
      */
     public static function count(): int
     {
@@ -306,6 +326,8 @@ trait Recordable
      * Return the number of models in database matching the given criteria.
      *
      * @param DatabaseCriteria $criteria
+     *
+     * @phpstan-impure
      */
     public static function countBy(array $criteria): int
     {
@@ -337,6 +359,8 @@ trait Recordable
      * @param ModelValues $values
      *
      * @return ?ModelPrimaryKey
+     *
+     * @phpstan-impure
      */
     public static function create(array $values): mixed
     {
@@ -400,6 +424,8 @@ trait Recordable
      *
      * @param DatabaseCriteria $criteria
      * @param ModelValues $values_for_create
+     *
+     * @phpstan-impure
      */
     public static function findOrCreateBy(array $criteria, array $values_for_create = []): static
     {
@@ -443,6 +469,8 @@ trait Recordable
      *
      * @param ModelPrimaryKey $pk_value
      * @param ModelValues $values
+     *
+     * @phpstan-impure
      */
     public static function update(mixed $pk_value, array $values): bool
     {
@@ -484,6 +512,8 @@ trait Recordable
      * Delete a model, using a primary key value.
      *
      * @param ModelPrimaryKey $pk_value
+     *
+     * @phpstan-impure
      */
     public static function delete(mixed $pk_value): bool
     {
@@ -497,6 +527,8 @@ trait Recordable
      * Delete a model, using criteria.
      *
      * @param DatabaseCriteria $criteria
+     *
+     * @phpstan-impure
      */
     public static function deleteBy(array $criteria): bool
     {
@@ -521,6 +553,8 @@ trait Recordable
 
     /**
      * Delete all the models and return the number of deleted models.
+     *
+     * @phpstan-impure
      */
     public static function deleteAll(): int
     {
@@ -610,6 +644,8 @@ trait Recordable
      *     If the model is not persisted.
      * @throws Errors\MissingRecordError
      *     If the model no longer exists.
+     *
+     * @phpstan-impure
      */
     public function reload(): static
     {
@@ -628,6 +664,8 @@ trait Recordable
      * Remove the current model from the database.
      *
      * It returns true if the model is not persisted.
+     *
+     * @phpstan-impure
      */
     public function remove(): bool
     {

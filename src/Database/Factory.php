@@ -135,6 +135,8 @@ abstract class Factory
      * @param ModelValues $values
      *
      * @return TModel
+     *
+     * @phpstan-impure
      */
     public static function create(array $values = []): object
     {

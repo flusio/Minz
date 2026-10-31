@@ -102,6 +102,8 @@ class Database
 
     /**
      * @see \PDO::errorCode https://www.php.net/manual/pdo.errorcode.php
+     *
+     * @phpstan-impure
      */
     public function errorCode(): ?string
     {
@@ -118,6 +120,8 @@ class Database
      *     1: ?string,
      *     2: string,
      * }
+     *
+     * @phpstan-impure
      */
     public function errorInfo(): array
     {
@@ -133,6 +137,8 @@ class Database
 
     /**
      * @see \PDO::exec() https://www.php.net/manual/pdo.exec.php
+     *
+     * @phpstan-impure
      */
     public function exec(string $sql_statement): int
     {
@@ -145,6 +151,8 @@ class Database
      * @see \PDO::getAttribute() https://www.php.net/manual/pdo.getattribute.php
      *
      * @param \PDO::ATTR_* $attribute
+     *
+     * @phpstan-impure
      */
     public function getAttribute(int $attribute): mixed
     {
@@ -153,6 +161,8 @@ class Database
 
     /**
      * @see \PDO::lastInsertId() https://www.php.net/manual/pdo.lastinsertid.php
+     *
+     * @phpstan-impure
      */
     public function lastInsertId(?string $name = null): string
     {
@@ -165,6 +175,8 @@ class Database
      * @see \PDO::prepare() https://www.php.net/manual/pdo.prepare.php
      *
      * @param mixed[] $options
+     *
+     * @phpstan-impure
      */
     public function prepare(string $sql_statement, array $options = []): \PDOStatement
     {
@@ -175,6 +187,8 @@ class Database
 
     /**
      * @see \PDO::query() https://www.php.net/manual/pdo.query.php
+     *
+     * @phpstan-impure
      */
     public function query(string $sql_statement, ?int $fetch_mode = null): \PDOStatement
     {
@@ -198,6 +212,8 @@ class Database
      * transactions.
      *
      * @see \PDO::beginTransaction https://www.php.net/manual/pdo.begintransaction.php
+     *
+     * @phpstan-impure
      */
     public function beginTransaction(): bool
     {
@@ -219,6 +235,8 @@ class Database
      * Commit a transaction or release a savepoint.
      *
      * @see \PDO::commit https://www.php.net/manual/pdo.commit.php
+     *
+     * @phpstan-impure
      */
     public function commit(): bool
     {
@@ -240,6 +258,8 @@ class Database
      * Rollback a transaction or a savepoint.
      *
      * @see \PDO::rollBack https://www.php.net/manual/pdo.rollback.php
+     *
+     * @phpstan-impure
      */
     public function rollBack(): bool
     {
@@ -259,6 +279,8 @@ class Database
 
     /**
      * @see \PDO::inTransaction() https://www.php.net/manual/pdo.intransaction.php
+     *
+     * @phpstan-impure
      */
     public function inTransaction(): bool
     {
@@ -269,6 +291,8 @@ class Database
 
     /**
      * @see \PDO::setAttribute() https://www.php.net/manual/pdo.setattribute.php
+     *
+     * @phpstan-impure
      */
     public function setAttribute(int $attribute, mixed $value): bool
     {
@@ -280,6 +304,8 @@ class Database
     /**
      * Transfer method calls to the PDO connection. It starts the connection if
      * it has been stopped.
+     *
+     * @phpstan-impure
      */
     public function pdoCall(string $name, mixed ...$arguments): mixed
     {
@@ -314,6 +340,8 @@ class Database
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on drop
+     *
+     * @phpstan-impure
      */
     public static function drop(): bool
     {
@@ -353,6 +381,8 @@ class Database
      *
      * @throws \Minz\Errors\DatabaseError if database is not configured
      * @throws \Minz\Errors\DatabaseError if an error occurs on create
+     *
+     * @phpstan-impure
      */
     public static function create(): bool
     {
@@ -405,6 +435,8 @@ class Database
 
     /**
      * Return whether the database already exists or not.
+     *
+     * @phpstan-impure
      */
     public static function exists(): bool
     {

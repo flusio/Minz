@@ -205,6 +205,8 @@ class Job
      * Return the next job id to be executed from the given queue.
      *
      * If $queue equals to "all", it will return the next job from any queue.
+     *
+     * @phpstan-impure
      */
     public static function findNextJobId(string $queue): ?int
     {
@@ -247,6 +249,8 @@ class Job
      *
      * The "name" class must exist and be a subclass of Job, or the method will
      * return null.
+     *
+     * @phpstan-impure
      */
     public static function load(int $job_id): ?self
     {

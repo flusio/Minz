@@ -31,6 +31,9 @@ namespace Minz\Validable;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Unique extends PropertyCheck
 {
+    /**
+     * @phpstan-impure
+     */
     public function assert(): bool
     {
         $value = $this->value();
