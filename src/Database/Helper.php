@@ -70,6 +70,63 @@ class Helper
     }
 
     /**
+     * Transform a list of criteria into a SQL where statement and a list of
+     * parameters, limited to the rows that the given class can represent.
+     *
+     * @see Inheritance
+     *
+     * @param class-string $class_name
+     * @param DatabaseCriteria $criteria
+     *
+     * @throws Errors\DatabaseModelError
+     *     If the class is not declared in the Inheritance attribute.
+     *
+     * @return array{
+     *     literal-string,
+     *     array<literal-string, mixed>,
+     * }
+     */
+    public static function buildScopedWhere(string $class_name, array $criteria): array
+    {
+        list($where_statement, $parameters) = self::buildWhere($criteria);
+
+        $inheritance = Inheritance::fromClass($class_name);
+
+        if (!$inheritance) {
+            return [$where_statement, $parameters];
+        }
+
+        $types = $inheritance->typesFor($class_name);
+
+        if (!$types) {
+            throw new Errors\DatabaseModelError("{$class_name} is not declared in the Inheritance attribute");
+        }
+
+        // The class represents all the rows: there is nothing to restrict.
+        if (count($types) === count($inheritance->classes)) {
+            return [$where_statement, $parameters];
+        }
+
+        $in_parameters = [];
+
+        foreach ($types as $index => $type) {
+            /** @var literal-string */
+            $parameter_key = "inheritance{$index}";
+            $parameters[$parameter_key] = $type;
+            $in_parameters[] = ":{$parameter_key}";
+        }
+
+        $in_statement = implode(',', $in_parameters);
+        $scope_statement = "{$inheritance->column} IN ({$in_statement})";
+
+        if ($where_statement) {
+            return ["{$where_statement} AND {$scope_statement}", $parameters];
+        }
+
+        return [$scope_statement, $parameters];
+    }
+
+    /**
      * Transform a list of "model" values in a list of "database" values.
      *
      * @param class-string $class_name

@@ -37,10 +37,17 @@ class Unique extends PropertyCheck
         $property_name = $this->property->getName();
         $instance = $this->instance;
         $instance_class = get_class($instance);
-        $used_traits = class_uses($instance_class);
+
+        // The Recordable trait can be used by a parent class, which
+        // class_uses() doesn't consider.
+        $used_traits = [];
+        $class = $instance_class;
+        while ($class) {
+            $used_traits = array_merge($used_traits, class_uses($class) ?: []);
+            $class = get_parent_class($class);
+        }
 
         if (
-            $used_traits === false ||
             !in_array(\Minz\Database\Recordable::class, $used_traits) ||
             !method_exists($instance, 'isPersisted')
         ) {

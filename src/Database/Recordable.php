@@ -80,6 +80,8 @@ use Minz\Errors;
  *         }
  *     }
  *
+ * Several classes can share the same table: see the Inheritance attribute.
+ *
  * @phpstan-type DatabaseCriteria array<literal-string, ModelValue|ModelValue[]>
  * @phpstan-type DatabaseValue mixed
  * @phpstan-type DatabaseValues array<literal-string, DatabaseValue>
@@ -113,7 +115,7 @@ trait Recordable
     public static function listBy(array $criteria, ?string $order_by = null): array
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildWhere($criteria);
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -157,7 +159,7 @@ trait Recordable
     public static function findBy(array $criteria): ?self
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildWhere($criteria);
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -227,18 +229,24 @@ trait Recordable
     public static function take(int $n = 0): ?self
     {
         $table_name = self::tableName();
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, []);
+
+        if ($where_statement) {
+            $where_statement = "WHERE {$where_statement}";
+        }
 
         $sql = <<<SQL
             SELECT * FROM {$table_name}
+            {$where_statement}
             LIMIT 1
             OFFSET :offset
         SQL;
 
+        $parameters[':offset'] = $n;
+
         $database = \Minz\Database::get();
         $statement = $database->prepare($sql);
-        $statement->execute([
-            ':offset' => $n,
-        ]);
+        $statement->execute($parameters);
 
         $result = $statement->fetch();
         if (is_array($result)) {
@@ -267,7 +275,7 @@ trait Recordable
     public static function existsBy(array $criteria): bool
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildWhere($criteria);
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -302,7 +310,7 @@ trait Recordable
     public static function countBy(array $criteria): int
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildWhere($criteria);
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -332,6 +340,18 @@ trait Recordable
      */
     public static function create(array $values): mixed
     {
+        $inheritance = Inheritance::fromClass(static::class);
+
+        if ($inheritance) {
+            $class_name = $inheritance->resolveClass(static::class, $values[$inheritance->column] ?? null);
+
+            if ($class_name !== static::class) {
+                return $class_name::create($values);
+            }
+
+            $values[$inheritance->column] = $inheritance->typeOf($class_name);
+        }
+
         $table_name = self::tableName();
         $parameters = [];
         $columns = [];
@@ -391,6 +411,17 @@ trait Recordable
 
         $values = array_merge($criteria, $values_for_create);
 
+        $inheritance = Inheritance::fromClass(static::class);
+
+        if ($inheritance) {
+            $class_name = $inheritance->resolveClass(static::class, $values[$inheritance->column] ?? null);
+
+            if ($class_name !== static::class) {
+                /** @var self */
+                return $class_name::findOrCreateBy($criteria, $values_for_create);
+            }
+        }
+
         $class_reflection = new \ReflectionClass(static::class);
         $model = $class_reflection->newInstanceWithoutConstructor();
 
@@ -422,6 +453,9 @@ trait Recordable
 
         $values = Helper::convertValuesToDatabase(static::class, $values);
 
+        list($scope_statement, $scope_parameters) = Helper::buildScopedWhere(static::class, []);
+
+        $parameters = $scope_parameters;
         $parameters[":{$pk_column}"] = $pk_value;
         foreach ($values as $property => $value) {
             $set_exprs[] = "{$property} = :{$property}";
@@ -429,11 +463,16 @@ trait Recordable
         }
 
         $set_statement = implode(', ', $set_exprs);
+        $where_statement = "{$pk_column} = :{$pk_column}";
+
+        if ($scope_statement) {
+            $where_statement .= " AND {$scope_statement}";
+        }
 
         $sql = <<<SQL
             UPDATE {$table_name}
             SET {$set_statement}
-            WHERE {$pk_column} = :{$pk_column}
+            WHERE {$where_statement}
         SQL;
 
         $database = \Minz\Database::get();
@@ -461,14 +500,14 @@ trait Recordable
      */
     public static function deleteBy(array $criteria): bool
     {
-        $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildWhere($criteria);
-
         // Don't accept empty where to avoid potential destructive operation on
         // bad formatted criteria.
-        if (!$where_statement) {
+        if (!$criteria) {
             return true;
         }
+
+        $table_name = self::tableName();
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
 
         $sql = <<<SQL
             DELETE FROM {$table_name}
@@ -486,13 +525,21 @@ trait Recordable
     public static function deleteAll(): int
     {
         $table_name = self::tableName();
+        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, []);
+
+        if ($where_statement) {
+            $where_statement = "WHERE {$where_statement}";
+        }
 
         $sql = <<<SQL
             DELETE FROM {$table_name}
+            {$where_statement}
         SQL;
 
         $database = \Minz\Database::get();
-        return $database->exec($sql);
+        $statement = $database->prepare($sql);
+        $statement->execute($parameters);
+        return $statement->rowCount();
     }
 
     /**
@@ -534,6 +581,14 @@ trait Recordable
         ) {
             // @phpstan-ignore-next-line
             $this->updated_at = \Minz\Time::now();
+        }
+
+        $inheritance = Inheritance::fromClass(static::class);
+        $type = $inheritance?->typeOf(static::class);
+
+        if ($inheritance && $type !== null) {
+            $inheritance_column = $inheritance->column;
+            $this->$inheritance_column = $type;
         }
 
         $values = $this->toValues();
@@ -682,6 +737,19 @@ trait Recordable
      */
     public static function fromDatabaseRow(array $row): self
     {
+        $inheritance = Inheritance::fromClass(static::class);
+
+        if ($inheritance) {
+            $class_name = $inheritance->resolveClass(static::class, $row[$inheritance->column] ?? null);
+
+            if ($class_name !== static::class) {
+                /** @var self */
+                return $class_name::fromDatabaseRow($row);
+            }
+
+            $row = $inheritance->removeForeignColumns($class_name, $row);
+        }
+
         $model_values = Helper::convertValuesFromDatabase(static::class, $row);
 
         $class_reflection = new \ReflectionClass(static::class);

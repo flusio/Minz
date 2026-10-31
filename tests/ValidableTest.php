@@ -240,6 +240,32 @@ class ValidableTest extends TestCase
         ], $model->errors(format: false));
     }
 
+    public function testValidateFailsIfNotUniqueOnChildClass(): void
+    {
+        assert(\Minz\Configuration::$database !== null);
+
+        $database_type = \Minz\Configuration::$database['type'];
+        $sql_schema_path = \Minz\Configuration::$app_path . "/schema.{$database_type}.sql";
+        $sql_schema = file_get_contents($sql_schema_path);
+
+        assert($sql_schema !== false);
+
+        $database = \Minz\Database::get();
+        $database->exec($sql_schema);
+
+        $existing_model = new models\ValidableUniqueChildModel();
+        $existing_model->email = 'alix@example.org';
+        $existing_model->save();
+        $model = new models\ValidableUniqueChildModel();
+        $model->email = 'alix@example.org';
+
+        $is_valid = $model->validate();
+
+        \Minz\Database::reset();
+
+        $this->assertFalse($is_valid);
+    }
+
     public function testValidateFailsIfNotUnique(): void
     {
         assert(\Minz\Configuration::$database !== null);

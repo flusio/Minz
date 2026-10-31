@@ -35,6 +35,7 @@ Minz.** You’ll often have to interact with them.
 - **[`\Minz\Database\Recordable`](/src/Database/Recordable.php) provides useful methods to manipulate the models in the database.** It is usable together with the following classes:
     - [`\Minz\Database\Table`](/src/Database/Table.php) to define the database table of the model;
     - [`\Minz\Database\Column`](/src/Database/Column.php) to define the database columns of the model;
+    - [`\Minz\Database\Inheritance`](/src/Database/Inheritance.php) to share a database table between several classes;
     - [`\Minz\Database\Resource`](/src/Database/Resource.php) which provides methods to load easily the model with a Request parameter;
     - [`\Minz\Database\Factory`](/src/Database/Factory.php) to easily create models with default values during the tests;
     - [`\Minz\Database\Helper`](/src/Database/Helper.php) which provides useful methods to the Recordable trait;

@@ -15,6 +15,14 @@ CREATE TABLE rabbits (
     FOREIGN KEY (friend_id) REFERENCES friends(id)
 );
 
+CREATE TABLE pets (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    lives INTEGER DEFAULT 9,
+    is_playful BOOLEAN DEFAULT true
+);
+
 CREATE TABLE validable_unique_models (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     email VARCHAR(255)
