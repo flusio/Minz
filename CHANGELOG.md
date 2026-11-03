@@ -1,5 +1,12 @@
 # Changelog of Minz
 
+## 2026-11-03 - 2.4.0
+
+### Features
+
+- Allow several models to share a table with Inheritance ([def3b99](https://github.com/flusio/Minz/commit/def3b99))
+- Return `static` from the Recordable and Resource methods ([3572ef5](https://github.com/flusio/Minz/commit/3572ef5))
+
 ## 2026-10-28 - 2.3.7
 
 ### Bug fixes
