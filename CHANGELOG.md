@@ -1,5 +1,12 @@
 # Changelog of Minz
 
+## 2026-11-11 - 2.4.1
+
+### Maintenance
+
+- Mark database-related methods as impure for PHPStan ([9e84c9c](https://github.com/flusio/Minz/commit/9e84c9c))
+- Update the dependencies ([b836ea9](https://github.com/flusio/Minz/commit/b836ea9), [7b806f8](https://github.com/flusio/Minz/commit/7b806f8))
+
 ## 2026-11-03 - 2.4.0
 
 ### Features
