@@ -130,7 +130,7 @@ class Simple implements TemplateInterface
             if (is_string($var_value)) {
                 $var_value = $this->protect($var_value);
             }
-            $$var_name = $var_value;
+            ${$var_name} = $var_value;
         }
 
         ob_start();

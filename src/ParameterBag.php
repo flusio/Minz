@@ -262,7 +262,7 @@ class ParameterBag
 
         try {
             return new File($file_info);
-        } catch (Errors\RuntimeException $e) {
+        } catch (Errors\RuntimeException) {
             return null;
         }
     }

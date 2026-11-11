@@ -46,7 +46,7 @@ namespace Minz;
  * I would be very happy to delete this class if a better option appears to
  * translate the Validable messages!
  */
-class Translatable
+class Translatable implements \Stringable
 {
     public string $message;
 

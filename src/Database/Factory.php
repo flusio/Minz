@@ -172,12 +172,10 @@ abstract class Factory
      */
     public static function sequence(mixed $value = 1, ?callable $callback = null): \Closure
     {
-        if ($callback === null) {
-            $callback = function (int|string $n): int|string {
-                $n++;
-                return $n;
-            };
-        }
+        $callback ??= function (int|string $n): int|string {
+            $n++;
+            return $n;
+        };
 
         return function () use (&$value, $callback) {
             $current_value = $value;

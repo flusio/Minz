@@ -81,9 +81,6 @@ class CsrfTokenTest extends TestCase
     public function testValidateReturnsFalseIfHmacAndRandomValueAreEmpty(): void
     {
         $csrf = new CsrfToken(session_id: '42');
-        $token = $csrf->get();
-
-        $csrf = new CsrfToken(session_id: '42');
         $result = $csrf->validate('.');
 
         $this->assertFalse($result);
@@ -91,9 +88,6 @@ class CsrfTokenTest extends TestCase
 
     public function testValidateReturnsFalseIfTokenIsEmpty(): void
     {
-        $csrf = new CsrfToken(session_id: '42');
-        $token = $csrf->get();
-
         $csrf = new CsrfToken(session_id: '42');
         $result = $csrf->validate('');
 

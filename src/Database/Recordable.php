@@ -115,7 +115,7 @@ trait Recordable
     public static function listBy(array $criteria, ?string $order_by = null): array
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -159,7 +159,7 @@ trait Recordable
     public static function findBy(array $criteria): ?static
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -229,7 +229,7 @@ trait Recordable
     public static function take(int $n = 0): ?static
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, []);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, []);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -275,7 +275,7 @@ trait Recordable
     public static function existsBy(array $criteria): bool
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -310,7 +310,7 @@ trait Recordable
     public static function countBy(array $criteria): int
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, $criteria);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -375,7 +375,7 @@ trait Recordable
 
         $database = \Minz\Database::get();
         $statement = $database->prepare($sql);
-        $result = $statement->execute($parameters);
+        $statement->execute($parameters);
 
         $pk_column = self::primaryKeyColumn();
         $inserted_pk_value = $values[$pk_column] ?? null;
@@ -453,7 +453,7 @@ trait Recordable
 
         $values = Helper::convertValuesToDatabase(static::class, $values);
 
-        list($scope_statement, $scope_parameters) = Helper::buildScopedWhere(static::class, []);
+        [$scope_statement, $scope_parameters] = Helper::buildScopedWhere(static::class, []);
 
         $parameters = $scope_parameters;
         $parameters[":{$pk_column}"] = $pk_value;
@@ -507,7 +507,7 @@ trait Recordable
         }
 
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, $criteria);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, $criteria);
 
         $sql = <<<SQL
             DELETE FROM {$table_name}
@@ -525,7 +525,7 @@ trait Recordable
     public static function deleteAll(): int
     {
         $table_name = self::tableName();
-        list($where_statement, $parameters) = Helper::buildScopedWhere(static::class, []);
+        [$where_statement, $parameters] = Helper::buildScopedWhere(static::class, []);
 
         if ($where_statement) {
             $where_statement = "WHERE {$where_statement}";
@@ -556,7 +556,6 @@ trait Recordable
      */
     public function save(): void
     {
-        $table_name = self::tableName();
         $pk_column = self::primaryKeyColumn();
         $columns = self::databaseColumns(include_computed: false);
 

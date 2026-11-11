@@ -53,7 +53,7 @@ class Random
         $microtime = (float) $datetime->format('U.u');
         $milliseconds = (int) ($microtime * 1000);
         $time_part = $milliseconds << 20;
-        $random_part = random_int(0, pow(2, 20) - 1); // max number on 20 bits
+        $random_part = random_int(0, (2 ** 20) - 1); // max number on 20 bits
         $random_string = strval($time_part | $random_part);
         return str_pad($random_string, 19, '0', STR_PAD_LEFT);
     }

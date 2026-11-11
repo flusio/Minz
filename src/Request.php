@@ -134,9 +134,6 @@ class Request
             throw new Errors\RequestError("The HTTP method '{$http_method}' is not supported.");
         }
 
-        /** @var RequestMethod */
-        $http_method = $http_method;
-
         $http_uri = $_SERVER['REQUEST_URI'];
         $http_parameters = array_merge(
             $_GET,
@@ -384,7 +381,7 @@ class Request
 
         $accept_medias = explode(',', $accept_header);
 
-        list($media_type, $media_subtype) = explode('/', $media);
+        [$media_type, $media_subtype] = explode('/', $media);
 
         foreach ($accept_medias as $accept_media) {
             // We only want to know if the media is included in the Accept
@@ -395,7 +392,7 @@ class Request
             }
             $accept_media = trim($accept_media);
 
-            list($accept_type, $accept_subtype) = explode('/', $accept_media);
+            [$accept_type, $accept_subtype] = explode('/', $accept_media);
 
             if (
                 ($accept_type === $media_type && $accept_subtype === '*') ||

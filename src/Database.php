@@ -288,7 +288,7 @@ class Database
         }
 
         if (!is_callable([$this->pdo_connection, $name])) {
-            throw new \BadMethodCallException('Call to undefined method ' . get_called_class() . '::' . $name);
+            throw new \BadMethodCallException('Call to undefined method ' . static::class . '::' . $name);
         }
 
         return $this->pdo_connection->$name(...$arguments);

@@ -42,7 +42,6 @@ class DatabaseTest extends TestCase
 
         $database = Database::get();
 
-        /** @var \PDOStatement */
         $statement = $database->query('PRAGMA foreign_keys');
         $foreign_keys_pragma = $statement->fetchColumn();
         $this->assertSame('sqlite', $database->getAttribute(\PDO::ATTR_DRIVER_NAME));
@@ -99,7 +98,6 @@ class DatabaseTest extends TestCase
         $this->assertTrue($result);
 
         $new_database = Database::get();
-        /** @var \PDOStatement */
         $statement = $new_database->query("SELECT name FROM sqlite_master WHERE type='table'");
         $table = $statement->fetchColumn();
         $this->assertFalse($table);

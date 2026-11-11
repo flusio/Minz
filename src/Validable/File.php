@@ -179,7 +179,7 @@ class File extends PropertyCheck
             );
         } elseif ($this->error_type === 'type' && $this->types && $this->types_message) {
             $expected_types = array_keys($this->types);
-            $expected_types = array_map('strtoupper', $expected_types);
+            $expected_types = array_map(strtoupper(...), $expected_types);
             $expected_types = implode(', ', $expected_types);
 
             return $this->formatMessage(

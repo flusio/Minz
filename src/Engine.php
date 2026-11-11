@@ -189,10 +189,7 @@ class Engine
         }
 
         try {
-            list(
-                $route,
-                $parameters
-            ) = self::$router->match($request->method(), $request->path());
+            [$route, $parameters] = self::$router->match($request->method(), $request->path());
         } catch (Errors\RouteNotFoundError $e) {
             return self::notFoundResponse($e);
         }
@@ -215,7 +212,7 @@ class Engine
         $namespace = self::$options['controller_namespace'];
 
         $route = $request->route();
-        list($controller_name, $action_name) = explode('#', $route['action']);
+        [$controller_name, $action_name] = explode('#', $route['action']);
         $controller_name = str_replace('/', '\\', $controller_name);
 
         if ($namespace === null) {
@@ -227,7 +224,7 @@ class Engine
 
         try {
             $controller = new $namespaced_controller();
-        } catch (\Error $e) {
+        } catch (\Error) {
             throw new Errors\ControllerError(
                 "{$namespaced_controller} controller class cannot be found."
             );
@@ -259,9 +256,7 @@ class Engine
 
                 $does_handler_apply = array_filter(
                     $error_handlers,
-                    function (Controller\ErrorHandler $error_handler) use ($error): bool {
-                        return is_a($error, $error_handler->class_error, true);
-                    }
+                    fn(Controller\ErrorHandler $error_handler): bool => is_a($error, $error_handler->class_error, true)
                 );
 
                 // Call the handle method only if the error matched on of the

@@ -3,16 +3,24 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Set\ValueObject\SetList;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
+use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 
 return RectorConfig::configure()
     ->withPaths([
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])
-    ->withSets([
-        SetList::PHP_82,
-        SetList::PHP_83,
-        SetList::PHP_84,
-        SetList::TYPE_DECLARATION,
+    ->withPhpSets()
+    ->withComposerBased(
+        phpunit: true,
+        twig: true,
+    )
+    ->withPreparedSets(
+        deadCode: true,
+        typeDeclarations: true,
+    )
+    ->withSkip([
+        ClassPropertyAssignToConstructorPromotionRector::class,
+        ReadOnlyPropertyRector::class,
     ]);

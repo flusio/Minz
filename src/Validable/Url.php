@@ -36,7 +36,7 @@ class Url extends PropertyCheck
     public function __construct(string $message, array $schemes = ['http', 'https'])
     {
         parent::__construct($message);
-        $this->schemes = array_map('strtolower', $schemes);
+        $this->schemes = array_map(strtolower(...), $schemes);
     }
 
     public function assert(): bool

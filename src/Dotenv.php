@@ -100,8 +100,8 @@ class Dotenv
             }
 
             // Extract the variable name and value from the line
-            if (strpos($line, '=') !== false) {
-                list($name, $value) = explode('=', $line, 2);
+            if (str_contains($line, '=')) {
+                [$name, $value] = explode('=', $line, 2);
                 $name = trim($name);
                 $value = trim($value);
             } else {

@@ -104,7 +104,7 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        list($route, $parameters) = $router->match('GET', '/rabbits');
+        [$route, $parameters] = $router->match('GET', '/rabbits');
 
         $this->assertSame('rabbits#list', $route['name']);
         $this->assertSame([], $parameters);
@@ -115,7 +115,7 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits', 'rabbits#list');
 
-        list($route, $parameters) = $router->match('GET', '/rabbits//');
+        [$route, $parameters] = $router->match('GET', '/rabbits//');
 
         $this->assertSame('rabbits#list', $route['name']);
         $this->assertSame([], $parameters);
@@ -126,7 +126,7 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits/:id', 'rabbits#get');
 
-        list($route, $parameters) = $router->match('GET', '/rabbits/42');
+        [$route, $parameters] = $router->match('GET', '/rabbits/42');
 
         $this->assertSame('rabbits#get', $route['name']);
         $this->assertSame(['id' => '42'], $parameters);
@@ -137,10 +137,7 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/assets/*', 'assets#serve');
 
-        list(
-            $route,
-            $parameters
-        ) = $router->match('GET', '/assets/path/to/an/asset.css');
+        [$route, $parameters] = $router->match('GET', '/assets/path/to/an/asset.css');
 
         $this->assertSame('assets#serve', $route['name']);
         $this->assertSame(['*' => 'path/to/an/asset.css'], $parameters);
@@ -332,7 +329,7 @@ class RouterTest extends TestCase
         $router = new Router();
         $router->addRoute('GET', '/rabbits/:id', 'rabbits#details', 'rabbit');
 
-        $uri = $router->uriByName('rabbit');
+        $router->uriByName('rabbit');
     }
 
     public function testUriByNameFailsIfNameNotRegistered(): void

@@ -47,7 +47,7 @@ class RequestTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'unsupported';
         $_SERVER['REQUEST_URI'] = '/';
 
-        $request = Request::initFromGlobals();
+        Request::initFromGlobals();
     }
 
     public function testInitFromGlobalsFailsIfRequestMethodIsCli(): void
@@ -58,7 +58,7 @@ class RequestTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'CLI';
         $_SERVER['REQUEST_URI'] = '/';
 
-        $request = Request::initFromGlobals();
+        Request::initFromGlobals();
     }
 
     public function testInitFromCli(): void

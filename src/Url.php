@@ -33,7 +33,7 @@ class Url
         try {
             $uri = $router->uriByName($name, $parameters);
             return self::path() . $uri;
-        } catch (Errors\RouteNotFoundError $e) {
+        } catch (Errors\RouteNotFoundError) {
             throw new Errors\UrlError("{$name} route does not exist in the router.");
         } catch (Errors\RoutingError $e) {
             throw new Errors\UrlError($e->getMessage());
@@ -82,7 +82,7 @@ class Url
     public static function path(): string
     {
         $path = Configuration::$url_options['path'];
-        if (substr($path, -1) === '/') {
+        if (str_ends_with($path, '/')) {
             $path = substr($path, 0, -1);
         }
         return $path;

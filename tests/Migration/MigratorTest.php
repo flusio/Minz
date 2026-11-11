@@ -15,9 +15,7 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
 
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('foo', fn(): true => true);
 
         $migrations = $migrator->migrations();
         $this->assertArrayHasKey('foo', $migrations);
@@ -29,11 +27,11 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
 
-        $migrator->addMigration('foo', function (): string {
-            return 'returned by migration';
-        }, function (): string {
-            return 'returned by rollback';
-        });
+        $migrator->addMigration(
+            'foo',
+            fn(): string => 'returned by migration',
+            fn(): string => 'returned by rollback',
+        );
 
         $migrations = $migrator->migrations();
         $this->assertArrayHasKey('foo', $migrations);
@@ -48,15 +46,9 @@ class MigratorTest extends TestCase
     public function testMigrationsIsSorted(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('2_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('10_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('1_foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('2_foo', fn(): true => true);
+        $migrator->addMigration('10_foo', fn(): true => true);
+        $migrator->addMigration('1_foo', fn(): true => true);
         $expected_names = ['1_foo', '2_foo', '10_foo'];
 
         $migrations = $migrator->migrations();
@@ -67,9 +59,7 @@ class MigratorTest extends TestCase
     public function testSetVersion(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('foo', fn(): true => true);
 
         $migrator->setVersion('foo');
 
@@ -79,9 +69,7 @@ class MigratorTest extends TestCase
     public function testSetVersionTrimArgument(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('foo', fn(): true => true);
 
         $migrator->setVersion("foo\n");
 
@@ -120,12 +108,8 @@ class MigratorTest extends TestCase
     public function testMigrateCallsMigrationsInSortedOrder(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('2_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('1_foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('2_foo', fn(): true => true);
+        $migrator->addMigration('1_foo', fn(): true => true);
 
         $result = $migrator->migrate();
 
@@ -155,12 +139,8 @@ class MigratorTest extends TestCase
     public function testMigrateWithMigrationReturningFalseDoesNotChangeVersion(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('1_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('2_foo', function (): false {
-            return false;
-        });
+        $migrator->addMigration('1_foo', fn(): true => true);
+        $migrator->addMigration('2_foo', fn(): false => false);
 
         $result = $migrator->migrate();
 
@@ -174,9 +154,7 @@ class MigratorTest extends TestCase
     public function testMigrateWithMigrationReturningFalseDoesNotExecuteNextMigrations(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('1_foo', function (): false {
-            return false;
-        });
+        $migrator->addMigration('1_foo', fn(): false => false);
         $spy = false;
         $migrator->addMigration('2_foo', function () use (&$spy): true {
             $spy = true;
@@ -211,12 +189,14 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
         $spy = false;
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = true;
-            return true;
-        });
+        $migrator->addMigration(
+            'foo',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = true;
+                return true;
+            },
+        );
         $migrator->migrate();
 
         $this->assertSame('foo', $migrator->version());
@@ -234,24 +214,30 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
         $spy = '';
-        $migrator->addMigration('foo1', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = 'foo1';
-            return true;
-        });
-        $migrator->addMigration('foo2', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = 'foo2';
-            return true;
-        });
-        $migrator->addMigration('foo3', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = 'foo3';
-            return true;
-        });
+        $migrator->addMigration(
+            'foo1',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = 'foo1';
+                return true;
+            },
+        );
+        $migrator->addMigration(
+            'foo2',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = 'foo2';
+                return true;
+            },
+        );
+        $migrator->addMigration(
+            'foo3',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = 'foo3';
+                return true;
+            },
+        );
         $migrator->migrate();
 
         $result = $migrator->rollback(2);
@@ -268,18 +254,22 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
         $spy = false;
-        $migrator->addMigration('foo1', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = 'foo1';
-            return true;
-        });
-        $migrator->addMigration('foo2', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = 'foo2';
-            return true;
-        });
+        $migrator->addMigration(
+            'foo1',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = 'foo1';
+                return true;
+            },
+        );
+        $migrator->addMigration(
+            'foo2',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = 'foo2';
+                return true;
+            },
+        );
         $migrator->setVersion('foo1');
 
         $result = $migrator->rollback(1);
@@ -295,12 +285,14 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator();
         $spy = false;
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = true;
-            return true;
-        });
+        $migrator->addMigration(
+            'foo',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = true;
+                return true;
+            },
+        );
 
         $this->assertNull($migrator->version());
 
@@ -314,18 +306,22 @@ class MigratorTest extends TestCase
     public function testRollbackWithCallbackReturningFalseDoesNotExecuteNextRollback(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo1', function (): true {
-            return true;
-        }, function () use (&$spy): true {
-            $spy = 'foo1';
-            return true;
-        });
-        $migrator->addMigration('foo2', function (): true {
-            return true;
-        }, function () use (&$spy): false {
-            $spy = 'foo2';
-            return false;
-        });
+        $migrator->addMigration(
+            'foo1',
+            fn(): true => true,
+            function () use (&$spy): true {
+                $spy = 'foo1';
+                return true;
+            },
+        );
+        $migrator->addMigration(
+            'foo2',
+            fn(): true => true,
+            function () use (&$spy): false {
+                $spy = 'foo2';
+                return false;
+            },
+        );
         $migrator->migrate();
 
         $result = $migrator->rollback(2);
@@ -340,11 +336,13 @@ class MigratorTest extends TestCase
     public function testRollbackWithFailingCallback(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        }, function (): void {
-            throw new \Exception('Oops, it failed.');
-        });
+        $migrator->addMigration(
+            'foo',
+            fn(): true => true,
+            function (): void {
+                throw new \Exception('Oops, it failed.');
+            },
+        );
         $migrator->migrate();
 
         $result = $migrator->rollback(1);
@@ -358,9 +356,7 @@ class MigratorTest extends TestCase
     public function testRollbackWithNoCallback(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('foo', fn(): true => true);
         $migrator->migrate();
 
         $result = $migrator->rollback(1);
@@ -374,9 +370,7 @@ class MigratorTest extends TestCase
     public function testUpToDate(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('foo', fn(): true => true);
         $migrator->setVersion('foo');
 
         $upToDate = $migrator->upToDate();
@@ -387,12 +381,8 @@ class MigratorTest extends TestCase
     public function testUpToDateRespectsOrder(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('2_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('1_foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('2_foo', fn(): true => true);
+        $migrator->addMigration('1_foo', fn(): true => true);
         $migrator->setVersion('2_foo');
 
         $upToDate = $migrator->upToDate();
@@ -403,12 +393,8 @@ class MigratorTest extends TestCase
     public function testUpToDateIfRemainingMigration(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('1_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('2_foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('1_foo', fn(): true => true);
+        $migrator->addMigration('2_foo', fn(): true => true);
         $migrator->setVersion('1_foo');
 
         $upToDate = $migrator->upToDate();
@@ -428,9 +414,7 @@ class MigratorTest extends TestCase
     public function testLastVersion(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('foo', fn(): true => true);
 
         $version = $migrator->lastVersion();
 
@@ -440,12 +424,8 @@ class MigratorTest extends TestCase
     public function testLastVersionRespectsOrder(): void
     {
         $migrator = new Migrator();
-        $migrator->addMigration('2_foo', function (): true {
-            return true;
-        });
-        $migrator->addMigration('1_foo', function (): true {
-            return true;
-        });
+        $migrator->addMigration('2_foo', fn(): true => true);
+        $migrator->addMigration('1_foo', fn(): true => true);
 
         $version = $migrator->lastVersion();
 

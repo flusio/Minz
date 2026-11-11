@@ -50,8 +50,7 @@ class ResourceTest extends TestCase
 
     public function testLoadFromRequestWithWrongId(): void
     {
-        /** @var int $id */
-        $id = models\Friend::create([
+        models\Friend::create([
             'name' => 'Alix',
         ]);
         $request = new Request('GET', '/', parameters: [
@@ -65,8 +64,7 @@ class ResourceTest extends TestCase
 
     public function testLoadFromRequestWithInvalidParameterType(): void
     {
-        /** @var int $id */
-        $id = models\Friend::create([
+        models\Friend::create([
             'name' => 'Alix',
         ]);
         $request = new Request('GET', '/', parameters: [
@@ -98,8 +96,7 @@ class ResourceTest extends TestCase
         $this->expectException(Errors\MissingRecordError::class);
         $this->expectExceptionMessage("No AppTest\\models\\Friend model matching 'id' request parameter");
 
-        /** @var int $id */
-        $id = models\Friend::create([
+        models\Friend::create([
             'name' => 'Alix',
         ]);
         $request = new Request('GET', '/', parameters: [
@@ -114,8 +111,7 @@ class ResourceTest extends TestCase
         $this->expectException(Errors\MissingRecordError::class);
         $this->expectExceptionMessage("No AppTest\\models\\Friend model matching 'id' request parameter");
 
-        /** @var int $id */
-        $id = models\Friend::create([
+        models\Friend::create([
             'name' => 'Alix',
         ]);
         $request = new Request('GET', '/', parameters: [

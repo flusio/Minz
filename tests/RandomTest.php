@@ -16,7 +16,7 @@ class RandomTest extends TestCase
     {
         $random = Random::hex(20);
 
-        $this->assertSame(1, preg_match('/^[0-9a-f]{20}$/', $random));
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{20}$/', $random);
     }
 
     public function testHexFailsIfLengthIs0(): void
@@ -33,7 +33,7 @@ class RandomTest extends TestCase
 
         $random = Random::timebased($datetime);
 
-        $this->assertSame(1, preg_match('/^[0-9]{19}$/', $random));
+        $this->assertMatchesRegularExpression('/^[0-9]{19}$/', $random);
         $this->assertSame('176264136622', substr($random, 0, 12));
     }
 
@@ -44,7 +44,7 @@ class RandomTest extends TestCase
 
         $random = Random::timebased();
 
-        $this->assertSame(1, preg_match('/^[0-9]{19}$/', $random));
+        $this->assertMatchesRegularExpression('/^[0-9]{19}$/', $random);
         $this->assertSame('176264136622', substr($random, 0, 12));
     }
 }

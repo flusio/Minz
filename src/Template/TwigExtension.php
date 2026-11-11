@@ -152,9 +152,7 @@ class TwigExtension
                 );
             }
 
-            $args = array_filter($args, function ($arg): bool {
-                return is_string($arg) || is_int($arg) || is_float($arg);
-            });
+            $args = array_filter($args, fn($arg): bool => is_string($arg) || is_int($arg) || is_float($arg));
 
             return vsprintf(gettext($message), $args);
         }
@@ -174,9 +172,7 @@ class TwigExtension
                 );
             }
 
-            $args = array_filter($args, function ($arg): bool {
-                return is_string($arg) || is_int($arg) || is_float($arg);
-            });
+            $args = array_filter($args, fn($arg): bool => is_string($arg) || is_int($arg) || is_float($arg));
 
             return vsprintf(ngettext($message, $message2, $n), $args);
         }

@@ -331,7 +331,7 @@ class Job
         if ($this->frequency) {
             $next_perform_at = $this->nextPerformAt();
         } else {
-            $number_seconds = 5 + pow($this->number_attempts, 4);
+            $number_seconds = 5 + $this->number_attempts ** 4;
             $next_perform_at = \Minz\Time::fromNow($number_seconds, 'seconds');
         }
 

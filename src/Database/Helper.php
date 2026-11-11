@@ -88,7 +88,7 @@ class Helper
      */
     public static function buildScopedWhere(string $class_name, array $criteria): array
     {
-        list($where_statement, $parameters) = self::buildWhere($criteria);
+        [$where_statement, $parameters] = self::buildWhere($criteria);
 
         $inheritance = Inheritance::fromClass($class_name);
 
@@ -208,9 +208,9 @@ class Helper
         $columns = $class_name::databaseColumns();
         $converted_values = [];
 
-        foreach ($values as $property => $value) {
-            if (!isset($columns[$property])) {
-                throw new Errors\DatabaseModelError("{$class_name} doesn't define a {$property} property");
+        foreach ($values as $unsafe_property => $value) {
+            if (!isset($columns[$unsafe_property])) {
+                throw new Errors\DatabaseModelError("{$class_name} doesn't define a {$unsafe_property} property");
             }
 
             /**
@@ -220,7 +220,7 @@ class Helper
              *
              * @var literal-string
              */
-            $property = $property;
+            $property = $unsafe_property;
             $column = $columns[$property];
 
             if (

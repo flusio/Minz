@@ -93,7 +93,7 @@ class Migrator
 
             try {
                 $migration = new $migration_classname();
-            } catch (\Error $e) {
+            } catch (\Error) {
                 throw new Errors\MigrationError("{$migration_version} migration cannot be instantiated.");
             }
 
@@ -143,13 +143,9 @@ class Migrator
     {
         $migrations = $this->migrations;
         if ($reverse) {
-            uksort($migrations, function ($migration1, $migration2): int {
-                return strnatcmp($migration2, $migration1);
-            });
+            uksort($migrations, fn($migration1, $migration2): int => strnatcmp($migration2, $migration1));
         } else {
-            uksort($migrations, function ($migration1, $migration2): int {
-                return strnatcmp($migration1, $migration2);
-            });
+            uksort($migrations, strnatcmp(...));
         }
         return $migrations;
     }

@@ -84,9 +84,9 @@ class Controller
     public function watch(Request $request): \Generator
     {
         \pcntl_async_signals(true);
-        \pcntl_signal(SIGINT, [$this, 'stopWatch']);
-        \pcntl_signal(SIGQUIT, [$this, 'stopWatch']);
-        \pcntl_signal(SIGTERM, [$this, 'stopWatch']);
+        \pcntl_signal(SIGINT, $this->stopWatch(...));
+        \pcntl_signal(SIGQUIT, $this->stopWatch(...));
+        \pcntl_signal(SIGTERM, $this->stopWatch(...));
 
         $this->is_watching = true;
 
@@ -212,9 +212,7 @@ class Controller
     public function index(Request $request): Response
     {
         $jobs = Job::listAll();
-        usort($jobs, function ($job_1, $job_2): int {
-            return $job_1->id - $job_2->id;
-        });
+        usort($jobs, fn($job_1, $job_2): int => $job_1->id - $job_2->id);
 
         $date_format = \Minz\Database\Column::DATETIME_FORMAT;
 
@@ -266,9 +264,7 @@ class Controller
         $date_format = \Minz\Database\Column::DATETIME_FORMAT;
 
         if ($job->args) {
-            $args = array_map(function (mixed $arg): string {
-                return var_export($arg, true);
-            }, $job->args);
+            $args = array_map(fn(mixed $arg): string => var_export($arg, true), $job->args);
 
             $args = implode(', ', $args);
 

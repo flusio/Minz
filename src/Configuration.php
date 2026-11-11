@@ -329,9 +329,6 @@ class Configuration
             );
         }
 
-        /** @var ConfigurationEnvironment $environment */
-        $environment = $environment;
-
         // Load the configuration file and make sure that it exists. A missing
         // file would be problematic to load required variables :)
         $configuration_path = $app_path . '/configuration';
@@ -569,14 +566,14 @@ class Configuration
     {
         $info = [];
 
-        list($database_type, $dsn_rest) = explode(':', $dsn, 2);
+        [$database_type, $dsn_rest] = explode(':', $dsn, 2);
 
         if ($database_type === 'sqlite') {
             $info['path'] = $dsn_rest;
         } elseif ($database_type === 'pgsql') {
             $dsn_parts = explode(';', $dsn_rest);
             foreach ($dsn_parts as $dsn_part) {
-                list($part_key, $part_value) = explode('=', $dsn_part, 2);
+                [$part_key, $part_value] = explode('=', $dsn_part, 2);
                 if ($part_key === 'user') {
                     $part_key = 'username';
                 }
@@ -611,9 +608,7 @@ class Configuration
             );
         }
 
-        $mailer = array_filter($mailer, function ($key): bool {
-            return is_string($key);
-        }, mode: ARRAY_FILTER_USE_KEY);
+        $mailer = array_filter($mailer, is_string(...), mode: ARRAY_FILTER_USE_KEY);
 
         $mailer_params = new ParameterBag($mailer);
 

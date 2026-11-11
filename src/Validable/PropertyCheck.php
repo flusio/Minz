@@ -91,12 +91,11 @@ abstract class PropertyCheck
      */
     public function code(): string
     {
-        $code = get_class($this);
+        $code = static::class;
         $code = str_replace(__NAMESPACE__ . '\\', '', $code);
         $code = preg_replace('/(?<!^)[A-Z]/', '_$0', $code);
         assert($code !== null);
-        $code = strtolower($code);
-        return $code;
+        return strtolower($code);
     }
 
     /**

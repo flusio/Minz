@@ -36,7 +36,7 @@ class Unique extends PropertyCheck
         $value = $this->value();
         $property_name = $this->property->getName();
         $instance = $this->instance;
-        $instance_class = get_class($instance);
+        $instance_class = $instance::class;
 
         // The Recordable trait can be used by a parent class, which
         // class_uses() doesn't consider.

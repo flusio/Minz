@@ -55,7 +55,7 @@ trait ApplicationHelper
         $application_class_name = "\\{$app_name}\\Application";
         try {
             $application = new $application_class_name();
-        } catch (\Error $e) {
+        } catch (\Error) {
             // fail silently, the application must be set manually
             return;
         }

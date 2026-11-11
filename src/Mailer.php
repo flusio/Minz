@@ -117,7 +117,7 @@ class Mailer
             } else {
                 $email->send();
             }
-        } catch (PHPMailer\Exception $e) {
+        } catch (PHPMailer\Exception) {
             // Do nothing on purpose, the $email->ErrorInfo should be set and
             // an error is raised below.
         }

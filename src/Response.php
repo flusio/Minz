@@ -691,8 +691,6 @@ class Response
 
         if (isset($response_generator)) {
             foreach ($response_generator as $response_part) {
-                /** @var Response */
-                $response_part = $response_part;
                 echo $response_part->render();
             }
         } else {
@@ -723,8 +721,6 @@ class Response
 
         if (isset($response_generator)) {
             foreach ($response_generator as $response_part) {
-                /** @var Response */
-                $response_part = $response_part;
                 $output = $response_part->render();
                 if ($output && $output[-1] === "\n") {
                     echo $output;

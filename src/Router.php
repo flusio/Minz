@@ -81,7 +81,7 @@ class Router
             throw new Errors\RoutingError('Route "pattern" must start by a slash (/).');
         }
 
-        if (strpos($action, '#') === false) {
+        if (!str_contains($action, '#')) {
             throw new Errors\RoutingError(
                 'Route "action" must contain a hash (#).'
             );
@@ -100,9 +100,7 @@ class Router
             );
         }
 
-        if ($name === null) {
-            $name = $action;
-        }
+        $name ??= $action;
 
         $this->routes[$name] = [
             'name' => $name,
@@ -174,7 +172,7 @@ class Router
             try {
                 $this->match($method, $path);
                 $allowed_methods[] = $method;
-            } catch (Errors\RouteNotFoundError $e) {
+            } catch (Errors\RouteNotFoundError) {
             }
         }
 

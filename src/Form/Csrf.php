@@ -184,9 +184,7 @@ trait Csrf
      */
     public function csrfSessionId(): string
     {
-        if (!isset($_SESSION['_csrf_session_id'])) {
-            $_SESSION['_csrf_session_id'] = \Minz\Random::hex(32);
-        }
+        $_SESSION['_csrf_session_id'] ??= \Minz\Random::hex(32);
 
         $session_id = $_SESSION['_csrf_session_id'];
 

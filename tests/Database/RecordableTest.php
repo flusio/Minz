@@ -93,7 +93,6 @@ class RecordableTest extends TestCase
 
     public function testCreateWithBoolean(): void
     {
-        $datetime = \Minz\Time::now();
         /** @var int $id */
         $id = models\Friend::create([
             'name' => 'Alix',

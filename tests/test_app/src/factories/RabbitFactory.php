@@ -29,14 +29,12 @@ class RabbitFactory extends Database\Factory
             'name' => 'Albert',
 
             'id' => Database\Factory::sequence('rabbit 1', function ($value): string {
-                list($name, $count) = explode(' ', $value);
+                [$name, $count] = explode(' ', $value);
                 $new_count = intval($count) + 1;
                 return "{$name} {$new_count}";
             }),
 
-            'friend_id' => function () {
-                return FriendFactory::create()->id;
-            },
+            'friend_id' => fn() => FriendFactory::create()->id,
         ];
     }
 }

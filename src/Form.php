@@ -315,7 +315,7 @@ class Form
                 $value = $request->parameters->getDatetime($field_name, format: $field_schema['format']);
             } elseif ($field_schema['type'] === 'array') {
                 $value = $request->parameters->getArray($field_name);
-            } elseif ($field_schema['type'] === 'Minz\\File') {
+            } elseif ($field_schema['type'] === File::class) {
                 $value = $request->parameters->getFile($field_name);
             } else {
                 $value = $request->parameters->getString($field_name);

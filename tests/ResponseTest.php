@@ -92,7 +92,7 @@ class ResponseTest extends TestCase
 
     public function testConstructorAcceptsNoTemplates(): void
     {
-        $response = new Response(200, null);
+        $response = new Response(200);
 
         $this->assertSame(200, $response->code());
         $headers = $response->headers(true);
@@ -105,7 +105,7 @@ class ResponseTest extends TestCase
         $this->expectExceptionMessage('666 is not a valid HTTP code.');
 
         // @phpstan-ignore-next-line
-        $response = new Response(666);
+        new Response(666);
     }
 
     public function testHeaders(): void
@@ -116,9 +116,10 @@ class ResponseTest extends TestCase
         /** @var string[] $headers */
         $headers = $response->headers();
 
-        $content_type_header = current(array_filter($headers, function (string $header): bool {
-            return str_starts_with($header, 'Content-Type');
-        }));
+        $content_type_header = current(array_filter(
+            $headers,
+            fn(string $header): bool => str_starts_with($header, 'Content-Type')
+        ));
         $this->assertSame('Content-Type: image/png', $content_type_header);
     }
 
@@ -133,9 +134,10 @@ class ResponseTest extends TestCase
         /** @var string[] $headers */
         $headers = $response->headers();
 
-        $csp_header = current(array_filter($headers, function (string $header): bool {
-            return str_starts_with($header, 'Content-Security-Policy');
-        }));
+        $csp_header = current(array_filter(
+            $headers,
+            fn(string $header): bool => str_starts_with($header, 'Content-Security-Policy')
+        ));
         $this->assertSame(
             "Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'",
             $csp_header
@@ -344,7 +346,7 @@ class ResponseTest extends TestCase
 
     public function testRenderWithEmptyTemplateName(): void
     {
-        $response = Response::ok(null);
+        $response = Response::ok();
 
         $output = $response->render();
 
