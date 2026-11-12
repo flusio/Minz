@@ -1,5 +1,11 @@
 # Changelog of Minz
 
+## 2026-11-12 - 2.4.2
+
+### Bug fixes
+
+- Improve handling of invalid form field values ([6f59d01](https://github.com/flusio/Minz/commit/6f59d01))
+
 ## 2026-11-11 - 2.4.1
 
 ### Maintenance
