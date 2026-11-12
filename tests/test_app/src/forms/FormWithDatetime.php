@@ -11,4 +11,7 @@ class FormWithDatetime extends Form
 
     #[Form\Field(format: 'Y-m-d')]
     public \DateTimeImmutable $custom_field_datetime;
+
+    #[Form\Field]
+    public ?\DateTimeImmutable $nullable_field_datetime = null;
 }

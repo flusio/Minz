@@ -103,6 +103,120 @@ class FormTest extends TestCase
         $this->assertStringContainsString('FOO=bar', $file_content);
     }
 
+    public function testHandleRequestWithNullString(): void
+    {
+        $request = new \Minz\Request('GET', '/', [
+            'name' => null,
+        ]);
+        $form = new forms\Rabbit([
+            'name' => 'Bugs',
+        ]);
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertSame('Bugs', $form->name);
+        $this->assertSame('The value is invalid.', $form->error('name'));
+        $errors = $form->errors(format: false);
+        $this->assertSame('type_invalid', $errors['name'][0][0]);
+    }
+
+    public function testHandleRequestWithNullStringAndBindedModel(): void
+    {
+        $rabbit = new models\Rabbit();
+        $rabbit->name = 'Bugs';
+        $request = new \Minz\Request('GET', '/', [
+            'name' => null,
+        ]);
+        $form = new forms\Rabbit(model: $rabbit);
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertSame('Bugs', $form->model()->name);
+    }
+
+    public function testHandleRequestWithNullNullableStringAndTransform(): void
+    {
+        $request = new \Minz\Request('GET', '/', [
+            'param_trimmed_string' => null,
+            'param_defaulted_string' => null,
+        ]);
+        $form = new forms\FormWithNullableString();
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertTrue($is_valid);
+        $this->assertNull($form->param_trimmed_string);
+        $this->assertSame('bar', $form->param_defaulted_string);
+    }
+
+    public function testHandleRequestWithNullNullableString(): void
+    {
+        $request = new \Minz\Request('GET', '/', [
+            'param_string' => null,
+        ]);
+        $form = new forms\FormWithNullableString();
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertTrue($is_valid);
+        $this->assertNull($form->param_string);
+    }
+
+    public function testHandleRequestWithInvalidNullableString(): void
+    {
+        $request = new \Minz\Request('GET', '/', [
+            'param_string' => [],
+        ]);
+        $form = new forms\FormWithNullableString();
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertSame('foo', $form->param_string);
+        $this->assertSame('Must be a string.', $form->error('param_string'));
+    }
+
+    public function testHandleRequestWithNullDatetime(): void
+    {
+        $datetime = new \DateTimeImmutable('2024-03-07 12:00');
+        $request = new \Minz\Request('GET', '/', [
+            'default_field_datetime' => null,
+        ]);
+        $form = new forms\FormWithDatetime([
+            'default_field_datetime' => $datetime,
+        ]);
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertFalse($is_valid);
+        $this->assertSame($datetime, $form->default_field_datetime);
+        $this->assertSame('The value is invalid.', $form->error('default_field_datetime'));
+    }
+
+    public function testHandleRequestWithEmptyNullableDatetime(): void
+    {
+        $request = new \Minz\Request('GET', '/', [
+            'nullable_field_datetime' => '',
+        ]);
+        $form = new forms\FormWithDatetime([
+            'nullable_field_datetime' => new \DateTimeImmutable('2024-03-07 12:00'),
+        ]);
+
+        $form->handleRequest($request);
+        $is_valid = $form->validate();
+
+        $this->assertTrue($is_valid);
+        $this->assertNull($form->nullable_field_datetime);
+    }
+
     public function testFormatWithDatetime(): void
     {
         $request = new \Minz\Request('GET', '/', [

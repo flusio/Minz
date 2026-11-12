@@ -60,6 +60,18 @@ namespace Minz\Form;
  *         #[Form\Field(bind: 'setTitle')]
  *         public string $title = '';
  *     }
+ *
+ * When handling a request, if the value type is incompatible (e.g. an array
+ * for a string field, or null for a non-nullable field), the field keeps its
+ * current value and an error is added to the form when calling `validate()`,
+ * with the `type_invalid` code. You can change the error message with
+ * `invalid_message` (can be Translatable).
+ *
+ *     class Article extends Form
+ *     {
+ *         #[Form\Field(invalid_message: 'The title is invalid.')]
+ *         public string $title = '';
+ *     }
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class Field
@@ -70,7 +82,8 @@ class Field
         /** @var callable-string */
         public ?string $transform = null,
         public ?string $format = null,
-        public bool|string $bind = true
+        public bool|string $bind = true,
+        public string $invalid_message = 'The value is invalid.',
     ) {
     }
 }

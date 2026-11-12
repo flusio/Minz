@@ -186,9 +186,11 @@ namespace Minz;
  *
  * @phpstan-type FieldSchema array{
  *     'type': string,
+ *     'nullable': bool,
  *     'transform': ?callable-string,
  *     'format': string,
  *     'bind': bool|string,
+ *     'invalid_message': string,
  * }
  *
  * @phpstan-import-type ValidableError from Validable
@@ -202,6 +204,13 @@ class Form
     protected ?object $model = null;
 
     public readonly ParameterBag $options;
+
+    /**
+     * The names of the fields which couldn't be cast in handleRequest().
+     *
+     * @var string[]
+     */
+    private array $invalid_fields = [];
 
     /**
      * Initialize a form.
@@ -288,9 +297,11 @@ class Form
 
             $fields_schema[$property_name] = [
                 'type' => $field_type,
+                'nullable' => $property_type->allowsNull(),
                 'transform' => $field_attribute->transform,
                 'bind' => $field_attribute->bind,
                 'format' => $format,
+                'invalid_message' => $field_attribute->invalid_message,
             ];
         }
 
@@ -300,11 +311,19 @@ class Form
     /**
      * Retrieve the fields values from a Request.
      *
-     * The values are automatically casted to the correct types, based on the
+     * The values are automatically cast to the correct types, based on the
      * fields schema.
+     *
+     * If the value type is incompatible (e.g. an array for a string field, or
+     * null for a non-nullable field), the field keeps its current value and an
+     * error is added to the form when calling `validate()`. However, a
+     * nullable field is set to null if the value is null, or if it is an
+     * empty string that cannot be cast (e.g. for a date field).
      */
     public function handleRequest(Request $request): void
     {
+        $this->invalid_fields = [];
+
         $fields_schema = $this->fieldsSchema();
         foreach ($fields_schema as $field_name => $field_schema) {
             if ($field_schema['type'] === 'bool') {
@@ -321,8 +340,25 @@ class Form
                 $value = $request->parameters->getString($field_name);
             }
 
-            if ($value === null && !$request->parameters->has($field_name)) {
-                continue;
+            if ($value === null) {
+                if (!$request->parameters->has($field_name)) {
+                    // The field wasn't in the request anyway, we can ignore it.
+                    continue;
+                }
+
+                $raw_value = $request->parameters->get($field_name);
+
+                // A browser can send an empty string when unsetting a date
+                // field for instance. In this case, the null value can be
+                // legitimate.
+                $is_raw_value_empty = $raw_value === null || $raw_value === '';
+                $is_null_accepted = $field_schema['nullable'];
+                $is_null_valid = $is_null_accepted && $is_raw_value_empty;
+
+                if (!$is_null_valid) {
+                    $this->invalid_fields[] = $field_name;
+                    continue;
+                }
             }
 
             $this->set($field_name, $value);
@@ -346,7 +382,8 @@ class Form
      * Set a field with the given value.
      *
      * If the field is declared with a `transform` callback, the value is
-     * passed to it and the returned value is used.
+     * passed to it and the returned value is used. A null value is passed to
+     * the callback only if its first parameter accepts null.
      *
      * If the form has been bound to a model, its properties are synchronized
      * (see the field `bind` attribute).
@@ -364,8 +401,11 @@ class Form
 
         $field_schema = $fields_schema[$field_name];
 
-        if ($field_schema['transform']) {
-            $transform_function = $field_schema['transform'];
+        $transform_function = $field_schema['transform'];
+        if (
+            $transform_function &&
+            ($value !== null || $this->transformAcceptsNull($transform_function))
+        ) {
             $value = call_user_func($transform_function, $value);
         }
 
@@ -421,6 +461,39 @@ class Form
         }
 
         return $this->model;
+    }
+
+    /**
+     * Return whether the first parameter of the given callable accepts null.
+     *
+     * @param callable-string $callable
+     */
+    private function transformAcceptsNull(string $callable): bool
+    {
+        $reflection = new \ReflectionFunction(\Closure::fromCallable($callable));
+        $parameters = $reflection->getParameters();
+
+        if (empty($parameters)) {
+            // A callable without parameters doesn't fail because of a null
+            // value (the argument is just ignored).
+            return true;
+        }
+
+        return $parameters[0]->allowsNull();
+    }
+
+    /**
+     * Add an error for each field which couldn't be cast in handleRequest().
+     */
+    #[Validable\Check]
+    public function checkInvalidFields(): void
+    {
+        $fields_schema = $this->fieldsSchema();
+
+        foreach ($this->invalid_fields as $field_name) {
+            $message = $fields_schema[$field_name]['invalid_message'];
+            $this->addError($field_name, 'type_invalid', $message);
+        }
     }
 
     /**
