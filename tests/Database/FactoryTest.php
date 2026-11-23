@@ -78,4 +78,34 @@ class FactoryTest extends TestCase
         $this->assertSame('rabbit 2', $rabbit2->id);
         $this->assertSame($friend->id, $rabbit2->friend_id);
     }
+
+    public function testCreateCallsBeforeCreateWithAllTheValues(): void
+    {
+        $friend = factories\FriendFactory::create([
+            'name' => 'Benedict',
+        ]);
+
+        $rabbit = factories\RabbitFactory::create([
+            'friend_id' => $friend->id,
+        ]);
+
+        $this->assertSame('Rabbit of Benedict', $rabbit->name);
+    }
+
+    public function testCreateCallsBeforeCreateWithTheDefaultValues(): void
+    {
+        $rabbit = factories\RabbitFactory::create();
+
+        $this->assertSame('Rabbit of Alix', $rabbit->name);
+    }
+
+    public function testCreateCallsAfterCreateWithTheCreatedModel(): void
+    {
+        $rabbit = factories\RabbitFactory::create([
+            'name' => 'Albert',
+        ]);
+
+        $friend = models\Friend::require($rabbit->friend_id);
+        $this->assertSame('Burrow of Albert', $friend->address);
+    }
 }

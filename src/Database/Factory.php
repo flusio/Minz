@@ -105,6 +105,44 @@ namespace Minz\Database;
  *         }
  *     }
  *
+ * You can override the beforeCreate() and afterCreate() methods if you need to
+ * act either on the model values before the creation, or on the model itself
+ * once created:
+ *
+ *     class RabbitFactory extends Factory
+ *     {
+ *         public static function model(): string
+ *         {
+ *             return \App\models\Rabbit::class;
+ *         }
+ *
+ *         public static function values(): array
+ *         {
+ *             return [
+ *                 'friend_id' => function () {
+ *                     return FriendFactory::create()->id;
+ *                 },
+ *             ];
+ *         }
+ *
+ *         protected static function beforeCreate(array $values): array
+ *         {
+ *             if (!array_key_exists('name', $values)) {
+ *                 $friend = \App\models\Friend::require($values['friend_id']);
+ *                 $values['name'] = "Rabbit of {$friend->name}";
+ *             }
+ *
+ *             return $values;
+ *         }
+ *
+ *         protected static function afterCreate(object $rabbit): void
+ *         {
+ *             CarrotFactory::create([
+ *                 'rabbit_id' => $rabbit->id,
+ *             ]);
+ *         }
+ *     }
+ *
  * General recommendations when using factories are:
  *
  * - to give default values only for required data (e.g. for columns that have
@@ -151,17 +189,44 @@ abstract class Factory
         }
 
         foreach ($default_values as $property => $value) {
-            if (is_callable($value) && !isset($values[$property])) {
+            if (is_callable($value) && !array_key_exists($property, $values)) {
                 $value = $value();
             }
             $default_values[$property] = $value;
         }
 
+        /** @var ModelValues $values */
         $values = array_merge($default_values, $values);
+        $values = static::beforeCreate($values);
 
         $pk_value = $model_class_name::create($values);
 
-        return $model_class_name::find($pk_value);
+        $model = $model_class_name::require($pk_value);
+
+        static::afterCreate($model);
+
+        return $model;
+    }
+
+    /**
+     * Change the values before creating the model.
+     *
+     * @param ModelValues $values
+     *
+     * @return ModelValues
+     */
+    protected static function beforeCreate(array $values): array
+    {
+        return $values;
+    }
+
+    /**
+     * Act on the model once it is created.
+     *
+     * @param TModel $model
+     */
+    protected static function afterCreate(object $model): void
+    {
     }
 
     /**
