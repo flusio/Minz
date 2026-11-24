@@ -1,6 +1,6 @@
 # Changelog of Minz
 
-## unreleased
+## 2026-11-24 - 2.5.0
 
 ### Breaking changes
 
@@ -11,6 +11,15 @@ This version comes with few minor breaking changes that have been considered as 
 - the `Factory` class declares the methods `build()`, `instantiate()`, `beforeBuild()`, `afterBuild()`, `beforeCreate()` and `afterCreate()`
 - the `Factory::create()` method inserts PHP default values instead of the SQL default values (it is discouraged to have different values though)
 - the `Factory::model()` method is typed `class-string<TModel>` instead of `class-string`
+
+### Features
+
+- Add a `Configuration::app_version` attribute ([a4f7a02](https://github.com/flusio/Minz/commit/a4f7a02))
+- Provide a `Factory::build()` method and `beforeBuild()`, `afterBuild()`, `beforeCreate()` and `afterCreate()` hooks ([d9e0562](https://github.com/flusio/Minz/commit/d9e0562), [caf59b4](https://github.com/flusio/Minz/commit/caf59b4))
+
+### Bug fixes
+
+- Fix `Configuration::tmp_path` to be as stable as possible ([0b7f987](https://github.com/flusio/Minz/commit/0b7f987))
 
 ## 2026-11-12 - 2.4.2
 
