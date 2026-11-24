@@ -1,5 +1,17 @@
 # Changelog of Minz
 
+## unreleased
+
+### Breaking changes
+
+This version comes with few minor breaking changes that have been considered as acceptable to be released in a minor version:
+
+- the `Recordable` trait now declares the method `fromValues()`, used by `findOrCreateBy()`; make sure that none of your models already declare this method
+- the `Recordable::findOrCreateBy()` method can fail if an unknown property is passed (a deprecation was previously logged)
+- the `Factory` class declares the methods `build()`, `instantiate()`, `beforeBuild()`, `afterBuild()`, `beforeCreate()` and `afterCreate()`
+- the `Factory::create()` method inserts PHP default values instead of the SQL default values (it is discouraged to have different values though)
+- the `Factory::model()` method is typed `class-string<TModel>` instead of `class-string`
+
 ## 2026-11-12 - 2.4.2
 
 ### Bug fixes

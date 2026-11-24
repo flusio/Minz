@@ -714,4 +714,49 @@ class RecordableTest extends TestCase
         $this->assertSame(1, $values['is_kind']);
         $this->assertSame('{"pet":true}', $values['options']);
     }
+
+    public function testFromValues(): void
+    {
+        $burrow = models\Burrow::fromValues([
+            'address' => '42 rue du Terrier',
+        ]);
+
+        $this->assertSame(0, models\Burrow::count());
+        $this->assertFalse($burrow->isPersisted());
+        $this->assertSame('42 rue du Terrier', $burrow->address);
+        // The constructor is not called
+        $this->assertFalse(isset($burrow->depth));
+    }
+
+    public function testFromValuesWithInheritance(): void
+    {
+        $pet = models\Pet::fromValues([
+            'type' => 'dog',
+            'name' => 'Mélo',
+        ]);
+
+        $this->assertInstanceOf(models\Dog::class, $pet);
+        $this->assertSame('dog', $pet->type);
+        $this->assertSame('Mélo', $pet->name);
+    }
+
+    public function testFromValuesSetsTheInheritanceType(): void
+    {
+        $cat = models\Cat::fromValues([
+            'name' => 'Méli',
+        ]);
+
+        $this->assertSame('cat', $cat->type);
+        $this->assertSame('Méli', $cat->name);
+    }
+
+    public function testFromValuesFailsWithUnknownProperty(): void
+    {
+        $this->expectException(Errors\DatabaseModelError::class);
+        $this->expectExceptionMessage('AppTest\models\Friend doesn\'t define a not_a_property property');
+
+        models\Friend::fromValues([
+            'not_a_property' => 'foo',
+        ]);
+    }
 }

@@ -14,7 +14,7 @@ use Minz\Database;
 class RabbitFactory extends Database\Factory
 {
     /**
-     * @return class-string
+     * @return class-string<models\Rabbit>
      */
     public static function model(): string
     {
@@ -42,7 +42,7 @@ class RabbitFactory extends Database\Factory
      *
      * @return ModelValues
      */
-    protected static function beforeCreate(array $values): array
+    protected static function beforeBuild(array $values): array
     {
         if (!array_key_exists('name', $values)) {
             $friend_id = $values['friend_id'];

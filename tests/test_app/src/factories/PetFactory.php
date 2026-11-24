@@ -13,7 +13,7 @@ use Minz\Database;
 class PetFactory extends Database\Factory
 {
     /**
-     * @return class-string
+     * @return class-string<models\Pet>
      */
     public static function model(): string
     {

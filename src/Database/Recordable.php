@@ -437,23 +437,7 @@ trait Recordable
 
         $values = array_merge($criteria, $values_for_create);
 
-        $inheritance = Inheritance::fromClass(static::class);
-
-        if ($inheritance) {
-            $class_name = $inheritance->resolveClass(static::class, $values[$inheritance->column] ?? null);
-
-            if ($class_name !== static::class) {
-                /** @var static */
-                return $class_name::findOrCreateBy($criteria, $values_for_create);
-            }
-        }
-
-        $class_reflection = new \ReflectionClass(static::class);
-        $model = $class_reflection->newInstanceWithoutConstructor();
-
-        foreach ($values as $property => $value) {
-            $model->$property = $value;
-        }
+        $model = self::fromValues($values);
 
         $model->save();
 
@@ -765,6 +749,55 @@ trait Recordable
             static::class,
             $this->toValues(),
         );
+    }
+
+    /**
+     * Instantiate a (non-persisted) model from the given values.
+     *
+     * The constructor of the model is not called, so models can declare
+     * custom constructors.
+     *
+     * If the model declares an Inheritance, the class corresponding to the
+     * type is instantiated.
+     *
+     * @param ModelValues $values
+     *
+     * @throws Errors\DatabaseModelError
+     *     If the values include a property that is not declared as a column.
+     */
+    public static function fromValues(array $values): static
+    {
+        $inheritance = Inheritance::fromClass(static::class);
+
+        if ($inheritance) {
+            $class_name = $inheritance->resolveClass(static::class, $values[$inheritance->column] ?? null);
+
+            if ($class_name !== static::class) {
+                /** @var static */
+                return $class_name::fromValues($values);
+            }
+
+            $type = $inheritance->typeOf($class_name);
+            if ($type !== null) {
+                $values[$inheritance->column] = $type;
+            }
+        }
+
+        $columns = self::databaseColumns();
+
+        $class_reflection = new \ReflectionClass(static::class);
+        $model = $class_reflection->newInstanceWithoutConstructor();
+
+        foreach ($values as $property => $value) {
+            if (!isset($columns[$property])) {
+                $class_name = static::class;
+                throw new Errors\DatabaseModelError("{$class_name} doesn't define a {$property} property");
+            }
+
+            $model->$property = $value;
+        }
+
+        return $model;
     }
 
     /**

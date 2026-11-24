@@ -105,9 +105,35 @@ namespace Minz\Database;
  *         }
  *     }
  *
- * You can override the beforeCreate() and afterCreate() methods if you need to
- * act either on the model values before the creation, or on the model itself
- * once created:
+ * If you need to build a model (i.e. without saving it in database), use the
+ * build() method. It accepts the same values as create():
+ *
+ *     $rabbit = RabbitFactory::build([
+ *         'age' => 2,
+ *     ]);
+ *
+ *     $this->assertFalse($rabbit->isPersisted());
+ *
+ * Note that the callables of the default values are still executed, so they
+ * may create other models in database.
+ *
+ * By default, the models are instantiated without calling their constructor.
+ * If a model must be instantiated with its constructor, you can override the
+ * instantiate() method:
+ *
+ *     protected static function instantiate(array $values): object
+ *     {
+ *         $user = new \App\models\User($values['email'], $values['password']);
+ *         $user->nickname = $values['nickname'];
+ *         return $user;
+ *     }
+ *
+ * You can also override the following hooks:
+ *
+ * - beforeBuild() to change the values before building the model;
+ * - afterBuild() to act on the model once it is built;
+ * - beforeCreate() to act on the built model before creating it in database;
+ * - afterCreate() to act on the model once it is created in database.
  *
  *     class RabbitFactory extends Factory
  *     {
@@ -125,7 +151,7 @@ namespace Minz\Database;
  *             ];
  *         }
  *
- *         protected static function beforeCreate(array $values): array
+ *         protected static function beforeBuild(array $values): array
  *         {
  *             if (!array_key_exists('name', $values)) {
  *                 $friend = \App\models\Friend::require($values['friend_id']);
@@ -133,6 +159,16 @@ namespace Minz\Database;
  *             }
  *
  *             return $values;
+ *         }
+ *
+ *         protected static function afterBuild(object $rabbit): void
+ *         {
+ *             $rabbit->nickname = strtolower($rabbit->name);
+ *         }
+ *
+ *         protected static function beforeCreate(object $rabbit): void
+ *         {
+ *             $rabbit->created_at = \Minz\Time::now();
  *         }
  *
  *         protected static function afterCreate(object $rabbit): void
@@ -170,16 +206,20 @@ abstract class Factory
     private static array $default_values = [];
 
     /**
+     * Build a model with the default values, without saving it in database.
+     *
+     * Note that the default values can still create other models in database
+     * (e.g. if they are callables calling other factories).
+     *
      * @param ModelValues $values
      *
      * @return TModel
      *
      * @phpstan-impure
      */
-    public static function create(array $values = []): object
+    public static function build(array $values = []): object
     {
         $factory_class_name = static::class;
-        $model_class_name = static::model();
 
         if (isset(self::$default_values[$factory_class_name])) {
             $default_values = self::$default_values[$factory_class_name];
@@ -197,9 +237,34 @@ abstract class Factory
 
         /** @var ModelValues $values */
         $values = array_merge($default_values, $values);
-        $values = static::beforeCreate($values);
+        $values = static::beforeBuild($values);
 
-        $pk_value = $model_class_name::create($values);
+        $model = static::instantiate($values);
+
+        static::afterBuild($model);
+
+        return $model;
+    }
+
+    /**
+     * Build a model with the default values, and create it in database.
+     *
+     * @param ModelValues $values
+     *
+     * @return TModel
+     *
+     * @phpstan-impure
+     */
+    public static function create(array $values = []): object
+    {
+        $model = static::build($values);
+
+        static::beforeCreate($model);
+
+        assert(method_exists($model, 'toValues'));
+
+        $model_class_name = $model::class;
+        $pk_value = $model_class_name::create($model->toValues());
 
         $model = $model_class_name::require($pk_value);
 
@@ -209,19 +274,56 @@ abstract class Factory
     }
 
     /**
-     * Change the values before creating the model.
+     * Instantiate the model from the given values.
+     *
+     * By default, the model constructor is not called. You can override this
+     * method if your model must be instantiated with its constructor.
+     *
+     * @param ModelValues $values
+     *
+     * @return TModel
+     */
+    protected static function instantiate(array $values): object
+    {
+        $model_class_name = static::model();
+
+        assert(method_exists($model_class_name, 'fromValues'));
+
+        return $model_class_name::fromValues($values);
+    }
+
+    /**
+     * Change the values before building the model.
      *
      * @param ModelValues $values
      *
      * @return ModelValues
      */
-    protected static function beforeCreate(array $values): array
+    protected static function beforeBuild(array $values): array
     {
         return $values;
     }
 
     /**
-     * Act on the model once it is created.
+     * Act on the model once it is built.
+     *
+     * @param TModel $model
+     */
+    protected static function afterBuild(object $model): void
+    {
+    }
+
+    /**
+     * Act on the built model before creating it in database.
+     *
+     * @param TModel $model
+     */
+    protected static function beforeCreate(object $model): void
+    {
+    }
+
+    /**
+     * Act on the model once it is created in database.
      *
      * @param TModel $model
      */
@@ -257,7 +359,7 @@ abstract class Factory
     abstract public static function values(): array;
 
     /**
-     * @return class-string
+     * @return class-string<TModel>
      */
     abstract public static function model(): string;
 }

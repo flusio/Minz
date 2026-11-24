@@ -15,6 +15,12 @@ CREATE TABLE rabbits (
     FOREIGN KEY (friend_id) REFERENCES friends(id)
 );
 
+CREATE TABLE burrows (
+    id SERIAL NOT NULL PRIMARY KEY,
+    address VARCHAR(255) NOT NULL,
+    depth INTEGER NOT NULL
+);
+
 CREATE TABLE pets (
     id SERIAL NOT NULL PRIMARY KEY,
     type TEXT NOT NULL,
