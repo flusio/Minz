@@ -226,8 +226,8 @@ class Configuration
     public static string $schema_path;
 
     /**
-     * The path to a temporary directory (default is a random directory created
-     * under `sys_get_temp_dir()/$app_name`)
+     * The path to a temporary directory (default is a directory created under
+     * `sys_get_temp_dir()/$app_name`, see getTmpPath()).
      */
     public static string $tmp_path;
 
@@ -366,8 +366,7 @@ class Configuration
         static::$data_path = $raw_configuration['data_path'] ?? $app_path . '/data';
         static::$schema_path = $raw_configuration['schema_path'] ?? $app_path . '/src/schema.sql';
         static::$app_version = self::getAppVersion($raw_configuration, $app_path);
-        $default_tmp_path = sys_get_temp_dir() . '/' . static::$app_name . '/' . bin2hex(random_bytes(10));
-        static::$tmp_path = $raw_configuration['tmp_path'] ?? $default_tmp_path;
+        static::$tmp_path = self::getTmpPath($raw_configuration);
         static::$database = self::getDatabase($raw_configuration);
         static::$mailer = self::getMailer($raw_configuration, $environment);
         $jobs_adapter = $raw_configuration['jobs_adapter'] ?? 'database';
@@ -462,6 +461,42 @@ class Configuration
         }
 
         return null;
+    }
+
+    /**
+     * Return the tmp_path option.
+     *
+     * If the option is not set, the path is computed from the environment and
+     * the application version, or is random if the version is not available.
+     *
+     * It must be called after $environment, $app_name and $app_version are
+     * initialized.
+     *
+     * @param ConfigurationArray $array
+     *
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the tmp_path is not a string.
+     */
+    private static function getTmpPath(array $array): string
+    {
+        if (isset($array['tmp_path'])) {
+            if (!is_string($array['tmp_path'])) {
+                throw new Errors\ConfigurationError('tmp_path must be a string');
+            }
+
+            return $array['tmp_path'];
+        }
+
+        $base_path = sys_get_temp_dir() . '/' . static::$app_name;
+
+        if (static::$app_version === null) {
+            return $base_path . '/' . bin2hex(random_bytes(10));
+        }
+
+        $environment = static::$environment;
+        $app_version = static::$app_version;
+
+        return $base_path . '/' . md5("{$environment}-{$app_version}");
     }
 
     /**
