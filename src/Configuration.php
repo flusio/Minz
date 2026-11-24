@@ -202,6 +202,12 @@ class Configuration
     public static string $app_name;
 
     /**
+     * The version of the application (default is the hash of the current Git
+     * commit if available, `null` otherwise).
+     */
+    public static ?string $app_version;
+
+    /**
      * Declare options specific to your application (default is an empty array).
      *
      * @var array<string, mixed>
@@ -359,6 +365,7 @@ class Configuration
         static::$application = $raw_configuration['application'] ?? [];
         static::$data_path = $raw_configuration['data_path'] ?? $app_path . '/data';
         static::$schema_path = $raw_configuration['schema_path'] ?? $app_path . '/src/schema.sql';
+        static::$app_version = self::getAppVersion($raw_configuration, $app_path);
         $default_tmp_path = sys_get_temp_dir() . '/' . static::$app_name . '/' . bin2hex(random_bytes(10));
         static::$tmp_path = $raw_configuration['tmp_path'] ?? $default_tmp_path;
         static::$database = self::getDatabase($raw_configuration);
@@ -385,6 +392,76 @@ class Configuration
         if (!isset($array[$key])) {
             throw new Errors\ConfigurationError("{$key} configuration key is required");
         }
+    }
+
+    /**
+     * Return the app_version option.
+     *
+     * If the option is not set (or empty), the hash of the current Git commit
+     * is returned. If it cannot be found, null is returned.
+     *
+     * @param ConfigurationArray $array
+     *
+     * @throws \Minz\Errors\ConfigurationError
+     *     Raised if the app_version is not a string.
+     */
+    private static function getAppVersion(array $array, string $app_path): ?string
+    {
+        $app_version = $array['app_version'] ?? '';
+
+        if (!is_string($app_version)) {
+            throw new Errors\ConfigurationError('app_version must be a string');
+        }
+
+        $app_version = trim($app_version);
+
+        if ($app_version === '') {
+            return self::getGitCommitHash($app_path);
+        }
+
+        return $app_version;
+    }
+
+    /**
+     * Return the hash of the current Git commit of the application, or null
+     * if it cannot be found.
+     */
+    private static function getGitCommitHash(string $app_path): ?string
+    {
+        $git_path = $app_path . '/.git';
+
+        $head = @file_get_contents($git_path . '/HEAD');
+        if ($head === false) {
+            return null;
+        }
+
+        $head = trim($head);
+
+        // HEAD is detached, it contains the hash directly.
+        if (!str_starts_with($head, 'ref: ')) {
+            return $head;
+        }
+
+        // Otherwise, HEAD refers to a branch, which is stored either in its
+        // own file, or in the packed-refs file (e.g. after a `git gc`).
+        $ref = substr($head, strlen('ref: '));
+
+        $hash = @file_get_contents($git_path . '/' . $ref);
+        if ($hash !== false) {
+            return trim($hash);
+        }
+
+        $packed_refs = @file_get_contents($git_path . '/packed-refs');
+        if ($packed_refs === false) {
+            return null;
+        }
+
+        $pattern = '/^([0-9a-f]+) ' . preg_quote($ref, '/') . '$/m';
+        if (preg_match($pattern, $packed_refs, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     /**
